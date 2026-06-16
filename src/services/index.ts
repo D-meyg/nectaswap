@@ -1,0 +1,8 @@
+export { authService }        from './authService'
+export { userService }        from './userService'
+export { transactionService } from './transactionService'
+export { dashboardService }   from './dashboardService'
+export { kycService }         from './kycService'
+export { cardService }        from './cardService'
+export { activityService }    from './activityService'
+export { noteService }        from './noteService'

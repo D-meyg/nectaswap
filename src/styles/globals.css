@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Geom";
+  src: url("@/assets/fonts/Geom-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geom";
+  src: url("@/assets/fonts/Geom-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geom";
+  src: url("@/assets/fonts/Geom-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Inter", sans-serif;
+  --font-geom: "Geom", "Inter", sans-serif;
+
+  --radius-radius-sm: var(--radius-sm);
+  --radius-radius-md: var(--radius-md);
+}
+
+@layer base {
+  :root {
+    --color-brand: #4e2bcc;
+    --color-brand-gradient: linear-gradient(135deg, #4e2bcc, #8200db);
+
+    --color-success: #00c950;
+    --color-success-subtle: #dcfce7;
+    --color-success-bg: #f0fdf4;
+    --color-success-dark: #008236;
+    --color-success-mid: #00a63e;
+    --color-success-muted: #b9f8cf;
+
+    --color-warning: #ff6900;
+    --color-warning-subtle: #ffedd4;
+    --color-warning-dark: #ca3500;
+    --color-warning-text: #a65f00;
+    --color-warning-border: #ffdf20;
+    --color-warning-yellow: #fff085;
+    --color-warning-yellow-bg: #fefce8;
+
+    --color-danger: #e7000b;
+    --color-danger-subtle: #fef2f2;
+    --color-danger-muted: #ffc9c9;
+    --color-danger-dark: #82181a;
+    --color-danger-darker: #9f0712;
+
+    --color-info: #155dfc;
+
+    --color-text-primary: #101828;
+    --color-text-secondary: #4a5565;
+    --color-text-tertiary: #6a7282;
+    --color-text-muted: #99a1af;
+    --color-border: #e5e7eb;
+    --color-border-02: #D1D5DC;
+    --color-bg-page: #f5f6f8;
+    --color-bg-card: #ffffff;
+    --color-bg-subtle: #f9fafb;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+
+    --shadow-card:
+      0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+
+    --z-sidebar: 30;
+    --z-dropdown: 40;
+    --z-modal: 50;
+    --z-toast: 60;
+
+    --color-focus-ring: #4e2bcc;
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-muted);
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .card {
+    background: var(--color-bg-card);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    border: 1.104px solid var(--color-border);
+  }
+
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+  .text-tertiary {
+    color: var(--color-text-tertiary);
+  }
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+
+  .badge-success {
+    background: var(--color-success-subtle);
+    color: var(--color-success-dark);
+  }
+  .badge-warning {
+    background: var(--color-warning-subtle);
+    color: var(--color-warning-dark);
+  }
+  .badge-danger {
+    background: var(--color-danger-subtle);
+    color: var(--color-danger-dark);
+  }
+  .badge-info {
+    background: #eff6ff;
+    color: var(--color-info);
+  }
+  .badge-neutral {
+    background: var(--color-bg-subtle);
+    color: var(--color-text-secondary);
+  }
+
+  .btn-primary {
+    background: var(--color-brand);
+    color: #fff;
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    font-size: 13px;
+    padding: 8px 16px;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover {
+    opacity: 0.9;
+  }
+  .btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
