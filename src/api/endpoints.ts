@@ -1,0 +1,128 @@
+export const ENDPOINTS = {
+  AUTH: {
+    LOGIN: "/api/v1/admin/auth/login",
+    ACCEPT_INVITATION: "/api/v1/admin/auth/accept-invitation",
+    REFRESH: "/api/v1/admin/auth/refresh",
+  },
+  DASHBOARD: {
+    STATS: "/api/v1/admin/control-room/stats",
+    LIQUIDITY: "/api/v1/admin/control-room/liquidity",
+    ALERTS: "/api/v1/admin/control-room/alerts",
+    RECENT_CONVERSIONS: "/api/v1/admin/control-room/recent-conversions",
+    RECENT_ACTIVITY: "/api/v1/admin/control-room/recent-activity",
+    KYC_QUEUE: "/api/v1/admin/control-room/kyc-queue",
+    SYSTEM_HEALTH: "/api/v1/admin/control-room/system-health",
+    MAIN: "/api/v1/admin/dashboard",
+  },
+  USERS: {
+    LIST: "/api/v1/admin/users",
+    DETAIL: (id: string) => `/api/v1/admin/users/${id}`,
+    RESTRICTION: "/api/v1/admin/users/restriction",
+    SOFT_RESTRICTION: "/api/v1/admin/users/soft-restriction",
+    WALLET_ACTION: "/api/v1/admin/users/wallet-action",
+    OVERVIEW: (id: string) => `/api/v1/admin/users/${id}/overview`,
+    KYC: (id: string) => `/api/v1/admin/users/${id}/kyc`,
+    CARDS: (id: string) => `/api/v1/admin/users/${id}/cards`,
+    FREEZE_CARDS: (id: string) => `/api/v1/admin/users/${id}/cards/freeze-all`,
+    TRANSACTIONS: (id: string) => `/api/v1/admin/users/${id}/transactions`,
+    REFERRALS: (id: string) => `/api/v1/admin/users/${id}/referrals`,
+    ACTIVITY: (id: string) => `/api/v1/admin/users/${id}/activity`,
+    NOTES: (id: string) => `/api/v1/admin/users/${id}/notes`,
+    AUDIT_LOG: (id: string) => `/api/v1/admin/users/${id}/audit-log`,
+    SEND_NOTIFICATION: (id: string) =>
+      `/api/v1/admin/users/${id}/send-notification`,
+  },
+  TRANSACTIONS: {
+    LIST: "/api/v1/admin/transactions",
+    STATUS: "/api/v1/admin/transactions/status",
+    DETAIL: (id: string) => `/api/v1/admin/transactions/${id}`,
+    PENDING_APPROVALS: "/api/v1/admin/transactions/pending/approvals",
+    APPROVE_FLAG: (flagId: string) =>
+      `/api/v1/admin/transactions/pending/${flagId}/approve`,
+    REJECT_FLAG: (flagId: string) =>
+      `/api/v1/admin/transactions/pending/${flagId}/reject`,
+    FAILED_LIST: "/api/v1/admin/transactions/failed/list",
+    FAILED_RETRY: (id: string) =>
+      `/api/v1/admin/transactions/failed/${id}/retry`,
+    FAILED_RESOLVE: (id: string) =>
+      `/api/v1/admin/transactions/failed/${id}/resolve`,
+    FAILED_REFUND: (id: string) =>
+      `/api/v1/admin/transactions/failed/${id}/refund`,
+  },
+  KYC: {
+    STATS: "/api/v1/admin/kyc-management/stats",
+    APPLICATIONS: "/api/v1/admin/kyc-management/applications",
+    DETAIL: (id: string) => `/api/v1/admin/kyc-management/applications/${id}`,
+    REVIEW: (id: string) =>
+      `/api/v1/admin/kyc-management/applications/${id}/review`,
+    GENERAL: "/api/v1/admin/kyc",
+  },
+  LEVELS: {
+    UPGRADES: "/api/v1/admin/level-upgrades",
+    REVIEW: "/api/v1/admin/level-upgrades/review",
+  },
+  ADMINS: {
+    LIST: "/api/v1/admin/admins",
+    INVITE: "/api/v1/admin/admins/invite",
+    ACTIVITY_LOGS: "/api/v1/admin/admins/activity-logs",
+    DETAIL: (id: string) => `/api/v1/admin/admins/${id}`,
+    ROLE: "/api/v1/admin/admins/role",
+    SUSPEND: (id: string) => `/api/v1/admin/admins/${id}/suspend`,
+    APP_UPDATE: "/api/v1/admin/admins/settings/app-update",
+  },
+  ROLES: {
+    LIST: "/api/v1/admin/roles",
+    CREATE: "/api/v1/admin/roles",
+    DETAIL: (id: string) => `/api/v1/admin/roles/${id}`,
+  },
+  CARDS: {
+    STATS: "/api/v1/admin/cards/stats",
+    LIST: "/api/v1/admin/cards",
+    LIMITS: "/api/v1/admin/cards/limits",
+    DETAIL: (id: string) => `/api/v1/admin/cards/${id}`,
+    TRANSACTIONS: (id: string) => `/api/v1/admin/cards/${id}/transactions`,
+    ACTIVITY: (id: string) => `/api/v1/admin/cards/${id}/activity`,
+    FREEZE: (id: string) => `/api/v1/admin/cards/${id}/freeze`,
+    UNFREEZE: (id: string) => `/api/v1/admin/cards/${id}/unfreeze`,
+  },
+  COMPLIANCE: {
+    STATS: "/api/v1/admin/compliance/stats",
+    FLAGGED_USERS: "/api/v1/admin/compliance/flagged-users",
+    FLAGGED_USERS_STATUS: "/api/v1/admin/compliance/flagged-users/status",
+    FLAGGED_TXNS: "/api/v1/admin/compliance/flagged-transactions",
+    FLAGGED_TXNS_STATUS: "/api/v1/admin/compliance/flagged-transactions/status",
+    RISK_RULES: "/api/v1/admin/compliance/risk-rules",
+    UPDATE_RULE: (id: string) => `/api/v1/admin/compliance/risk-rules/${id}`,
+  },
+  RATES: {
+    EXCHANGE: "/api/v1/admin/rates/exchange-rates",
+    OVERRIDE: "/api/v1/admin/rates/exchange-rates/override",
+    REFRESH: "/api/v1/admin/rates/exchange-rates/refresh",
+    FEE_CONFIG: "/api/v1/admin/rates/fee-config",
+    UPDATE_TIER: (tier: string) => `/api/v1/admin/rates/fee-config/${tier}`,
+    FEE_REVENUE: "/api/v1/admin/rates/fee-revenue",
+  },
+  REFERRALS: {
+    STATS: "/api/v1/admin/referral/stats",
+    REFERRERS: "/api/v1/admin/referral/referrers",
+    REFERRED_USERS: "/api/v1/admin/referral/referred-users",
+  },
+  NOTIFICATIONS: {
+    LIST: "/api/v1/notifications/",
+    CREATE: "/api/v1/notifications/create",
+    TRASH: "/api/v1/notifications/trash",
+  },
+  SETTINGS: {
+    GENERAL: "/api/v1/admin/settings",
+    FEES_LIMITS: "/api/v1/admin/settings/fees-limits",
+    SECURITY: "/api/v1/admin/settings/security",
+    NOTIFICATIONS: "/api/v1/admin/settings/notifications",
+    ADVANCED: "/api/v1/admin/settings/advanced",
+  },
+  API_KEYS: {
+    LIST: "/api/v1/admin/api-keys",
+    CREATE: "/api/v1/admin/api-keys",
+    DETAIL: (id: string) => `/api/v1/admin/api-keys/${id}`,
+    REVOKE: (id: string) => `/api/v1/admin/api-keys/${id}/revoke`,
+  },
+} as const;
