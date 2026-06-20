@@ -21,10 +21,10 @@ interface ReferralsTabProps {
 function ReferralStat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <Card>
-      <Box px={4} py={4}>
-        <Text variant="micro" color="muted" uppercase className="mb-1 block">{label}</Text>
-        <Text variant="title" color="primary" weight="semibold" as="p">{value}</Text>
-        {sub && <Text variant="micro" color="muted" className="mt-0.5 block">{sub}</Text>}
+      <Box px={3} py={3}>
+        <Text variant="micro" color="muted" className="mb-1 block text-[10px] leading-3">{label}</Text>
+        <Text variant="title" color="primary" weight="semibold" as="p" className="text-[18px] leading-6">{value}</Text>
+        {sub && <Text variant="micro" color="success" className="mt-0.5 block text-[10px] leading-3">{sub}</Text>}
       </Box>
     </Card>
   )
@@ -39,10 +39,10 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
       header: 'User',
       cell: ({ row }) => (
         <Stack gap={0}>
-          <Text variant="caption" color="primary" weight="medium" as="p">
+          <Text variant="caption" color="primary" weight="medium" as="p" className="text-[12px] leading-4">
             {row.original.name}
           </Text>
-          <Text variant="micro" color="muted" as="p">{row.original.email}</Text>
+          <Text variant="micro" color="muted" as="p" className="text-[10px] leading-3">{row.original.email}</Text>
         </Stack>
       ),
     },
@@ -50,14 +50,14 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
       accessorKey: 'join_date',
       header: 'Join Date',
       cell: ({ getValue }) => (
-        <Text variant="caption" color="secondary">{getValue<string>()}</Text>
+        <Text variant="caption" color="secondary" className="text-[12px]">{getValue<string>()}</Text>
       ),
     },
     {
       accessorKey: 'total_volume',
       header: 'Total Volume',
       cell: ({ getValue }) => (
-        <Text variant="caption" color="primary" weight="medium">
+        <Text variant="caption" color="primary" weight="semibold" className="text-[12px]">
           {formatNGN(getValue<number>())}
         </Text>
       ),
@@ -66,7 +66,7 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
       accessorKey: 'commission',
       header: 'Commission',
       cell: ({ getValue }) => (
-        <Text variant="caption" color="success" weight="medium">
+        <Text variant="caption" color="success" weight="semibold" className="text-[12px]">
           {formatNGN(getValue<number>())}
         </Text>
       ),
@@ -77,7 +77,8 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
       cell: ({ getValue }) => (
         <Text variant="caption"
           color={getValue<string>() === 'Active' ? 'success' : 'muted'}
-          weight="medium">
+          weight="medium"
+          className="text-[12px]">
           {getValue<string>()}
         </Text>
       ),
@@ -91,7 +92,7 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
         {/* Referral Code — special CodeBadge display */}
         <Card>
           <Box px={4} py={4}>
-            <Text variant="micro" color="muted" uppercase className="mb-2 block">
+            <Text variant="micro" color="muted" className="mb-2 block text-[10px] leading-3">
               Referral Code
             </Text>
             <CodeBadge code={ref.code} />
@@ -117,6 +118,7 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
         <Card.Header
           title="Referred Users"
           subtitle="Users who joined using this referral code"
+          className="px-4 py-3 [&_h4]:text-[12px] [&_h4]:leading-4 [&_p]:text-[10px]"
         />
         <DataTable
           data={DUMMY_REFERRED_USERS}
@@ -128,7 +130,7 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
 
       {/* ── Recent Commission Earnings list ─────────── */}
       <Card>
-        <Card.Header title="Recent Commission Earnings" />
+        <Card.Header title="Recent Commission Earnings" className="px-4 py-3 [&_h4]:text-[12px] [&_h4]:leading-4" />
         <Card.Body>
           {DUMMY_REFERRED_USERS.map((u, i) => (
             <Row
@@ -136,7 +138,7 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
               justify="between"
               align="center"
               className={[
-                'py-3 px-4',
+                'py-2.5 px-4',
                 i < DUMMY_REFERRED_USERS.length - 1
                   ? 'border-b border-(--color-border)'
                   : '',
@@ -145,17 +147,17 @@ export function ReferralsTab({ userId: _ }: ReferralsTabProps) {
               <Row gap={3} align="center">
                 <Avatar name={u.name} size="sm" />
                 <Stack gap={0}>
-                  <Text variant="caption" color="primary" weight="medium" as="p">
+                  <Text variant="caption" color="primary" weight="medium" as="p" className="text-[12px] leading-4">
                     {u.name}
                   </Text>
-                  <Text variant="micro" color="muted" as="p">Joined {u.join_date}</Text>
+                  <Text variant="micro" color="muted" as="p" className="text-[10px] leading-3">Joined {u.join_date}</Text>
                 </Stack>
               </Row>
               <Stack gap={0} className="text-right">
-                <Text variant="caption" color="success" weight="semibold" as="p">
+                <Text variant="caption" color="success" weight="semibold" as="p" className="text-[12px] leading-4">
                   {formatNGN(u.commission)}
                 </Text>
-                <Text variant="micro" color="muted" as="p">Commission</Text>
+                <Text variant="micro" color="muted" as="p" className="text-[10px] leading-3">Commission</Text>
               </Stack>
             </Row>
           ))}

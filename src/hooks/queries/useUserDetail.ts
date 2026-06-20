@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
-import type { UserDetail, ActivityEvent, Note, KYCHistoryEvent } from "@/api/types";
+import type { UserDetail, ActivityEvent, Note, KYCHistoryEvent, Card } from "@/api/types";
 
 export function useUserDetail(userId: string) {
   return useQuery<UserDetail>({
@@ -14,7 +14,7 @@ export function useUserDetail(userId: string) {
 }
 
 export function useUserCards(userId: string) {
-  return useQuery<unknown[]>({
+  return useQuery<Card[]>({
     queryKey: ["users", userId, "cards"],
     queryFn: async () => {
       const res = await userService.getUserCards(userId);

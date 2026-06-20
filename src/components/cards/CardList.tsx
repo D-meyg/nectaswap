@@ -21,20 +21,21 @@ export function CardList({
     <Card>
       <Card.Header
         title={`User Cards (${cards.length})`}
+        className="px-4 py-3 [&_h4]:text-[12px] [&_h4]:leading-4"
         action={
-          <Button size="sm" onClick={onIssueCard}>
+          <Button size="sm" onClick={onIssueCard} className="h-[28px] px-3 text-[11px]">
             Issue New Card
           </Button>
         }
       />
-      <Card.Body padded>
+      <Card.Body className="p-3">
         {cards.length === 0 ? (
           <EmptyState
             icon={CreditCard}
             title="No Cards Issued"
             description="This user doesn't have any Naira cards yet"
             action={
-              <Button size="sm" onClick={onIssueCard}>
+              <Button size="sm" onClick={onIssueCard} className="h-[30px] px-3 text-[11px]">
                 Issue First Card
               </Button>
             }

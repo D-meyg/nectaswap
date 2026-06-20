@@ -57,7 +57,7 @@ export function OverviewTab({ user, loading }: OverviewTabProps) {
   return (
     <Stack gap={4}>
       <OverviewCard title="Profile Information">
-        <Box className="grid grid-cols-2 gap-x-8 gap-y-4">
+        <Box className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
           <InfoField label="Email"   value={user.email} />
           <InfoField label="Phone"   value={user.phone} />
           <InfoField label="Joined"  value={user.joined} />
@@ -66,7 +66,7 @@ export function OverviewTab({ user, loading }: OverviewTabProps) {
       </OverviewCard>
 
       <OverviewCard title="KYC & Risk">
-        <Box className="grid grid-cols-3 gap-x-8 gap-y-4">
+        <Box className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
           <Stack gap={0}>
             <Text variant="micro" color="muted" className="text-[10px] leading-4">KYC Level</Text>
             <Text variant="caption" color="primary" className="text-[12px] leading-4">{user.kyc_level ?? 'N/A'}</Text>
@@ -115,7 +115,7 @@ export function OverviewTab({ user, loading }: OverviewTabProps) {
         </Text>
       </OverviewCard>
 
-      <Box className="grid grid-cols-2 gap-4">
+      <Box className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <OverviewCard>
           <Text variant="micro" color="muted" className="text-[10px] leading-4">Total Volume (Crypto → Naira)</Text>
           <Text variant="heading" color="primary" className="mt-1 block text-[24px] leading-7">

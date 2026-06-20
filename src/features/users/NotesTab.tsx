@@ -39,8 +39,8 @@ export function NotesTab({ userId }: NotesTabProps) {
         [...notes]
           .sort(
             (a, b) =>
-              (b.is_pinned || b.pinned ? 1 : 0) -
-              (a.is_pinned || a.pinned ? 1 : 0),
+              (b.pinned ? 1 : 0) -
+              (a.pinned ? 1 : 0),
           )
           .map((note) => (
             <NoteItem

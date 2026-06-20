@@ -15,6 +15,7 @@ import { usePageTitle } from "@/layouts/AppLayout";
 import { BackLink } from "@/components/common/BackLink";
 import { UserHeader } from "@/components/common/UserHeader";
 import { QuickActionsPanel } from "@/components/common/QuickActionsPanel";
+import { ReferralActionsPanel } from "@/components/common/ReferralActionsPanel";
 import { RiskIndicatorsPanel } from "@/components/common/RiskIndicatorsPanel";
 import { TabsRoot, TabsList, Tab, TabPanel } from "@/components/ui/Tabs";
 import { Stack } from "@/components/ui/Stack";
@@ -47,7 +48,8 @@ type TabValue =
   | "notes"
   | "audit";
 
-const userDetailTabClassName = "h-[42px] gap-1.5 text-[12px] [&_p]:text-[12px]";
+const userDetailTabClassName =
+  "h-[38px] gap-1.5 px-1 text-[12px] [&_p]:text-[12px] [&_p]:leading-4";
 
 export default function UserDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
@@ -81,8 +83,8 @@ export default function UserDetailPage() {
   const freezeLoading = freezeMutation.isPending || unfreezeMutation.isPending;
 
   return (
-    <Box className="w-full max-w-[1120px] px-5 py-4 lg:px-6">
-      <BackLink label="Back to Users" to="/users" className="mb-3" />
+    <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
+      <BackLink label="Back to Users" to="/users" className="mb-3 text-[11px]" />
 
       {isLoading && !apiUser ? (
         <Stack gap={3} className="mb-8">
@@ -101,7 +103,7 @@ export default function UserDetailPage() {
         value={activeTab}
         onChange={(value) => setActiveTab(value as TabValue)}
       >
-        <TabsList className="min-h-[42px] gap-5">
+        <TabsList className="min-h-[38px] gap-5">
           <Tab
             value="overview"
             icon={<User size={14} />}
@@ -161,7 +163,7 @@ export default function UserDetailPage() {
           </Tab>
         </TabsList>
 
-        <Box className="mt-4 grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <Box className="mt-4 grid w-full grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
           <Box className="min-w-0">
             <TabPanel value="overview" className="pt-0">
               <OverviewTab user={user} loading={isLoading && !apiUser} />
@@ -202,6 +204,7 @@ export default function UserDetailPage() {
               velocityCheck={user?.velocity_check}
               amlScreening={user?.aml_screening}
             />
+            {activeTab === "referrals" && <ReferralActionsPanel />}
           </Stack>
         </Box>
       </TabsRoot>

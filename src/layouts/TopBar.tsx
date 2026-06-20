@@ -16,34 +16,32 @@ export const TopBar = memo(function TopBar() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const { title, subtitle } = useCurrentPageTitle();
 
-  console.log(title, subtitle)
-
   return (
     <Row
       as="header"
       justify="between"
       align="center"
       gap={4}
-      className="h-[80px] shrink-0 px-6 bg-white border-b border-(--color-border)"
+      className="h-[64px] shrink-0 px-6 bg-white border-b border-(--color-border)"
     >
       {/* Left: dynamic page title + subtitle */}
       <Stack gap={0}>
-        <Text as="h1" variant="heading" color="primary" weight="semibold">
+        <Text as="h1" variant="heading" color="primary" weight="semibold" className="text-[24px] leading-[28px]">
           {title}
         </Text>
-        <Text as="p" variant="caption" color="tertiary">
+        <Text as="p" variant="caption" color="tertiary" className="text-[11px] leading-4">
           {subtitle}
         </Text>
       </Stack>
 
       {/* Right: search + bell + user */}
-      <Row gap={4} align="center">
+      <Row gap={3} align="center">
         {/* Search */}
         <Row
           gap={2}
           align="center"
           className={[
-            "w-[280px] h-[36px] px-3",
+            "w-[300px] h-[32px] px-3",
             "rounded-(--radius-sm) border border-(--color-border)",
             "bg-(--color-bg-subtle)",
             "transition-colors focus-within:border-(--color-brand) focus-within:bg-white",
@@ -56,7 +54,7 @@ export const TopBar = memo(function TopBar() {
           <input
             type="text"
             placeholder="Search users, transactions, cards..."
-            className="flex-1 min-w-0 bg-transparent outline-none text-[13px] text-(--color-text-primary) placeholder:text-(--color-text-muted)"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[11px] text-(--color-text-primary) placeholder:text-(--color-text-muted)"
           />
         </Row>
 
@@ -80,10 +78,10 @@ export const TopBar = memo(function TopBar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center gap-2 pl-1.5 pr-2 py-1 h-auto"
+                className="flex h-8 items-center gap-2 pl-1.5 pr-2 py-1"
               >
                 <Avatar name={user.name} size="sm" />
-                <Text variant="caption" color="primary" weight="medium">
+                <Text variant="caption" color="primary" weight="medium" className="text-[11px]">
                   {user.name.split(" ")[0]}
                 </Text>
                 <ChevronDown

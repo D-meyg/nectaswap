@@ -27,22 +27,22 @@ function ActivityEntry({
   return (
     <div
       className={[
-        "px-5 py-4",
+        "px-4 py-3",
         !isLast ? "border-b border-(--color-border)" : "",
       ].join(" ")}
     >
       {/* Top row: title + timestamp */}
       <Row justify="between" align="start" gap={4}>
-        <Text variant="caption" color="primary" weight="semibold">
+        <Text variant="caption" color="primary" weight="semibold" className="text-[12px] leading-4">
           {event.title}
         </Text>
-        <Text variant="micro" color="muted" className="shrink-0">
+        <Text variant="micro" color="muted" className="shrink-0 text-[10px] leading-4">
           {event.created_at}
         </Text>
       </Row>
 
       {/* Description — TXN ID or auth message */}
-      <Text variant="caption" color="secondary" className="mt-0.5 block">
+      <Text variant="caption" color="secondary" className="mt-0.5 block text-[11px] leading-4">
         {event.txn_id
           ? `${event.txn_id} - ${event.description}`
           : event.description}
@@ -50,13 +50,13 @@ function ActivityEntry({
 
       {/* IP • device — muted micro text */}
       <Row gap={1} align="center" className="mt-1">
-        <Text variant="micro" color="muted">
+        <Text variant="micro" color="muted" className="text-[10px] leading-4">
           IP: {event.ip}
         </Text>
-        <Text variant="micro" color="muted">
+        <Text variant="micro" color="muted" className="text-[10px] leading-4">
           •
         </Text>
-        <Text variant="micro" color="muted">
+        <Text variant="micro" color="muted" className="text-[10px] leading-4">
           {event.device}
         </Text>
       </Row>

@@ -64,8 +64,8 @@ function TableSkeleton({ columns }: { columns: number }) {
       {Array.from({ length: 5 }).map((_, rowIndex) => (
         <tr key={rowIndex} className="border-b border-(--color-border)">
           {Array.from({ length: columns }).map((__, cellIndex) => (
-            <td key={cellIndex} className="px-5 py-4">
-              <div className="h-4 w-full max-w-[140px] animate-pulse rounded bg-(--color-border)" />
+            <td key={cellIndex} className="px-4 py-3">
+              <div className="h-3 w-full max-w-[140px] animate-pulse rounded bg-(--color-border)" />
             </td>
           ))}
         </tr>
@@ -140,7 +140,7 @@ export function DataTable<TData>({
   return (
     <div className={cn("flex flex-col w-full", className)}>
       {toolbar && (
-        <div className="border-b border-(--color-border) bg-white px-5 py-4">
+        <div className="border-b border-(--color-border) bg-white px-4 py-3">
           {toolbar}
         </div>
       )}
@@ -156,20 +156,20 @@ export function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
-                className="h-[44px] border-b border-(--color-border)"
+                className="h-[36px] border-b border-(--color-border)"
               >
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
                     className={cn(
-                      "whitespace-nowrap px-5 py-3 text-left align-middle",
+                      "whitespace-nowrap px-4 py-2 text-left align-middle",
                       header.column.getCanSort() &&
                         "cursor-pointer select-none hover:bg-[rgba(0,0,0,0.02)] transition-colors",
                     )}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <span className="font-geom text-[11px] font-semibold uppercase leading-none tracking-[0.05em] text-(--color-text-tertiary)">
+                      <span className="font-geom text-[10px] font-semibold uppercase leading-none tracking-[0.04em] text-(--color-text-tertiary)">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
@@ -191,20 +191,20 @@ export function DataTable<TData>({
               <TableSkeleton columns={columns.length} />
             ) : error ? (
               <tr>
-                <td colSpan={columns.length} className="px-5 py-12 text-center">
-                  <Text variant="caption" color="danger">
+                <td colSpan={columns.length} className="px-4 py-10 text-center">
+                  <Text variant="caption" color="danger" className="text-[12px]">
                     {error}
                   </Text>
                 </td>
               </tr>
             ) : table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-5 py-12 text-center">
-                  <Text variant="subtitle" color="primary" weight="semibold">
+                <td colSpan={columns.length} className="px-4 py-10 text-center">
+                  <Text variant="subtitle" color="primary" weight="semibold" className="text-[13px]">
                     {emptyTitle}
                   </Text>
 
-                  <Text variant="caption" color="tertiary" className="mt-1">
+                  <Text variant="caption" color="tertiary" className="mt-1 text-[11px]">
                     {emptyMessage}
                   </Text>
                 </td>
@@ -214,7 +214,7 @@ export function DataTable<TData>({
                 <tr
                   key={row.id}
                   className={cn(
-                    "h-[64px] border-b border-(--color-border) last:border-b-0",
+                    "h-[44px] border-b border-(--color-border) last:border-b-0",
                     "transition-colors hover:bg-(--color-bg-subtle)",
                     row.getIsSelected() && "bg-[rgba(78,43,204,0.04)]",
                   )}
@@ -222,7 +222,7 @@ export function DataTable<TData>({
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="whitespace-nowrap px-5 py-3 align-middle"
+                      className="whitespace-nowrap px-4 py-2 align-middle text-[12px]"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -238,8 +238,8 @@ export function DataTable<TData>({
       </div>
 
       {onPageChange && (
-        <div className="flex items-center justify-between gap-4 border-t border-(--color-border) bg-white px-5 py-4">
-          <Text variant="caption" color="tertiary">
+        <div className="flex items-center justify-between gap-4 border-t border-(--color-border) bg-white px-4 py-3">
+          <Text variant="caption" color="tertiary" className="text-[11px]">
             {total
               ? `Showing ${(page - 1) * pageSize + 1}–${Math.min(
                   page * pageSize,

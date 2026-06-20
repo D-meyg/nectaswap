@@ -7,8 +7,8 @@ interface CardsTabProps { userId: string }
 
 export function CardsTab({ userId }: CardsTabProps) {
   const { data: cards = [], isLoading } = useUserCards(userId)
-  const freeze   = useFreezeCard(userId)
-  const unfreeze = useUnfreezeCard(userId)
+  const freeze   = useFreezeCard()
+  const unfreeze = useUnfreezeCard()
 
   if (isLoading) return <TableSkeleton rows={4} cols={3} />
 

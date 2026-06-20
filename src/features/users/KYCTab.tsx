@@ -18,22 +18,22 @@ function DocRow({ doc }: { doc: KYCDocument }) {
     <Row
       align="center"
       justify="between"
-      className="py-4 border-b border-(--color-border) last:border-0"
+      className="min-h-[48px] rounded-(--radius-sm) border border-(--color-border) bg-white px-4 py-2"
     >
-      <Row align="center" gap={4}>
-        <Box className="flex h-10 w-10 shrink-0 items-center justify-center rounded-(--radius-md) bg-(--color-bg-subtle)">
-          <FileText size={18} className="text-(--color-text-secondary)" />
+      <Row align="center" gap={3}>
+        <Box className="flex h-7 w-7 shrink-0 items-center justify-center rounded-(--radius-sm) bg-(--color-bg-card)">
+          <FileText size={15} className="text-(--color-text-secondary)" />
         </Box>
         <Stack gap={0.5}>
           <Text
             variant="caption"
             color="primary"
             weight="semibold"
-            className="text-[13.5px]"
+            className="text-[12px] leading-4"
           >
             {doc.type}
           </Text>
-          <Text variant="micro" color="tertiary">
+          <Text variant="micro" color="tertiary" className="text-[11px] leading-4">
             Reviewed by{" "}
             <span className="font-medium text-(--color-text-secondary)">
               {doc.reviewed_by}
@@ -44,7 +44,7 @@ function DocRow({ doc }: { doc: KYCDocument }) {
       </Row>
       <span
         className={cn(
-          "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[11.5px] font-semibold tracking-wide uppercase leading-none",
+        "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[11px] font-semibold leading-none",
           isApproved
             ? "bg-(--color-success-bg) text-(--color-success-dark)"
             : "bg-(--color-danger-subtle) text-(--color-danger)",
@@ -71,29 +71,28 @@ function TimelineEvent({
   isLast: boolean;
 }) {
   return (
-    <div className="relative flex gap-5">
+    <div className="relative flex gap-3 rounded-(--radius-sm) border border-(--color-border) bg-white px-4 py-3">
       <div className="flex flex-col items-center">
-        {/* Timeline Dot */}
-        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-(--color-success-bg) z-10 ring-4 ring-white">
-          <CheckCircle size={14} className="text-(--color-success-dark)" />
-        </div>
-        {/* Connecting Line */}
+        <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-(--color-brand)" />
         {!isLast && (
-          <div className="absolute top-7 bottom-[-16px] left-[13px] w-[2px] bg-(--color-border)" />
+          <div className="absolute bottom-[-10px] left-[19px] top-5 w-px bg-(--color-border)" />
         )}
+        <div className="sr-only">
+          <CheckCircle size={14} />
+        </div>
       </div>
 
-      <div className={cn("w-full", !isLast ? "pb-8" : "")}>
-        <Stack gap={1}>
+      <div className="w-full">
+        <Stack gap={0}>
           <Text
             variant="caption"
             color="primary"
             weight="semibold"
-            className="text-[13.5px] leading-none"
+            className="text-[12px] leading-4"
           >
             {event.event}
           </Text>
-          <Text variant="micro" color="tertiary">
+          <Text variant="micro" color="tertiary" className="text-[11px] leading-4">
             {event.date} by{" "}
             <span className="font-medium text-(--color-text-secondary)">
               {event.by}
@@ -103,7 +102,7 @@ function TimelineEvent({
         <Text
           variant="caption"
           color="secondary"
-          className="mt-2.5 block leading-relaxed"
+          className="block text-[11px] leading-4"
         >
           {event.description}
         </Text>
@@ -145,27 +144,25 @@ export function KYCTab({ userId }: KYCTabProps) {
   const { data: history, isLoading } = useKYCHistory(userId);
 
   return (
-    <Stack gap={6}>
-      {/* Submitted Documents */}
+    <Stack gap={4}>
       <Card className="rounded-[8px] shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Card.Header
           title="Submitted Documents"
-          className="border-b border-(--color-border) pb-4"
+          className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[13px] [&_h4]:leading-4"
         />
-        <Card.Body className="px-5 pt-0 pb-1">
+        <Card.Body className="space-y-3 px-4 pb-4 pt-0">
           {MOCK_DOCS.map((doc) => (
             <DocRow key={doc.id} doc={doc} />
           ))}
         </Card.Body>
       </Card>
 
-      {/* Verification History */}
       <Card className="rounded-[8px] shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Card.Header
           title="Verification History"
-          className="border-b border-(--color-border) pb-4"
+          className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[13px] [&_h4]:leading-4"
         />
-        <Card.Body className="p-6">
+        <Card.Body className="px-4 pb-4 pt-0">
           {isLoading ? (
             <Stack gap={6}>
               <Skeleton className="h-[60px] w-full rounded-(--radius-md)" />
@@ -178,7 +175,7 @@ export function KYCTab({ userId }: KYCTabProps) {
               description="Verification events will appear here"
             />
           ) : (
-            <div className="pt-2">
+            <div className="space-y-3">
               {history.map((event, i) => (
                 <TimelineEvent
                   key={event.id}

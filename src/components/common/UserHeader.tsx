@@ -55,7 +55,7 @@ export function UserHeader({
   const isFrozen = user.status?.toLowerCase() === "frozen";
 
   return (
-    <section className={cn("mb-4", className)}>
+    <section className={cn("mb-3", className)}>
       <Row
         align="start"
         justify="between"
@@ -70,7 +70,7 @@ export function UserHeader({
               color="primary"
               weight="semibold"
               truncate
-              className="text-[24px] leading-[30px] tracking-[-0.24px]"
+              className="text-[22px] leading-[28px]"
             >
               {name}
             </Text>
@@ -82,20 +82,20 @@ export function UserHeader({
               color="secondary"
               weight="medium"
               as="span"
-              className="ml-0.5 text-[12px]"
+              className="ml-0.5 text-[11px]"
             >
               ID: {id}
             </Text>
           </Row>
 
           <Row align="center" gap={2}>
-            <Text variant="caption" color="secondary" as="span" className="text-[12px]">
+            <Text variant="caption" color="secondary" as="span" className="text-[11px]">
               {email}
             </Text>
 
             <span className="h-1 w-1 rounded-full bg-(--color-border-02)" />
 
-            <Text variant="caption" color="secondary" as="span" className="text-[12px]">
+            <Text variant="caption" color="secondary" as="span" className="text-[11px]">
               Last active: {lastActive}
             </Text>
           </Row>
@@ -105,7 +105,7 @@ export function UserHeader({
           <Button
             variant="secondary"
             size="md"
-            className="h-[34px] w-full px-3 text-[12px] sm:w-auto"
+            className="h-[32px] w-full px-3 text-[11px] sm:w-auto"
           >
             <Mail size={14} />
             Send Message
@@ -116,7 +116,7 @@ export function UserHeader({
             size="md"
             loading={freezeLoading}
             onClick={onFreeze}
-            className="h-[34px] w-full px-3 text-[12px] sm:w-auto"
+            className="h-[32px] w-full px-3 text-[11px] sm:w-auto"
           >
             <Lock size={14} />
             {isFrozen ? "Unfreeze Account" : "Freeze Account"}

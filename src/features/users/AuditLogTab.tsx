@@ -56,32 +56,32 @@ function AuditEntryRow({ entry, isLast }: AuditEntryRowProps) {
   return (
     <div
       className={[
-        "px-5 py-4",
+        "px-4 py-3",
         !isLast ? "border-b border-(--color-border)" : "",
       ].join(" ")}
     >
       {/* Top row: action title + timestamp */}
       <Row justify="between" align="start" gap={4}>
-        <Text variant="caption" color="primary" weight="semibold">
+        <Text variant="caption" color="primary" weight="semibold" className="text-[12px] leading-4">
           {entry.action}
         </Text>
-        <Text variant="micro" color="muted" className="shrink-0">
+        <Text variant="micro" color="muted" className="shrink-0 text-[10px] leading-4">
           {entry.created_at}
         </Text>
       </Row>
 
       {/* "by Admin/System" */}
-      <Text variant="micro" color="muted" className="mt-0.5 block">
+      <Text variant="micro" color="muted" className="mt-0.5 block text-[10px] leading-4">
         by {entry.by}
       </Text>
 
       {/* Description */}
-      <Text variant="caption" color="secondary" className="mt-1 block">
+      <Text variant="caption" color="secondary" className="mt-1 block text-[11px] leading-4">
         {entry.description}
       </Text>
 
       {/* IP */}
-      <Text variant="micro" color="muted" className="mt-1 block">
+      <Text variant="micro" color="muted" className="mt-1 block text-[10px] leading-4">
         IP: {entry.ip}
       </Text>
     </div>
