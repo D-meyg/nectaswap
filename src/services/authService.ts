@@ -8,6 +8,11 @@ export const authService = {
     return data;
   },
 
+  verifyOtp: async (payload: { v_id: string; otp: string }) => {
+    const { data } = await client.post(ENDPOINTS.AUTH.VERIFY_OTP, payload);
+    return data;
+  },
+
   acceptInvitation: async (payload: AcceptInvitePayload) => {
     const { data } = await client.post(
       ENDPOINTS.AUTH.ACCEPT_INVITATION,

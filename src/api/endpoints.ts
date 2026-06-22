@@ -1,6 +1,7 @@
 export const ENDPOINTS = {
   AUTH: {
     LOGIN: "/api/v1/admin/auth/login",
+    VERIFY_OTP: "/api/v1/admin/auth/verify-otp",
     ACCEPT_INVITATION: "/api/v1/admin/auth/accept-invitation",
     REFRESH: "/api/v1/admin/auth/refresh",
   },

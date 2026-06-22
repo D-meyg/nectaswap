@@ -71,55 +71,33 @@ export default function LoginPage() {
 
   const [step, setStep] = useState<Step>("login");
   const [userEmail, setUserEmail] = useState("");
+  const [vId, setVId] = useState("");
 
-  const handleLoginSuccess = (email: string, authPayload?: any) => {
+  const handleLoginSuccess = (email: string, v_id: string) => {
     setUserEmail(email);
-
-    if (authPayload) {
-      const user = authPayload.user || authPayload.admin || authPayload.data?.user;
-      const token = authPayload.access_token || authPayload.token || authPayload.data?.access_token || authPayload.data?.token;
-      const refreshToken = authPayload.refresh_token || authPayload.refreshToken || authPayload.data?.refresh_token || authPayload.data?.refreshToken || "";
-
-      if (user && token) {
-        setAuth(user, token, refreshToken);
-        navigate("/");
-        return;
-      }
-    }
-
+    setVId(v_id);
     setStep("2fa");
   };
 
-  const handleVerified = () => {
-    setAuth(
-      { id: "1", name: "Super Admin", email: userEmail, role: "super_admin" },
-      "demo-token",
-      "demo-refresh-token",
-    );
-    navigate("/");
-  };
-
-  const handleSkip = () => {
-    setAuth(
-      {
-        id: "1",
-        name: "Super Admin",
-        email: "admin@nectaswap.io",
-        role: "super_admin",
-      },
-      "demo-token",
-      "demo-refresh-token",
-    );
+  const handleVerified = (authData: any) => {
+    const user = {
+      id: authData.user_id ?? "",
+      name: `${authData.first_name ?? ""} ${authData.last_name ?? ""}`.trim(),
+      email: userEmail,
+      role: "admin" as const,
+    };
+    setAuth(user, authData.access_token, authData.refresh_token ?? "");
     navigate("/");
   };
 
   return (
     <AuthPage>
       {step === "login" ? (
-        <LoginStep onSuccess={handleLoginSuccess} onSkip={handleSkip} />
+        <LoginStep onSuccess={handleLoginSuccess} />
       ) : (
         <TwoFAStep
           userEmail={userEmail}
+          vId={vId}
           onVerified={handleVerified}
           onBack={() => setStep("login")}
         />
@@ -132,11 +110,10 @@ export default function LoginPage() {
 // LOGIN STEP
 // ────────────────────────────────────────────────────────────
 interface LoginStepProps {
-  onSuccess: (email: string, authPayload?: any) => void;
-  onSkip: () => void;
+  onSuccess: (email: string, v_id: string) => void;
 }
 
-function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
+function LoginStep({ onSuccess }: LoginStepProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -163,7 +140,8 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
         user_agent: navigator.userAgent,
       });
       const payload = unwrapApiData<any>(response, {});
-      onSuccess(email, payload);
+      const v_id = payload?.v_id ?? response?.data?.v_id ?? "";
+      onSuccess(email, v_id);
     } catch (err: any) {
       setError(err?.response?.data?.message || "Invalid email or password");
     } finally {
@@ -291,18 +269,10 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
         </div>
       </div>
 
-      <div className="mt-8 flex flex-col items-center justify-center gap-2">
+      <div className="mt-8 flex items-center justify-center">
         <Text variant="micro" color="muted">
           © 2026 NectaSwap. All rights reserved.
         </Text>
-        <button
-          onClick={onSkip}
-          className="hover:underline text-(--color-brand) opacity-80 hover:opacity-100 transition-opacity"
-        >
-          <Text variant="micro" color="inherit" as="span">
-            Demo: Skip to Dashboard →
-          </Text>
-        </button>
       </div>
     </div>
   );
@@ -313,11 +283,12 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
 // ────────────────────────────────────────────────────────────
 interface TwoFAStepProps {
   userEmail: string;
-  onVerified: () => void;
+  vId: string;
+  onVerified: (authData: any) => void;
   onBack: () => void;
 }
 
-function TwoFAStep({ userEmail, onVerified, onBack }: TwoFAStepProps) {
+function TwoFAStep({ userEmail, vId, onVerified, onBack }: TwoFAStepProps) {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -355,23 +326,24 @@ function TwoFAStep({ userEmail, onVerified, onBack }: TwoFAStepProps) {
     document.getElementById(`otp-${Math.min(digits.length, 5)}`)?.focus();
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     const code = otp.join("");
     if (code.length < 6) {
       setError("Please enter all 6 digits");
       return;
     }
     setLoading(true);
-    setTimeout(() => {
+    try {
+      const response = await authService.verifyOtp({ v_id: vId, otp: code });
+      const authData = response?.data ?? response;
+      onVerified(authData);
+    } catch (err: any) {
+      setError(err?.response?.data?.message ?? "Invalid verification code. Please try again.");
+      setOtp(["", "", "", "", "", ""]);
+      document.getElementById("otp-0")?.focus();
+    } finally {
       setLoading(false);
-      if (code === "123456") {
-        onVerified();
-      } else {
-        setError("Invalid verification code. Please try again.");
-        setOtp(["", "", "", "", "", ""]);
-        document.getElementById("otp-0")?.focus();
-      }
-    }, 800);
+    }
   };
 
   return (
@@ -497,13 +469,6 @@ function TwoFAStep({ userEmail, onVerified, onBack }: TwoFAStepProps) {
           </Text>
           <Text variant="micro" color="tertiary" className="leading-[1.4]">
             Open your authenticator app (Google Authenticator, Authy, etc.) and enter the 6-digit code shown for NectaSwap Admin.
-          </Text>
-          <Text variant="micro" color="tertiary" className="mt-1">
-            <span className="font-semibold text-(--color-text-primary)">Demo:</span> Use code{" "}
-            <Text variant="micro" color="brand" weight="bold" as="span">
-              123456
-            </Text>{" "}
-            to proceed
           </Text>
         </div>
       </div>
