@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 type AvatarSize = "xs" | "sm" | "md" | "lg";
 
@@ -10,10 +10,10 @@ interface AvatarProps {
 }
 
 const sizeMap: Record<AvatarSize, { wrapper: string; text: string }> = {
-  xs: { wrapper: "h-6 w-6", text: "text-[9px]" },
-  sm: { wrapper: "h-8 w-8", text: "text-[11px]" },
-  md: { wrapper: "h-10 w-10", text: "text-[14px]" },
-  lg: { wrapper: "h-12 w-12", text: "text-[16px]" },
+  xs: { wrapper: "h-6 w-6", text: "text-[0.5625rem]" },
+  sm: { wrapper: "h-8 w-8", text: "text-[0.6875rem]" },
+  md: { wrapper: "h-10 w-10", text: "text-sm" },
+  lg: { wrapper: "h-12 w-12", text: "text-base" },
 };
 
 function getInitials(name: string) {

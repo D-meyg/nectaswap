@@ -25,7 +25,7 @@ function PriorityTag({ p }: { p: Priority }) {
   return (
     <span
       className={[
-        "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold",
+        "inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold",
         styles[p],
       ].join(" ")}
     >
@@ -214,7 +214,7 @@ export default function NotificationsPage() {
                         color="primary"
                         weight="semibold"
                         as="p"
-                        className="text-[20px] leading-tight"
+                        className="text-xl leading-tight"
                       >
                         {data.count.toLocaleString()}
                       </Text>
@@ -248,7 +248,7 @@ export default function NotificationsPage() {
                         key={p}
                         onClick={() => setPriority(p)}
                         className={[
-                          "rounded-(--radius-sm) py-2 text-[13px] font-medium transition-colors border capitalize",
+                          "rounded-(--radius-sm) py-2 text-[0.8125rem] font-medium transition-colors border capitalize",
                           priority === p
                             ? p === "info"
                               ? "bg-(--color-brand) text-white border-(--color-brand)"
@@ -277,7 +277,7 @@ export default function NotificationsPage() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Enter a clear, concise title..."
-                    className="w-full rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-2.5 text-[13px] text-(--color-text-primary) placeholder:text-(--color-text-muted) outline-none focus:border-(--color-brand) transition-colors"
+                    className="w-full rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-2.5 text-[0.8125rem] text-(--color-text-primary) placeholder:text-(--color-text-muted) outline-none focus:border-(--color-brand) transition-colors"
                   />
                 </Box>
 
@@ -295,7 +295,7 @@ export default function NotificationsPage() {
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Type your notification message here..."
                     rows={5}
-                    className="w-full rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-2.5 text-[13px] text-(--color-text-primary) placeholder:text-(--color-text-muted) outline-none focus:border-(--color-brand) resize-none transition-colors"
+                    className="w-full rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-2.5 text-[0.8125rem] text-(--color-text-primary) placeholder:text-(--color-text-muted) outline-none focus:border-(--color-brand) resize-none transition-colors"
                   />
                   <Row justify="between" className="mt-1">
                     <Text variant="micro" color="muted">
@@ -392,7 +392,7 @@ export default function NotificationsPage() {
                             variant="micro"
                             color="muted"
                             as="p"
-                            className="max-w-[240px] truncate"
+                            className="max-w-60 truncate"
                           >
                             {n.body}
                           </Text>
@@ -473,7 +473,7 @@ export default function NotificationsPage() {
                     color="primary"
                     weight="semibold"
                     as="p"
-                    className="text-[20px]"
+                    className="text-xl"
                   >
                     {selectedData.count.toLocaleString()}
                   </Text>
@@ -485,7 +485,7 @@ export default function NotificationsPage() {
                   <Text
                     variant="heading"
                     weight="semibold"
-                    className="text-[20px] text-(--color-success-mid)"
+                    className="text-xl text-(--color-success-mid)"
                     as="p"
                   >
                     {"< 1min"}

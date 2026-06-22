@@ -1,4 +1,4 @@
-import { memo, useMemo, useState, type ElementType } from "react";
+﻿import { memo, useMemo, useState, type ElementType } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -107,8 +107,8 @@ const NAV_SYSTEM: NavItem[] = [
   { label: "Security", icon: Lock, path: "/security" },
 ];
 
-const SIDEBAR_WIDTH = "w-[200px]";
-const COLLAPSED_WIDTH = "w-[72px]";
+const SIDEBAR_WIDTH = "w-[12.5rem]";
+const COLLAPSED_WIDTH = "w-[4.5rem]";
 
 function isRouteMatch(pathname: string, path: string) {
   if (path === "/") return pathname === "/";
@@ -130,7 +130,7 @@ const SubItem = memo(function SubItem({
     <NavLink
       to={path}
       className={cn(
-        "flex h-[28px] items-center rounded-(--radius-sm) px-3 ml-5 transition-colors duration-200 outline-none",
+        "flex h-7 items-center rounded-(--radius-sm) px-3 ml-5 transition-colors duration-200 outline-none",
         active
           ? "bg-(--color-brand)/10 text-(--color-brand)"
           : "text-(--color-text-secondary) hover:bg-(--color-bg-subtle) hover:text-(--color-text-primary)",
@@ -147,7 +147,7 @@ const SubItem = memo(function SubItem({
           variant="label"
           weight={active ? "semibold" : "medium"}
           color="inherit"
-          className="truncate text-[11px] leading-4"
+          className="truncate text-[0.6875rem] leading-4"
         >
           {label}
         </Text>
@@ -183,7 +183,7 @@ const NavGroup = memo(function NavGroup({
         if (!collapsed) setManualExpanded((value) => !value);
       }}
       className={cn(
-        "flex w-full items-center justify-between rounded-(--radius-sm) py-2 transition-colors outline-none h-[32px]",
+        "flex w-full items-center justify-between rounded-(--radius-sm) py-2 transition-colors outline-none h-8",
         isGroupActive
           ? "bg-(--color-brand) text-white shadow-[0_2px_4px_rgba(78,43,204,0.12)]"
           : "text-(--color-text-secondary) hover:bg-(--color-bg-subtle) hover:text-(--color-text-primary)",
@@ -205,14 +205,14 @@ const NavGroup = memo(function NavGroup({
         <div
           className={cn(
             "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden text-left",
-            collapsed ? "max-w-0 opacity-0" : "max-w-[130px] opacity-100",
+            collapsed ? "max-w-0 opacity-0" : "max-w-[8.125rem] opacity-100",
           )}
         >
           <Text
             variant="caption"
             weight={isGroupActive ? "semibold" : "medium"}
             color="inherit"
-            className="text-[11px] leading-4"
+            className="text-[0.6875rem] leading-4"
           >
             {item.label}
           </Text>
@@ -222,7 +222,7 @@ const NavGroup = memo(function NavGroup({
       <div
         className={cn(
           "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden shrink-0 flex items-center justify-center",
-          collapsed ? "max-w-0 opacity-0" : "max-w-[20px] opacity-100",
+          collapsed ? "max-w-0 opacity-0" : "max-w-5 opacity-100",
         )}
       >
         <ChevronDown
@@ -277,7 +277,7 @@ const NavLinkItem = memo(function NavLinkItem({
     <NavLink
       to={item.path!}
       className={cn(
-        "flex items-center rounded-(--radius-sm) py-2 transition-colors outline-none h-[32px]",
+        "flex items-center rounded-(--radius-sm) py-2 transition-colors outline-none h-8",
         isActive
           ? "bg-(--color-brand) text-white shadow-[0_2px_4px_rgba(78,43,204,0.12)]"
           : "text-(--color-text-secondary) hover:bg-(--color-bg-subtle) hover:text-(--color-text-primary)",
@@ -299,14 +299,14 @@ const NavLinkItem = memo(function NavLinkItem({
         <div
           className={cn(
             "transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden text-left",
-            collapsed ? "max-w-0 opacity-0" : "max-w-[130px] opacity-100",
+            collapsed ? "max-w-0 opacity-0" : "max-w-[8.125rem] opacity-100",
           )}
         >
           <Text
             variant="caption"
             weight={isActive ? "semibold" : "medium"}
             color="inherit"
-            className="text-[11px] leading-4"
+            className="text-[0.6875rem] leading-4"
           >
             {item.label}
           </Text>
@@ -343,7 +343,7 @@ export const Sidebar = memo(function Sidebar() {
         type="button"
         onClick={toggle}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className="absolute -right-3 top-[22px] z-20 flex h-6 w-6 items-center justify-center rounded-full border border-(--color-border) bg-white text-(--color-text-tertiary) shadow-sm transition-colors hover:text-(--color-brand) hover:border-(--color-brand) focus:outline-none"
+        className="absolute -right-3 top-[1.375rem] z-20 flex h-6 w-6 items-center justify-center rounded-full border border-(--color-border) bg-white text-(--color-text-tertiary) shadow-sm transition-colors hover:text-(--color-brand) hover:border-(--color-brand) focus:outline-none"
       >
         {collapsed ? (
           <ChevronRight size={14} strokeWidth={2.5} />
@@ -355,14 +355,14 @@ export const Sidebar = memo(function Sidebar() {
       {/* Brand Header */}
       <Box
         className={cn(
-          "flex h-[64px] shrink-0 flex-col justify-center border-b border-(--color-border) transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+          "flex h-16 shrink-0 flex-col justify-center border-b border-(--color-border) transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
           collapsed ? "px-0 items-center" : "px-5",
         )}
       >
         <div
           className={cn(
             "overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
-            collapsed ? "max-w-[22px]" : "max-w-[132px]",
+            collapsed ? "max-w-[1.375rem]" : "max-w-[8.25rem]",
           )}
         >
           <NectaLogo height={22} className="max-w-none" />
@@ -414,7 +414,7 @@ export const Sidebar = memo(function Sidebar() {
               "transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap",
               collapsed
                 ? "max-h-0 opacity-0 mb-0"
-                : "max-h-[16px] opacity-100 mb-3",
+                : "max-h-4 opacity-100 mb-3",
             )}
           >
             <Text
@@ -451,7 +451,7 @@ export const Sidebar = memo(function Sidebar() {
       {user && (
         <Box
           className={cn(
-            "flex h-[64px] shrink-0 items-center border-t border-(--color-border) bg-(--color-bg-subtle) transition-colors hover:bg-[rgba(0,0,0,0.02)] overflow-hidden",
+            "flex h-16 shrink-0 items-center border-t border-(--color-border) bg-(--color-bg-subtle) transition-colors hover:bg-[rgba(0,0,0,0.02)] overflow-hidden",
             collapsed ? "justify-center px-0" : "px-4",
           )}
         >
@@ -468,14 +468,14 @@ export const Sidebar = memo(function Sidebar() {
             <div
               className={cn(
                 "transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] whitespace-nowrap overflow-hidden flex flex-col",
-                collapsed ? "max-w-0 opacity-0" : "max-w-[130px] opacity-100",
+                collapsed ? "max-w-0 opacity-0" : "max-w-[8.125rem] opacity-100",
               )}
             >
               <Text
                 variant="caption"
                 color="primary"
                 weight="semibold"
-                className="truncate text-[11px] leading-4"
+                className="truncate text-[0.6875rem] leading-4"
               >
                 {user.name}
               </Text>

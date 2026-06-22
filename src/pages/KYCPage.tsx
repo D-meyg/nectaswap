@@ -33,7 +33,7 @@ function DocIcons({ count, total }: { count: number; total: number }) {
         <span
           key={i}
           className={cn(
-            "text-[13px]",
+            "text-[0.8125rem]",
             i < count ? "opacity-100" : "opacity-30",
           )}
         >
@@ -171,7 +171,7 @@ export default function KYCPage() {
           return (
             <span
               className={cn(
-                "inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium",
+                "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
                 style,
               )}
             >

@@ -78,7 +78,7 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[120px]">
+    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[7.5rem]">
       <Text variant="micro" color="muted" className="mb-1 block">
         {label}
       </Text>
@@ -132,7 +132,7 @@ export default function AnalyticsPage() {
               <button
                 key={f}
                 onClick={() => setActiveDate(f)}
-                className={`px-3 py-[6px] text-[12px] font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
                   activeDate === f
                     ? "bg-(--color-brand) text-white"
                     : "bg-white text-(--color-text-secondary) hover:bg-(--color-bg-subtle)"

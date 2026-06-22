@@ -48,7 +48,7 @@ function ModalRoot({ open, onClose, size = 'md', className, children, closeable 
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-black/40 backdrop-blur-[0.125rem]"
         onClick={closeable ? onClose : undefined}
       />
       {/* Dialog */}

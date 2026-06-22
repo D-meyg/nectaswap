@@ -22,14 +22,14 @@ export const TopBar = memo(function TopBar() {
       justify="between"
       align="center"
       gap={4}
-      className="h-[64px] shrink-0 px-6 bg-white border-b border-(--color-border)"
+      className="h-16 shrink-0 px-6 bg-white border-b border-(--color-border)"
     >
       {/* Left: dynamic page title + subtitle */}
       <Stack gap={0}>
-        <Text as="h1" variant="heading" color="primary" weight="semibold" className="text-[24px] leading-[28px]">
+        <Text as="h1" variant="heading" color="primary" weight="semibold" className="text-2xl leading-7">
           {title}
         </Text>
-        <Text as="p" variant="caption" color="tertiary" className="text-[11px] leading-4">
+        <Text as="p" variant="caption" color="tertiary" className="text-[0.6875rem] leading-4">
           {subtitle}
         </Text>
       </Stack>
@@ -41,7 +41,7 @@ export const TopBar = memo(function TopBar() {
           gap={2}
           align="center"
           className={[
-            "w-[300px] h-[32px] px-3",
+            "w-[18.75rem] h-8 px-3",
             "rounded-(--radius-sm) border border-(--color-border)",
             "bg-(--color-bg-subtle)",
             "transition-colors focus-within:border-(--color-brand) focus-within:bg-white",
@@ -54,7 +54,7 @@ export const TopBar = memo(function TopBar() {
           <input
             type="text"
             placeholder="Search users, transactions, cards..."
-            className="flex-1 min-w-0 bg-transparent outline-none text-[11px] text-(--color-text-primary) placeholder:text-(--color-text-muted)"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[0.6875rem] text-(--color-text-primary) placeholder:text-(--color-text-muted)"
           />
         </Row>
 
@@ -68,7 +68,7 @@ export const TopBar = memo(function TopBar() {
           >
             <Bell size={16} />
           </Button>
-          <span className="absolute top-[7px] right-[7px] h-[7px] w-[7px] rounded-full bg-(--color-danger) ring-[1.5px] ring-white pointer-events-none" />
+          <span className="absolute top-[0.4375rem] right-[0.4375rem] h-[0.4375rem] w-[0.4375rem] rounded-full bg-(--color-danger) ring-[1.5px] ring-white pointer-events-none" />
         </Box>
 
         {/* User dropdown */}
@@ -81,7 +81,7 @@ export const TopBar = memo(function TopBar() {
                 className="flex h-8 items-center gap-2 pl-1.5 pr-2 py-1"
               >
                 <Avatar name={user.name} size="sm" />
-                <Text variant="caption" color="primary" weight="medium" className="text-[11px]">
+                <Text variant="caption" color="primary" weight="medium" className="text-[0.6875rem]">
                   {user.name.split(" ")[0]}
                 </Text>
                 <ChevronDown

@@ -147,9 +147,9 @@ const severityStyle: Record<SeverityLevel, string> = {
 
 // ── Status text ───────────────────────────────────────────
 const statusStyle: Record<LogStatus, string> = {
-  success: "text-(--color-success-mid) font-medium text-[12px]",
-  failed: "text-(--color-danger) font-medium text-[12px]",
-  pending: "text-(--color-warning) font-medium text-[12px]",
+  success: "text-(--color-success-mid) font-medium text-xs",
+  failed: "text-(--color-danger) font-medium text-xs",
+  pending: "text-(--color-warning) font-medium text-xs",
 };
 
 export default function UserActivityPage() {
@@ -200,7 +200,7 @@ export default function UserActivityPage() {
         cell: ({ getValue }) => (
           <Row gap={2} align="center">
             {/* Checkbox-style icon matching image 1 */}
-            <span className="h-4 w-4 rounded-[2px] border border-(--color-border) flex items-center justify-center shrink-0" />
+            <span className="h-4 w-4 rounded-sm border border-(--color-border) flex items-center justify-center shrink-0" />
             <Text variant="caption" color="secondary">
               {getValue<string>()}
             </Text>
@@ -226,7 +226,7 @@ export default function UserActivityPage() {
         header: "Action",
         cell: ({ row }) => (
           <Row gap={2} align="center">
-            <span className="text-(--color-brand) text-[13px]">
+            <span className="text-(--color-brand) text-[0.8125rem]">
               {row.original.action_icon}
             </span>
             <Stack gap={0}>
@@ -328,7 +328,7 @@ export default function UserActivityPage() {
                     {/* Severity pill */}
                     <span
                       className={[
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold",
+                        "inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold",
                         severityStyle[pattern.severity],
                       ].join(" ")}
                     >
@@ -389,7 +389,7 @@ export default function UserActivityPage() {
               value={search}
               onChange={setSearch}
               placeholder="Search by user name, ID, or IP address..."
-              className="flex-1 max-w-[480px]"
+              className="flex-1 max-w-[30rem]"
             />
             <Row gap={2} align="center">
               <FilterButton label="All Actions" />

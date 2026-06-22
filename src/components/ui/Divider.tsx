@@ -33,7 +33,7 @@ export function Divider({ vertical, className, label }: DividerProps) {
         role="separator"
       >
         <div className="flex-1 h-px bg-(--color-border)" />
-        <span className="text-[11px] text-(--color-text-muted) font-medium uppercase tracking-[0.5px]">
+        <span className="text-[0.6875rem] text-(--color-text-muted) font-medium uppercase tracking-[0.5px]">
           {label}
         </span>
         <div className="flex-1 h-px bg-(--color-border)" />

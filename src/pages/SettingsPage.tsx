@@ -59,7 +59,7 @@ function SettingsField({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-2.5 text-[13px] text-(--color-text-primary) outline-none transition-colors focus:border-(--color-brand)"
+        className="w-full rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-2.5 text-[0.8125rem] text-(--color-text-primary) outline-none transition-colors focus:border-(--color-brand)"
       />
     </Stack>
   );

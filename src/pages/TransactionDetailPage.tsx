@@ -32,14 +32,14 @@ function InfoField({
 }) {
   return (
     <Stack gap={0}>
-      <Text variant="micro" color="muted" className="mb-0.5">
+      <Text variant="micro" color="muted" className="mb-0.5 text-[0.625rem] leading-3">
         {label}
       </Text>
       <Text
         variant="caption"
         color="primary"
         weight="semibold"
-        className={valueColor}
+        className={`text-xs leading-4 ${valueColor ?? ""}`}
       >
         {value}
       </Text>
@@ -60,8 +60,8 @@ function TxStatusPill({ status }: { status: string }) {
   return (
     <span
       className={[
-        "inline-flex items-center px-2 py-0.5 rounded-[4px]",
-        "text-[12px] font-semibold capitalize",
+        "inline-flex items-center px-2 py-0.5 rounded",
+        "text-[0.625rem] font-semibold capitalize leading-none",
         styles[status] ?? styles.pending,
       ].join(" ")}
     >
@@ -77,20 +77,20 @@ function RightSidebar() {
     <Stack gap={4}>
       {/* Quick Actions */}
       <Card>
-        <Card.Header title="Quick Actions" />
-        <Card.Body padded>
+        <Card.Header title="Quick Actions" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
+        <Card.Body className="px-4 pb-4 pt-0">
           <Stack gap={2}>
             <Button
               variant="primary"
               size="sm"
-              className="w-full justify-center"
+              className="h-8 w-full justify-center text-[0.6875rem]"
             >
               View User Profile
             </Button>
             <Button
               variant="secondary"
               size="sm"
-              className="w-full justify-center"
+              className="h-8 w-full justify-center text-[0.6875rem]"
             >
               <Download size={13} />
               Export Details
@@ -101,67 +101,65 @@ function RightSidebar() {
 
       {/* Status */}
       <Card>
-        <Card.Header title="Status" />
-        <Card.Body padded>
-          <Stack gap={3}>
-            <Row justify="between" align="center">
-              <Text variant="caption" color="secondary">
+        <Card.Header title="Status" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
+        <Card.Body className="space-y-2 px-4 pb-4 pt-0">
+            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) px-3">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Transaction
               </Text>
-              <Text variant="caption" color="success" weight="medium">
+              <Text variant="caption" color="success" weight="medium" className="text-[0.625rem]">
                 Completed
               </Text>
             </Row>
-            <Row justify="between" align="center">
-              <Text variant="caption" color="secondary">
+            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) px-3">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Blockchain
               </Text>
               <Text
                 variant="caption"
                 weight="medium"
-                className="text-(--color-brand)"
+                className="text-[0.625rem] text-(--color-success-dark)"
               >
                 {tx.blockchain}
               </Text>
             </Row>
-            <Row justify="between" align="center">
-              <Text variant="caption" color="secondary">
+            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) px-3">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Settlement
               </Text>
-              <Text variant="caption" color="success" weight="medium">
+              <Text variant="caption" color="success" weight="medium" className="text-[0.625rem]">
                 {tx.settlement}
               </Text>
             </Row>
-          </Stack>
         </Card.Body>
       </Card>
 
       {/* Timing */}
       <Card>
-        <Card.Header title="Timing" />
-        <Card.Body padded>
+        <Card.Header title="Timing" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
+        <Card.Body className="px-4 pb-4 pt-0">
           <Stack gap={3}>
             <Row justify="between" align="center">
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Started
               </Text>
-              <Text variant="caption" color="primary" weight="medium">
+              <Text variant="caption" color="primary" weight="medium" className="text-[0.6875rem]">
                 {tx.started}
               </Text>
             </Row>
             <Row justify="between" align="center">
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Completed
               </Text>
-              <Text variant="caption" color="primary" weight="semibold">
+              <Text variant="caption" color="primary" weight="semibold" className="text-[0.6875rem]">
                 {tx.completed}
               </Text>
             </Row>
             <Row justify="between" align="center">
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Total Time
               </Text>
-              <Text variant="caption" color="primary" weight="semibold">
+              <Text variant="caption" color="primary" weight="semibold" className="text-[0.6875rem]">
                 {tx.total_time}
               </Text>
             </Row>
@@ -179,35 +177,35 @@ function OverviewTab() {
     <Stack gap={4}>
       {/* Transaction Summary */}
       <Card>
-        <Card.Header title="Transaction Summary" />
+        <Card.Header title="Transaction Summary" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
         <Card.Body padded>
           {/* From/To row */}
           <Row gap={4} className="mb-4">
             {/* From */}
             <Box className="flex-1 rounded-(--radius-sm) border border-(--color-border) p-4">
-              <Text variant="micro" color="muted" className="mb-2 block">
+              <Text variant="micro" color="muted" className="mb-2 block text-[0.625rem] leading-3">
                 From
               </Text>
               <Row gap={2} align="center">
                 <CryptoLabel symbol={tx.from_crypto} />
-                <Text variant="display" color="primary" weight="semibold">
+                <Text variant="display" color="primary" weight="semibold" className="text-xl leading-6">
                   {tx.from_amount}
                 </Text>
               </Row>
-              <Text variant="caption" color="muted" className="mt-1 block">
+              <Text variant="caption" color="muted" className="mt-1 block text-[0.6875rem] leading-4">
                 {tx.from_ngn_equiv}
               </Text>
             </Box>
             {/* To */}
             <Box className="flex-1 rounded-(--radius-sm) border border-(--color-border) p-4">
-              <Text variant="micro" color="muted" className="mb-2 block">
+              <Text variant="micro" color="muted" className="mb-2 block text-[0.625rem] leading-3">
                 To (Naira)
               </Text>
               <Row gap={2} align="center">
-                <span className="inline-flex items-center rounded-(--radius-sm) bg-(--color-success-bg) text-(--color-success-mid) px-2 py-0.5 text-[11px] font-semibold">
+                <span className="inline-flex items-center rounded-(--radius-sm) bg-(--color-success-bg) text-(--color-success-mid) px-2 py-0.5 text-[0.6875rem] font-semibold">
                   NGN
                 </span>
-                <Text variant="display" color="primary" weight="semibold">
+                <Text variant="display" color="primary" weight="semibold" className="text-xl leading-6">
                   {tx.to_ngn}
                 </Text>
               </Row>
@@ -223,7 +221,7 @@ function OverviewTab() {
 
       {/* User Information */}
       <Card>
-        <Card.Header title="User Information" />
+        <Card.Header title="User Information" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
         <Card.Body padded>
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <InfoField label="Name" value={tx.user_name} />
@@ -240,7 +238,7 @@ function OverviewTab() {
 
       {/* Bank Transfer Details */}
       <Card>
-        <Card.Header title="Bank Transfer Details" />
+        <Card.Header title="Bank Transfer Details" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
         <Card.Body padded>
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <InfoField label="Bank Name" value={tx.bank_name} />
@@ -269,7 +267,7 @@ function TechnicalTab() {
 
   return (
     <Card>
-      <Card.Header title="Blockchain Details" />
+      <Card.Header title="Blockchain Details" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
       <Card.Body padded>
         <Stack gap={4}>
           {/* Transaction Hash */}
@@ -395,11 +393,11 @@ function LedgerTab() {
 
   return (
     <Card noPadding>
-      <Box px={5} py={4} className="border-b border-(--color-border)">
-        <Text variant="subtitle" color="primary" weight="semibold" as="p">
+      <Box px={4} py={3} className="border-b border-(--color-border)">
+        <Text variant="subtitle" color="primary" weight="semibold" as="p" className="text-xs leading-4">
           Internal Ledger Entries
         </Text>
-        <Text variant="micro" color="muted" as="p">
+        <Text variant="micro" color="muted" as="p" className="text-[0.625rem] leading-3">
           Double-entry accounting records
         </Text>
       </Box>
@@ -417,8 +415,8 @@ function LedgerTab() {
 function TimelineTab() {
   const tx = DUMMY_TX_DETAIL;
   return (
-    <Card>
-      <Card.Body padded>
+    <Card className="border-0 bg-transparent shadow-none">
+      <Card.Body className="p-0">
         <Stack gap={0}>
           {tx.timeline.map((event, i) => {
             const isLast = i === tx.timeline.length - 1;
@@ -426,31 +424,31 @@ function TimelineTab() {
               <div key={i} className="flex gap-4">
                 {/* Left: icon + vertical line */}
                 <div className="flex flex-col items-center">
-                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-(--color-success-subtle) border-2 border-(--color-success-mid)">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-(--color-success-subtle) border border-(--color-success-mid)">
                     <CheckCircle
-                      size={14}
+                      size={12}
                       className="text-(--color-success-mid)"
                     />
                   </div>
                   {!isLast && (
-                    <div className="w-[2px] flex-1 bg-(--color-success-subtle) my-1" />
+                  <div className="w-px flex-1 bg-(--color-border) my-1" />
                   )}
                 </div>
 
                 {/* Right: content */}
                 <Box className={!isLast ? "pb-5" : ""}>
                   <Row justify="between" align="start" gap={4}>
-                    <Text variant="caption" color="primary" weight="semibold">
+                    <Text variant="caption" color="primary" weight="semibold" className="text-xs leading-4">
                       {event.event}
                     </Text>
-                    <Text variant="micro" color="muted" className="shrink-0">
+                    <Text variant="micro" color="muted" className="shrink-0 text-[0.625rem] leading-4">
                       {event.timestamp}
                     </Text>
                   </Row>
                   <Text
                     variant="micro"
                     color="secondary"
-                    className="mt-0.5 block"
+                    className="mt-0.5 block text-[0.6875rem] leading-4"
                   >
                     {event.description}
                   </Text>
@@ -477,7 +475,7 @@ export default function TransactionDetailPage() {
   const tx = (apiTx as unknown as typeof DUMMY_TX_DETAIL) || DUMMY_TX_DETAIL;
 
   return (
-    <Box p={6}>
+    <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
       <DetailPageHeader
         backLabel="Back to Transactions"
         backTo="/transactions"
@@ -504,7 +502,7 @@ export default function TransactionDetailPage() {
           </>
         }
         actions={
-          <Button variant="secondary" size="sm">
+          <Button variant="secondary" size="sm" className="h-8 px-3 text-[0.6875rem]">
             <Download size={13} />
             Export Details
           </Button>
@@ -516,7 +514,7 @@ export default function TransactionDetailPage() {
         value={activeTab}
         onChange={(v) => setActiveTab(v as TabValue)}
         sidebar={<RightSidebar />}
-        sidebarWidth="260px"
+        sidebarWidth="300px"
       >
         <TabsList>
           <Tab value="overview">Overview</Tab>

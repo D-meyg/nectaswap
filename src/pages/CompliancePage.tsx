@@ -41,7 +41,7 @@ function LinkButton({ label, danger }: { label: string; danger?: boolean }) {
   return (
     <button
       className={[
-        "text-[13px] font-medium transition-colors",
+        "text-[0.8125rem] font-medium transition-colors",
         danger
           ? "text-(--color-text-muted) hover:text-(--color-danger)"
           : "text-(--color-brand) hover:underline",

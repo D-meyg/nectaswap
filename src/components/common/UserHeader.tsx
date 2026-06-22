@@ -1,4 +1,4 @@
-import { Lock, Mail } from "lucide-react";
+﻿import { Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
@@ -70,7 +70,7 @@ export function UserHeader({
               color="primary"
               weight="semibold"
               truncate
-              className="text-[22px] leading-[28px]"
+              className="text-[1.375rem] leading-7"
             >
               {name}
             </Text>
@@ -82,20 +82,20 @@ export function UserHeader({
               color="secondary"
               weight="medium"
               as="span"
-              className="ml-0.5 text-[11px]"
+              className="ml-0.5 text-[0.6875rem]"
             >
               ID: {id}
             </Text>
           </Row>
 
           <Row align="center" gap={2}>
-            <Text variant="caption" color="secondary" as="span" className="text-[11px]">
+            <Text variant="caption" color="secondary" as="span" className="text-[0.6875rem]">
               {email}
             </Text>
 
             <span className="h-1 w-1 rounded-full bg-(--color-border-02)" />
 
-            <Text variant="caption" color="secondary" as="span" className="text-[11px]">
+            <Text variant="caption" color="secondary" as="span" className="text-[0.6875rem]">
               Last active: {lastActive}
             </Text>
           </Row>
@@ -105,7 +105,7 @@ export function UserHeader({
           <Button
             variant="secondary"
             size="md"
-            className="h-[32px] w-full px-3 text-[11px] sm:w-auto"
+            className="h-8 w-full px-3 text-[0.6875rem] sm:w-auto"
           >
             <Mail size={14} />
             Send Message
@@ -116,7 +116,7 @@ export function UserHeader({
             size="md"
             loading={freezeLoading}
             onClick={onFreeze}
-            className="h-[32px] w-full px-3 text-[11px] sm:w-auto"
+            className="h-8 w-full px-3 text-[0.6875rem] sm:w-auto"
           >
             <Lock size={14} />
             {isFrozen ? "Unfreeze Account" : "Freeze Account"}

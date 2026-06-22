@@ -58,7 +58,7 @@ function ErrorBanner({ message }: { message: string }) {
 function AuthPage({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-(--color-bg-page) px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-[420px] flex flex-col">{children}</div>
+      <div className="w-full max-w-105 flex flex-col">{children}</div>
     </div>
   );
 }
@@ -154,7 +154,14 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
     setLoading(true);
 
     try {
-      const response = await authService.login({ email, password });
+      const response = await authService.login({
+        email,
+        password,
+        device_name: "Admin Dashboard",
+        ip_address: "0.0.0.0",
+        location: "unknown",
+        user_agent: navigator.userAgent,
+      });
       const payload = unwrapApiData<any>(response, {});
       onSuccess(email, payload);
     } catch (err: any) {
@@ -170,7 +177,7 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
         <div className="flex justify-center mb-3">
           <NectaLogo height={36} className="max-w-none" />
         </div>
-        <Text variant="heading" color="primary" as="h1" className="text-[26px]">
+        <Text variant="heading" color="primary" as="h1" className="text-[1.625rem]">
           Admin Dashboard
         </Text>
         <Text variant="body" color="tertiary" className="mt-2 block">
@@ -191,7 +198,7 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               leftIcon={<Mail size={16} />}
-              className="h-[44px] text-[14px]"
+              className="h-11 text-sm"
             />
 
             <Input
@@ -202,7 +209,7 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
               leftIcon={<Lock size={16} />}
-              className="h-[44px] text-[14px]"
+              className="h-11 text-sm"
               rightIcon={
                 <button
                   type="button"
@@ -218,12 +225,12 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
 
           <div className="flex items-center justify-between mt-5 mb-7">
             <label className="flex items-center gap-2.5 cursor-pointer group">
-              <div className="relative flex items-center justify-center w-[16px] h-[16px]">
+              <div className="relative flex items-center justify-center w-4 h-4">
                 <input
                   type="checkbox"
                   checked={remember}
                   onChange={(e) => setRemember(e.target.checked)}
-                  className="peer appearance-none w-full h-full border border-(--color-border-02) rounded-[3px] bg-white checked:bg-(--color-brand) checked:border-(--color-brand) transition-colors cursor-pointer"
+                  className="peer appearance-none w-full h-full border border-(--color-border-02) rounded bg-white checked:bg-(--color-brand) checked:border-(--color-brand) transition-colors cursor-pointer"
                 />
                 <svg
                   className="absolute w-2.5 h-2.5 pointer-events-none opacity-0 peer-checked:opacity-100 text-white"
@@ -260,7 +267,7 @@ function LoginStep({ onSuccess, onSkip }: LoginStepProps) {
             size="lg"
             loading={loading}
             onClick={handleSubmit}
-            className="w-full justify-center h-[44px] text-[14px] shadow-sm"
+            className="w-full justify-center h-11 text-sm shadow-sm"
           >
             {!loading && <LogIn size={16} />}
             Sign In
@@ -375,15 +382,15 @@ function TwoFAStep({ userEmail, onVerified, onBack }: TwoFAStepProps) {
       >
         <ArrowLeft size={16} />
         <Text variant="caption" color="inherit" weight="medium" as="span">
-          Back
+          Back to login
         </Text>
       </button>
 
       <div className="text-center mb-8 mt-10 lg:mt-6">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-(--color-brand)/10 mb-5">
-          <Smartphone className="h-7 w-7 text-(--color-brand)" />
+        <div className="flex justify-center mb-5">
+          <NectaLogo height={36} className="max-w-none" />
         </div>
-        <Text variant="heading" color="primary" as="h1" className="text-[24px]">
+        <Text variant="heading" color="primary" as="h1" className="text-2xl">
           Two-Factor Authentication
         </Text>
         <Text variant="body" color="tertiary" className="mt-2 block px-4">
@@ -435,8 +442,8 @@ function TwoFAStep({ userEmail, onVerified, onBack }: TwoFAStepProps) {
                   onChange={(e) => handleOtpChange(i, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(i, e)}
                   className={cn(
-                    "h-[52px] w-[46px] sm:h-[56px] sm:w-[52px] rounded-(--radius-md) border text-center",
-                    "text-[24px] font-geom font-semibold text-(--color-text-primary)",
+                    "h-12 sm:h-14 flex-1 min-w-0 max-w-13 rounded-(--radius-md) border text-center",
+                    "text-2xl font-geom font-semibold text-(--color-text-primary)",
                     "bg-white outline-none transition-all shadow-sm",
                     digit
                       ? "border-(--color-brand) ring-1 ring-(--color-brand)/20"
@@ -454,7 +461,7 @@ function TwoFAStep({ userEmail, onVerified, onBack }: TwoFAStepProps) {
             loading={loading}
             disabled={otp.join("").length < 6}
             onClick={handleVerify}
-            className="w-full justify-center h-[44px] text-[14px] shadow-sm mb-5"
+            className="w-full justify-center h-11 text-sm shadow-sm mb-5"
           >
             {!loading && (
               <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
@@ -482,13 +489,28 @@ function TwoFAStep({ userEmail, onVerified, onBack }: TwoFAStepProps) {
         </Card.Body>
       </Card>
 
+      <div className="mt-6 flex items-start gap-3.5 rounded-(--radius-md) bg-white border border-(--color-border) p-4 shadow-sm">
+        <Smartphone size={20} className="text-(--color-brand) shrink-0 mt-0.5" />
+        <div className="flex flex-col gap-1">
+          <Text variant="caption" color="primary" weight="semibold">
+            Using an Authenticator App
+          </Text>
+          <Text variant="micro" color="tertiary" className="leading-[1.4]">
+            Open your authenticator app (Google Authenticator, Authy, etc.) and enter the 6-digit code shown for NectaSwap Admin.
+          </Text>
+          <Text variant="micro" color="tertiary" className="mt-1">
+            <span className="font-semibold text-(--color-text-primary)">Demo:</span> Use code{" "}
+            <Text variant="micro" color="brand" weight="bold" as="span">
+              123456
+            </Text>{" "}
+            to proceed
+          </Text>
+        </div>
+      </div>
+
       <div className="mt-8 text-center">
-        <Text variant="micro" color="tertiary" className="block">
-          Demo: Use code{" "}
-          <Text variant="micro" color="primary" weight="bold" as="span">
-            123456
-          </Text>{" "}
-          to proceed
+        <Text variant="micro" color="muted">
+          © 2026 NectaSwap. All rights reserved.
         </Text>
       </div>
     </div>

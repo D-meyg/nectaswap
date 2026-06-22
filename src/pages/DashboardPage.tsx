@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Users, ArrowLeftRight, TrendingUp, CheckCircle } from "lucide-react";
 
 import { usePageTitle } from "@/layouts/AppLayout";
@@ -235,7 +235,7 @@ export default function DashboardPage() {
   const systemHealth = health.length ? health : MOCK_HEALTH;
 
   return (
-    <Box p={6} className="max-w-[1600px] mx-auto w-full lg:p-8">
+    <Box p={6} className="max-w-400 mx-auto w-full lg:p-8">
       <Stack gap={6}>
         <PriorityAlertBanner alerts={priorityAlerts as any} />
 

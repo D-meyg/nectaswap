@@ -56,7 +56,7 @@ function WalletAddress({ address }: { address: string }) {
       <Text
         variant="micro"
         color="secondary"
-        className="font-mono truncate max-w-[120px]"
+        className="font-mono truncate max-w-[7.5rem]"
       >
         {address}
       </Text>
@@ -104,7 +104,7 @@ export default function WalletsPage() {
         header: "Wallet Type",
         cell: ({ row }) => (
           <Row gap={2} align="center">
-            <span className="text-[16px]">
+            <span className="text-base">
               {row.original.type === "Hot Wallet"
                 ? "🔥"
                 : row.original.type === "Cold Wallet"
@@ -177,7 +177,7 @@ export default function WalletsPage() {
                 ? "text-(--color-brand)"
                 : "text-(--color-warning)";
           return (
-            <span className={["text-[13px] font-medium", color].join(" ")}>
+            <span className={["text-[0.8125rem] font-medium", color].join(" ")}>
               {v}
             </span>
           );
@@ -187,7 +187,7 @@ export default function WalletsPage() {
         id: "actions",
         header: "Actions",
         cell: () => (
-          <button className="text-(--color-brand) text-[13px] font-medium hover:underline transition-colors">
+          <button className="text-(--color-brand) text-[0.8125rem] font-medium hover:underline transition-colors">
             Manage
           </button>
         ),

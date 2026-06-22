@@ -91,7 +91,7 @@ const cohortData: CohortRow[] = [
 ];
 
 function CohortBadge({ value }: { value: number | null }) {
-  if (value === null) return <span className="text-(--color-text-muted) text-[12px]">—</span>;
+  if (value === null) return <span className="text-(--color-text-muted) text-xs">—</span>;
   const bg =
     value >= 80 ? "rgba(78,43,204,0.85)" :
     value >= 60 ? "rgba(78,43,204,0.55)" :
@@ -99,7 +99,7 @@ function CohortBadge({ value }: { value: number | null }) {
                   "rgba(78,43,204,0.12)";
   return (
     <span
-      className="inline-block px-2.5 py-0.5 rounded-[3px] text-[12px] font-medium text-white"
+      className="inline-block px-2.5 py-0.5 rounded text-xs font-medium text-white"
       style={{ background: bg }}
     >
       {value}%
@@ -133,7 +133,7 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[130px]">
+    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[8.125rem]">
       <Text variant="micro" color="muted" className="mb-1 block">{label}</Text>
       {payload.map((p) => (
         <div key={String(p.name)} className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default function UserGrowthPage() {
             <button
               key={f}
               onClick={() => setActiveDate(f)}
-              className={`px-3 py-[6px] text-[12px] font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
                 activeDate === f
                   ? "bg-(--color-brand) text-white"
                   : "bg-white text-(--color-text-secondary) hover:bg-(--color-bg-subtle)"
@@ -244,7 +244,7 @@ export default function UserGrowthPage() {
                     <Text variant="caption" color="primary">{r.region}</Text>
                     <Row gap={3} align="center">
                       <Text variant="caption" color="primary" weight="medium">{r.users.toLocaleString()}</Text>
-                      <span className={`text-[11px] font-medium ${r.growth > 0 ? "text-(--color-success-mid)" : "text-(--color-danger)"}`}>
+                      <span className={`text-[0.6875rem] font-medium ${r.growth > 0 ? "text-(--color-success-mid)" : "text-(--color-danger)"}`}>
                         {r.growth > 0 ? "+" : ""}{r.growth}%
                       </span>
                     </Row>

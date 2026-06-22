@@ -26,7 +26,7 @@ import { type ReactNode } from "react";
 
 // ── Shared content styles ─────────────────────────────────
 const contentStyles = cn(
-  "z-(--z-dropdown) min-w-[160px] overflow-hidden",
+  "z-(--z-dropdown) min-w-40 overflow-hidden",
   "rounded-(--radius-md)",
   "bg-white border border-(--color-border)",
   "shadow-[0_4px_16px_rgba(0,0,0,0.10)]",
@@ -40,7 +40,7 @@ const contentStyles = cn(
 
 const itemBaseStyles = cn(
   "relative flex items-center gap-2.5 select-none outline-none cursor-pointer",
-  "px-3 py-[7px] text-[13px] transition-colors",
+  "px-3 py-[0.4375rem] text-[0.8125rem] transition-colors",
   "data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
 );
 
@@ -199,7 +199,7 @@ function SubContent({
 function Label({ children }: { children: ReactNode }) {
   return (
     <RadixDropdown.Label className="px-3 py-1.5">
-      <span className="text-[11px] font-medium text-(--color-text-muted) uppercase tracking-[0.5px]">
+      <span className="text-[0.6875rem] font-medium text-(--color-text-muted) uppercase tracking-[0.5px]">
         {children}
       </span>
     </RadixDropdown.Label>

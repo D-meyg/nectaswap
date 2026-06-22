@@ -32,7 +32,7 @@ export function CryptoBadge({ symbol, className, size = 'sm' }: CryptoBadgeProps
   return (
     <span className={cn(
       'inline-flex items-center gap-1 rounded-full font-medium',
-      size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-3 py-1 text-[13px]',
+      size === 'sm' ? 'px-2 py-0.5 text-[0.6875rem]' : 'px-3 py-1 text-[0.8125rem]',
       config.bg,
       config.color,
       className
@@ -54,7 +54,7 @@ export function CryptoLabel({ symbol, className }: { symbol: CryptoSymbol; class
   return (
     <span className={cn(
       'inline-flex items-center rounded-(--radius-sm) px-2 py-0.5',
-      'text-[11px] font-semibold',
+      'text-[0.6875rem] font-semibold',
       config.bg, config.color,
       className
     )}>

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { DataTable } from "@/components/tables/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
@@ -22,7 +22,7 @@ export function TransactionsTab({ userId }: TransactionsTabProps) {
         accessorKey: "id",
         header: "Transaction ID",
         cell: ({ getValue }) => (
-          <Text variant="caption" color="secondary" className="font-mono text-[12px]">
+          <Text variant="caption" color="secondary" className="font-mono text-xs">
             {getValue<string>()}
           </Text>
         ),
@@ -31,7 +31,7 @@ export function TransactionsTab({ userId }: TransactionsTabProps) {
         accessorKey: "time",
         header: "Date",
         cell: ({ getValue }) => (
-          <Text variant="caption" color="secondary" className="text-[12px]">
+          <Text variant="caption" color="secondary" className="text-xs">
             {formatDateTime(getValue<string>())}
           </Text>
         ),
@@ -40,7 +40,7 @@ export function TransactionsTab({ userId }: TransactionsTabProps) {
         accessorKey: "crypto",
         header: "Type",
         cell: ({ getValue }) => (
-          <Text variant="caption" color="primary" weight="medium" className="text-[12px]">
+          <Text variant="caption" color="primary" weight="medium" className="text-xs">
             {getValue<string>()} - NGN
           </Text>
         ),
@@ -49,7 +49,7 @@ export function TransactionsTab({ userId }: TransactionsTabProps) {
         accessorKey: "amount_ngn",
         header: "Amount (NGN)",
         cell: ({ getValue }) => (
-          <Text variant="caption" color="primary" weight="semibold" className="text-[12px]">
+          <Text variant="caption" color="primary" weight="semibold" className="text-xs">
             {formatNGN(getValue<number>())}
           </Text>
         ),
@@ -76,7 +76,7 @@ export function TransactionsTab({ userId }: TransactionsTabProps) {
     <Card noPadding>
       <Card.Header
         title="Crypto - Naira Conversions"
-        className="px-4 py-3 [&_h4]:text-[12px] [&_h4]:leading-4"
+        className="px-4 py-3 [&_h4]:text-xs [&_h4]:leading-4"
       />
       <DataTable
         data={rows}

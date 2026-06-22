@@ -253,7 +253,7 @@ export default function AuditLogsPage() {
           <Text
             variant="caption"
             color="secondary"
-            className="max-w-[200px] truncate block"
+            className="max-w-[12.5rem] truncate block"
           >
             {getValue<string>()}
           </Text>
@@ -305,7 +305,7 @@ export default function AuditLogsPage() {
             value={search}
             onChange={setSearch}
             placeholder="Search by admin, action, or target..."
-            className="max-w-[380px] flex-1"
+            className="max-w-[23.75rem] flex-1"
           />
           <Row gap={2}>
             <FilterButton label="" />

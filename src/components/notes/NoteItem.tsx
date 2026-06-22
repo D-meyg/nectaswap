@@ -20,16 +20,16 @@ export const NoteItem = memo(function NoteItem({ note, onDelete }: NoteItemProps
     )}>
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <Text variant="label" color="primary" weight="medium" className="text-[11px] leading-4">{note.author}</Text>
+          <Text variant="label" color="primary" weight="medium" className="text-[0.6875rem] leading-4">{note.author}</Text>
           {note.pinned && (
             <span className="inline-flex items-center gap-1 rounded-(--radius-sm) bg-(--color-warning) px-1.5 py-0.5">
               <Pin size={9} className="text-white" />
-              <Text variant="micro" color="white" as="span" className="text-[9px] leading-3">Pinned</Text>
+              <Text variant="micro" color="white" as="span" className="text-[0.5625rem] leading-3">Pinned</Text>
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Text variant="micro" color="muted" className="text-[10px] leading-4">{formatDateTime(note.created_at)}</Text>
+          <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">{formatDateTime(note.created_at)}</Text>
           {onDelete && (
             <button
               onClick={() => onDelete(note.id)}
@@ -41,7 +41,7 @@ export const NoteItem = memo(function NoteItem({ note, onDelete }: NoteItemProps
           )}
         </div>
       </div>
-      <Text variant="caption" color="secondary" className="text-[11px] leading-4">{note.content}</Text>
+      <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">{note.content}</Text>
     </div>
   )
 })

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   User,
   FileText,
@@ -187,7 +187,7 @@ export function KYCReviewModal() {
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="Provide a reason for rejection…"
                 rows={3}
-                className="w-full rounded-lg border border-(--color-danger-muted) bg-white px-4 py-3 text-[14px] outline-none resize-none focus:ring-2 focus:ring-(--color-danger-muted)"
+                className="w-full rounded-lg border border-(--color-danger-muted) bg-white px-4 py-3 text-sm outline-none resize-none focus:ring-2 focus:ring-(--color-danger-muted)"
               />
             </div>
           )}

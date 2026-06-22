@@ -1,4 +1,4 @@
-import * as TooltipPrimitive from "@radix-ui/react-tooltip";
+﻿import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 import { type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ export function Tooltip({
             side={side}
             sideOffset={6}
             className={cn(
-              "z-dropdown rounded-radius-sm bg-text-primary px-2 py-1 font-geom text-[11px] font-medium text-white shadow-card",
+              "z-dropdown rounded-radius-sm bg-text-primary px-2 py-1 font-geom text-[0.6875rem] font-medium text-white shadow-card",
               className,
             )}
           >

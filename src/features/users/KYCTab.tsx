@@ -1,4 +1,4 @@
-import { CheckCircle, FileText, Clock } from "lucide-react";
+﻿import { CheckCircle, FileText, Clock } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -18,7 +18,7 @@ function DocRow({ doc }: { doc: KYCDocument }) {
     <Row
       align="center"
       justify="between"
-      className="min-h-[48px] rounded-(--radius-sm) border border-(--color-border) bg-white px-4 py-2"
+      className="min-h-12 rounded-(--radius-sm) border border-(--color-border) bg-white px-4 py-2"
     >
       <Row align="center" gap={3}>
         <Box className="flex h-7 w-7 shrink-0 items-center justify-center rounded-(--radius-sm) bg-(--color-bg-card)">
@@ -29,11 +29,11 @@ function DocRow({ doc }: { doc: KYCDocument }) {
             variant="caption"
             color="primary"
             weight="semibold"
-            className="text-[12px] leading-4"
+            className="text-xs leading-4"
           >
             {doc.type}
           </Text>
-          <Text variant="micro" color="tertiary" className="text-[11px] leading-4">
+          <Text variant="micro" color="tertiary" className="text-[0.6875rem] leading-4">
             Reviewed by{" "}
             <span className="font-medium text-(--color-text-secondary)">
               {doc.reviewed_by}
@@ -44,7 +44,7 @@ function DocRow({ doc }: { doc: KYCDocument }) {
       </Row>
       <span
         className={cn(
-        "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[11px] font-semibold leading-none",
+        "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[0.6875rem] font-semibold leading-none",
           isApproved
             ? "bg-(--color-success-bg) text-(--color-success-dark)"
             : "bg-(--color-danger-subtle) text-(--color-danger)",
@@ -75,7 +75,7 @@ function TimelineEvent({
       <div className="flex flex-col items-center">
         <div className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-(--color-brand)" />
         {!isLast && (
-          <div className="absolute bottom-[-10px] left-[19px] top-5 w-px bg-(--color-border)" />
+          <div className="absolute bottom-[-0.625rem] left-[1.1875rem] top-5 w-px bg-(--color-border)" />
         )}
         <div className="sr-only">
           <CheckCircle size={14} />
@@ -88,11 +88,11 @@ function TimelineEvent({
             variant="caption"
             color="primary"
             weight="semibold"
-            className="text-[12px] leading-4"
+            className="text-xs leading-4"
           >
             {event.event}
           </Text>
-          <Text variant="micro" color="tertiary" className="text-[11px] leading-4">
+          <Text variant="micro" color="tertiary" className="text-[0.6875rem] leading-4">
             {event.date} by{" "}
             <span className="font-medium text-(--color-text-secondary)">
               {event.by}
@@ -102,7 +102,7 @@ function TimelineEvent({
         <Text
           variant="caption"
           color="secondary"
-          className="block text-[11px] leading-4"
+          className="block text-[0.6875rem] leading-4"
         >
           {event.description}
         </Text>
@@ -145,10 +145,10 @@ export function KYCTab({ userId }: KYCTabProps) {
 
   return (
     <Stack gap={4}>
-      <Card className="rounded-[8px] shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+      <Card className="rounded-lg shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Card.Header
           title="Submitted Documents"
-          className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[13px] [&_h4]:leading-4"
+          className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[0.8125rem] [&_h4]:leading-4"
         />
         <Card.Body className="space-y-3 px-4 pb-4 pt-0">
           {MOCK_DOCS.map((doc) => (
@@ -157,16 +157,16 @@ export function KYCTab({ userId }: KYCTabProps) {
         </Card.Body>
       </Card>
 
-      <Card className="rounded-[8px] shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+      <Card className="rounded-lg shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Card.Header
           title="Verification History"
-          className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[13px] [&_h4]:leading-4"
+          className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[0.8125rem] [&_h4]:leading-4"
         />
         <Card.Body className="px-4 pb-4 pt-0">
           {isLoading ? (
             <Stack gap={6}>
-              <Skeleton className="h-[60px] w-full rounded-(--radius-md)" />
-              <Skeleton className="h-[60px] w-full rounded-(--radius-md)" />
+              <Skeleton className="h-[3.75rem] w-full rounded-(--radius-md)" />
+              <Skeleton className="h-[3.75rem] w-full rounded-(--radius-md)" />
             </Stack>
           ) : !history || history.length === 0 ? (
             <EmptyState

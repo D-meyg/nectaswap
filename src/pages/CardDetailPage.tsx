@@ -35,7 +35,7 @@ function CardStatusPill({ status }: { status: string }) {
   return (
     <span
       className={[
-        "inline-flex items-center px-2 py-0.5 rounded-[4px] text-[12px] font-semibold",
+        "inline-flex items-center px-2 py-0.5 rounded text-[0.625rem] font-semibold leading-none",
         styles[status] ?? styles.Pending,
       ].join(" ")}
     >
@@ -51,27 +51,27 @@ function CardSidebar() {
     <Stack gap={4}>
       {/* Quick Actions */}
       <Card>
-        <Card.Header title="Quick Actions" />
-        <Card.Body padded>
+        <Card.Header title="Quick Actions" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
+        <Card.Body className="px-4 pb-4 pt-0">
           <Stack gap={2}>
             <Button
               variant="primary"
               size="sm"
-              className="w-full justify-center"
+              className="h-8 w-full justify-center text-[0.6875rem]"
             >
               View User Profile
             </Button>
             <Button
               variant="secondary"
               size="sm"
-              className="w-full justify-center"
+              className="h-8 w-full justify-center text-[0.6875rem]"
             >
               Top Up Balance
             </Button>
             <Button
               variant="secondary"
               size="sm"
-              className="w-full justify-center"
+              className="h-8 w-full justify-center text-[0.6875rem]"
             >
               Reset PIN
             </Button>
@@ -81,38 +81,38 @@ function CardSidebar() {
 
       {/* Card Info */}
       <Card>
-        <Card.Header title="Card Info" />
-        <Card.Body padded>
+        <Card.Header title="Card Info" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
+        <Card.Body className="px-4 pb-4 pt-0">
           <Stack gap={3}>
             <Row justify="between">
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Type
               </Text>{" "}
-              <Text variant="caption" color="primary" weight="semibold">
+              <Text variant="caption" color="primary" weight="semibold" className="text-[0.6875rem]">
                 {card.type}
               </Text>
             </Row>
             <Row justify="between">
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Provider
               </Text>{" "}
-              <Text variant="caption" color="primary" weight="semibold">
+              <Text variant="caption" color="primary" weight="semibold" className="text-[0.6875rem]">
                 {card.network}
               </Text>
             </Row>
             <Row justify="between">
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Issued
               </Text>{" "}
-              <Text variant="caption" color="primary" weight="semibold">
+              <Text variant="caption" color="primary" weight="semibold" className="text-[0.6875rem]">
                 {card.issued}
               </Text>
             </Row>
             <Row justify="between">
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Expires
               </Text>{" "}
-              <Text variant="caption" color="primary" weight="semibold">
+              <Text variant="caption" color="primary" weight="semibold" className="text-[0.6875rem]">
                 2027-01-15
               </Text>
             </Row>
@@ -132,7 +132,7 @@ function OverviewTab() {
     <Stack gap={4}>
       {/* Card visual — gradient purple card matching cd2 */}
       <Box
-        className="rounded-[12px] p-5 text-white relative overflow-hidden"
+        className="relative min-h-[13.75rem] overflow-hidden rounded-lg p-5 text-white"
         style={{
           background: "linear-gradient(135deg, #4E2BCC 0%, #8200DB 100%)",
         }}
@@ -151,7 +151,7 @@ function OverviewTab() {
             <Text variant="micro" className="text-white/70" as="p">
               Balance (NGN)
             </Text>
-            <Text variant="title" className="text-white font-bold" as="p">
+            <Text variant="title" className="text-2xl font-bold leading-7 text-white" as="p">
               ₦ {card.balance.toLocaleString()}
             </Text>
           </Stack>
@@ -162,7 +162,7 @@ function OverviewTab() {
           <Row gap={2} align="center">
             <Text
               variant="subtitle"
-              className="text-white font-mono tracking-[4px]"
+              className="text-white font-mono tracking-[0.25rem]"
               as="p"
             >
               {card.masked}
@@ -216,7 +216,7 @@ function OverviewTab() {
         {/* Mastercard logo watermark */}
         <Text
           variant="subtitle"
-          className="absolute bottom-4 right-4 text-white/20 font-bold italic text-[20px]"
+          className="absolute bottom-4 right-4 text-white/20 font-bold italic text-xl"
           as="p"
         >
           Mastercard
@@ -225,7 +225,7 @@ function OverviewTab() {
 
       {/* Card Features */}
       <Card>
-        <Card.Header title="Card Features" />
+        <Card.Header title="Card Features" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
         <Card.Body padded>
           <div className="grid grid-cols-2 gap-3">
             {[
@@ -244,15 +244,16 @@ function OverviewTab() {
                 key={f.label}
                 justify="between"
                 align="center"
-                className="py-1"
+                className="rounded-(--radius-sm) border border-(--color-border) px-3 py-2"
               >
-                <Text variant="caption" color="secondary">
+                <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                   {f.label}
                 </Text>
                 <Text
                   variant="caption"
                   weight="medium"
                   color={f.enabled ? "success" : "muted"}
+                  className="text-[0.625rem]"
                 >
                   {f.enabled ? "Enabled" : "Disabled"}
                 </Text>
@@ -266,14 +267,14 @@ function OverviewTab() {
       <div className="grid grid-cols-2 gap-4">
         <Card>
           <Box px={4} py={4}>
-            <Text variant="micro" color="muted" className="block mb-2">
+            <Text variant="micro" color="muted" className="block mb-2 text-[0.625rem] leading-3">
               Daily Spending
             </Text>
-            <Text variant="heading" color="primary" weight="semibold" as="p">
+            <Text variant="heading" color="primary" weight="semibold" as="p" className="text-[1.375rem] leading-7">
               ₦ {card.daily_spend.toLocaleString()}
             </Text>
             <Row justify="between" align="center" className="mt-0.5 mb-2">
-              <Text variant="micro" color="muted">
+              <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
                 of ₦ {card.daily_limit.toLocaleString()}
               </Text>
               <Text variant="micro" color="muted">
@@ -289,10 +290,10 @@ function OverviewTab() {
         </Card>
         <Card>
           <Box px={4} py={4}>
-            <Text variant="micro" color="muted" className="block mb-2">
+            <Text variant="micro" color="muted" className="block mb-2 text-[0.625rem] leading-3">
               Monthly Spending
             </Text>
-            <Text variant="heading" color="primary" weight="semibold" as="p">
+            <Text variant="heading" color="primary" weight="semibold" as="p" className="text-[1.375rem] leading-7">
               ₦ {card.monthly_spend.toLocaleString()}
             </Text>
             <Row justify="between" align="center" className="mt-0.5 mb-2">
@@ -385,11 +386,11 @@ function TransactionsTab() {
 
   return (
     <Card noPadding>
-      <Box px={5} py={4} className="border-b border-(--color-border)">
-        <Text variant="subtitle" color="primary" weight="semibold" as="p">
+      <Box px={4} py={3} className="border-b border-(--color-border)">
+        <Text variant="subtitle" color="primary" weight="semibold" as="p" className="text-xs leading-4">
           Card Transactions
         </Text>
-        <Text variant="micro" color="muted" as="p">
+        <Text variant="micro" color="muted" as="p" className="text-[0.625rem] leading-3">
           All transactions made with this card
         </Text>
       </Box>
@@ -408,7 +409,7 @@ function LimitsTab() {
   const card = DUMMY_CARD_DETAIL;
   return (
     <Card>
-      <Card.Header title="Transaction Limits" />
+      <Card.Header title="Transaction Limits" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
       <Card.Body padded>
         <Stack gap={0} className="mb-4">
           {[
@@ -426,18 +427,18 @@ function LimitsTab() {
               key={row.label}
               justify="between"
               align="center"
-              className="py-3.5 border-b border-(--color-border) last:border-0"
+              className="py-3 border-b border-(--color-border) last:border-0"
             >
-              <Text variant="caption" color="secondary">
+              <Text variant="caption" color="secondary" className="text-xs">
                 {row.label}
               </Text>
-              <Text variant="caption" color="primary" weight="semibold">
+              <Text variant="caption" color="primary" weight="semibold" className="text-xs">
                 {row.value}
               </Text>
             </Row>
           ))}
         </Stack>
-        <Button className="w-full justify-center">Update Limits</Button>
+        <Button className="h-8 w-full justify-center text-[0.6875rem]">Update Limits</Button>
       </Card.Body>
     </Card>
   );
@@ -454,8 +455,8 @@ function ActivityLogTab() {
         return (
           <Box
             key={i}
-            px={5}
-            py={4}
+            px={4}
+            py={3}
             className={!isLast ? "border-b border-(--color-border)" : ""}
           >
             {/* Title + timestamp */}
@@ -464,15 +465,16 @@ function ActivityLogTab() {
                 variant="caption"
                 weight="semibold"
                 color={isDeclined ? "danger" : "primary"}
+                className="text-xs leading-4"
               >
                 {entry.title}
               </Text>
-              <Text variant="micro" color="muted" className="shrink-0">
+              <Text variant="micro" color="muted" className="shrink-0 text-[0.625rem] leading-4">
                 {entry.timestamp}
               </Text>
             </Row>
             {/* Description */}
-            <Text variant="caption" color="secondary" className="mt-0.5 block">
+            <Text variant="caption" color="secondary" className="mt-0.5 block text-[0.6875rem] leading-4">
               {entry.description}
             </Text>
             {/* IP • location • admin action */}
@@ -482,24 +484,24 @@ function ActivityLogTab() {
               </Text>
               {entry.location && (
                 <>
-                  <Text variant="micro" color="muted">
+                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
                     •
                   </Text>
                   <MapPin
                     size={10}
                     className="text-(--color-text-muted)"
                   />
-                  <Text variant="micro" color="muted">
+                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
                     {entry.location}
                   </Text>
                 </>
               )}
               {entry.is_admin && (
                 <>
-                  <Text variant="micro" color="muted">
+                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
                     •
                   </Text>
-                  <Text variant="micro" color="brand">
+                  <Text variant="micro" color="brand" className="text-[0.625rem] leading-4">
                     Admin Action
                   </Text>
                 </>
@@ -525,12 +527,12 @@ export default function CardDetailPage() {
   const card = (apiCard as typeof DUMMY_CARD_DETAIL) || DUMMY_CARD_DETAIL;
 
   return (
-    <Box p={6}>
+    <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
       <DetailPageHeader
         backLabel="Back to Cards"
         backTo="/cards"
         title={
-          <Text variant="heading" color="primary" as="h1">
+          <Text variant="heading" color="primary" as="h1" className="text-[1.375rem] leading-7">
             {card.type} Card - <span className="font-mono">{card.masked}</span>
           </Text>
         }
@@ -566,7 +568,7 @@ export default function CardDetailPage() {
             </Button>
             <Button
               size="sm"
-              className="border border-(--color-danger) bg-white text-(--color-danger) hover:bg-(--color-danger-subtle)"
+              className="h-8 border border-(--color-danger) bg-white px-3 text-[0.6875rem] text-(--color-danger) hover:bg-(--color-danger-subtle)"
             >
               <Lock size={13} />
               Freeze Card
@@ -579,7 +581,7 @@ export default function CardDetailPage() {
         value={activeTab}
         onChange={(v) => setActiveTab(v as TabValue)}
         sidebar={<CardSidebar />}
-        sidebarWidth="220px"
+        sidebarWidth="320px"
       >
         <TabsList>
           <Tab value="overview">Overview</Tab>

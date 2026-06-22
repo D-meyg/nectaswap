@@ -16,10 +16,10 @@ export interface ApiError {
 export interface LoginPayload {
   email: string;
   password: string;
-  device_name?: string;
-  ip_address?: string;
-  location?: string;
-  user_agent?: string;
+  device_name: string;
+  ip_address: string;
+  location: string;
+  user_agent: string;
 }
 
 export interface AcceptInvitePayload {

@@ -19,7 +19,7 @@ type FeeRow = (typeof DUMMY_FEE_TIERS)[0];
 
 function LinkButton({ label }: { label: string }) {
   return (
-    <button className="text-(--color-brand) text-[13px] font-medium hover:underline transition-colors">
+    <button className="text-(--color-brand) text-[0.8125rem] font-medium hover:underline transition-colors">
       {label}
     </button>
   );

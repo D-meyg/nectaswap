@@ -93,7 +93,7 @@ function MaskedKey({ value }: { value: string }) {
       <Text
         variant="micro"
         color="secondary"
-        className="font-mono truncate max-w-[200px]"
+        className="font-mono truncate max-w-[12.5rem]"
       >
         {value}
       </Text>
@@ -158,7 +158,7 @@ export default function APIKeysPage() {
               <span
                 key={p}
                 className={[
-                  "inline-flex items-center px-1.5 py-0.5 rounded-[3px] text-[11px] font-medium",
+                  "inline-flex items-center px-1.5 py-0.5 rounded text-[0.6875rem] font-medium",
                   PERM_COLORS[p] ?? "",
                 ].join(" ")}
               >

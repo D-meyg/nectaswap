@@ -1,4 +1,4 @@
-import { forwardRef, type SelectHTMLAttributes } from "react";
+﻿import { forwardRef, type SelectHTMLAttributes } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Text } from "@/components/ui/Text";
@@ -31,7 +31,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           className={cn(
-            "h-[36px] w-full appearance-none rounded-radius-md border border-border bg-white px-3 pr-9 font-geom text-[13px] text-text-primary",
+            "h-9 w-full appearance-none rounded-radius-md border border-border bg-white px-3 pr-9 font-geom text-[0.8125rem] text-text-primary",
             "transition-colors focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/10",
             "disabled:cursor-not-allowed disabled:bg-bg-subtle disabled:opacity-60",
             error && "border-danger focus:border-danger",

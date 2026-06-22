@@ -12,7 +12,7 @@ function CardRoot({ className, children }: CardProps) {
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[8px] border border-(--color-border) bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)]",
+        "overflow-hidden rounded-lg border border-(--color-border) bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)]",
         className,
       )}
     >
@@ -74,7 +74,7 @@ interface CardBodyProps {
 
 function CardBody({ className, children, padded }: CardBodyProps) {
   return (
-    <div className={cn(padded && "p-5 sm:p-6", className)}>{children}</div>
+    <div className={cn(padded && "p-4", className)}>{children}</div>
   );
 }
 

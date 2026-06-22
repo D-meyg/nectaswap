@@ -17,10 +17,10 @@ interface DrawerProps {
 }
 
 const sizeMap: Record<DrawerSize, string> = {
-  sm: "w-[320px]",
-  md: "w-[480px]",
-  lg: "w-[600px]",
-  xl: "w-[760px]",
+  sm: "w-80",
+  md: "w-[30rem]",
+  lg: "w-[37.5rem]",
+  xl: "w-[47.5rem]",
 };
 
 function DrawerRoot({
@@ -56,7 +56,7 @@ function DrawerRoot({
     <div className="fixed inset-0" style={{ zIndex: "var(--z-modal)" }}>
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-black/40 backdrop-blur-[0.125rem]"
         onClick={closeable ? onClose : undefined}
       />
       {/* Panel — slides in from side */}

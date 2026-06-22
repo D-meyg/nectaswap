@@ -17,8 +17,8 @@ export function Toggle({
 }: ToggleProps) {
   const trackW = size === "sm" ? "w-8" : "w-11";
   const trackH = size === "sm" ? "h-4" : "h-6";
-  const thumbS = size === "sm" ? "h-3 w-3" : "h-[18px] w-[18px]";
-  const thumbT = size === "sm" ? "top-0.5 left-0.5" : "top-[3px] left-[3px]";
+  const thumbS = size === "sm" ? "h-3 w-3" : "h-[1.125rem] w-[1.125rem]";
+  const thumbT = size === "sm" ? "top-0.5 left-0.5" : "top-[0.1875rem] left-[0.1875rem]";
   const translateX = size === "sm" ? "translate-x-4" : "translate-x-5";
 
   return (

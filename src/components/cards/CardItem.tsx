@@ -43,8 +43,8 @@ export const CardItem = memo(function CardItem({
             <CreditCard size={14} />
           </div>
           <div>
-            <Text variant="caption" color="primary" weight="medium" className="text-[12px] leading-4">{card.masked_number}</Text>
-            <Text variant="micro" color="muted" className="text-[10px] leading-3">{card.network} · {card.variant}</Text>
+            <Text variant="caption" color="primary" weight="medium" className="text-xs leading-4">{card.masked_number}</Text>
+            <Text variant="micro" color="muted" className="text-[0.625rem] leading-3">{card.network} · {card.variant}</Text>
           </div>
         </div>
         <Badge variant={statusVariant[card.status]} label={card.status} />
@@ -53,17 +53,17 @@ export const CardItem = memo(function CardItem({
       {/* Balance + spend */}
       <div className="grid grid-cols-2 gap-4 mb-3">
         <div>
-          <Text variant="micro" color="muted" uppercase className="text-[10px] leading-3">Balance (NGN)</Text>
-          <Text variant="subtitle" color="primary" weight="semibold" className="text-[12px] leading-4">
+          <Text variant="micro" color="muted" uppercase className="text-[0.625rem] leading-3">Balance (NGN)</Text>
+          <Text variant="subtitle" color="primary" weight="semibold" className="text-xs leading-4">
             {formatNGN(card.balance_ngn)}
           </Text>
         </div>
         <div>
-          <Text variant="micro" color="muted" uppercase className="text-[10px] leading-3">Monthly Spend</Text>
-          <Text variant="subtitle" color="primary" weight="semibold" className="text-[12px] leading-4">
+          <Text variant="micro" color="muted" uppercase className="text-[0.625rem] leading-3">Monthly Spend</Text>
+          <Text variant="subtitle" color="primary" weight="semibold" className="text-xs leading-4">
             {formatNGN(card.monthly_spend)}
           </Text>
-          <Text variant="micro" color="muted" className="text-[10px] leading-3">of {formatNGN(card.monthly_limit)}</Text>
+          <Text variant="micro" color="muted" className="text-[0.625rem] leading-3">of {formatNGN(card.monthly_limit)}</Text>
         </div>
       </div>
 
@@ -79,7 +79,7 @@ export const CardItem = memo(function CardItem({
         <Button
           variant="secondary"
           size="sm"
-          className="h-[28px] flex-1 justify-center text-[11px]"
+          className="h-7 flex-1 justify-center text-[0.6875rem]"
           onClick={() => onViewDetails?.(card.id)}
         >
           View Details
@@ -88,7 +88,7 @@ export const CardItem = memo(function CardItem({
           <Button
             variant="secondary"
             size="sm"
-            className="h-[28px] text-[11px]"
+            className="h-7 text-[0.6875rem]"
             onClick={() => onUnfreeze?.(card.id)}
             loading={freezeLoading}
           >
@@ -98,7 +98,7 @@ export const CardItem = memo(function CardItem({
           <Button
             variant="danger"
             size="sm"
-            className="h-[28px] text-[11px]"
+            className="h-7 text-[0.6875rem]"
             onClick={() => onFreeze?.(card.id)}
             loading={freezeLoading}
           >

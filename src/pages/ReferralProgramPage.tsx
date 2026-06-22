@@ -271,7 +271,7 @@ export default function ReferralProgramPage() {
                   }}
                   className={[
                     "inline-flex items-center px-4 py-2 rounded-(--radius-sm)",
-                    "text-[13px] font-medium transition-colors",
+                    "text-[0.8125rem] font-medium transition-colors",
                     tab === t
                       ? "bg-(--color-brand) text-white"
                       : "bg-(--color-bg-subtle) text-(--color-text-secondary) hover:text-(--color-text-primary)",
@@ -295,7 +295,7 @@ export default function ReferralProgramPage() {
                   ? "Search referrers..."
                   : "Search referred users..."
               }
-              className="max-w-[320px] flex-1"
+              className="max-w-80 flex-1"
             />
             <Row gap={2} align="center">
               <Button variant="secondary" size="sm">

@@ -1,4 +1,4 @@
-import { Card } from "@/components/ui/Card";
+﻿import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
@@ -25,9 +25,9 @@ function RiskRow({ label, value }: { label: string; value: string }) {
     <Row
       justify="between"
       align="center"
-      className="h-[30px] rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg-card) px-3"
+      className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) bg-(--color-bg-card) px-3"
     >
-      <Text variant="caption" color="secondary" weight="medium" className="text-[11px]">
+      <Text variant="caption" color="secondary" weight="medium" className="text-[0.6875rem]">
         {label}
       </Text>
 
@@ -35,7 +35,7 @@ function RiskRow({ label, value }: { label: string; value: string }) {
         variant="caption"
         color={isPass ? "success" : "warning"}
         weight="semibold"
-        className="text-[10px]"
+        className="text-[0.625rem]"
       >
         {value}
       </Text>
@@ -48,10 +48,10 @@ export function RiskIndicatorsPanel({
   amlScreening,
 }: RiskIndicatorsPanelProps) {
   return (
-    <Card className="rounded-[8px] shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+    <Card className="rounded-lg shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
       <Card.Header
         title="Risk Indicators"
-        className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-[12px] [&_h4]:leading-4"
+        className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4"
       />
 
       <Card.Body className="px-4 pb-4 pt-0">

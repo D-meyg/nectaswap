@@ -35,7 +35,7 @@ export const StatCard = memo(function StatCard({
     return (
       <div
         className={cn(
-          "min-h-[116px] rounded-[8px] border border-(--color-border) bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]",
+          "min-h-[7.25rem] rounded-lg border border-(--color-border) bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)]",
           className,
         )}
       >
@@ -51,7 +51,7 @@ export const StatCard = memo(function StatCard({
   return (
     <div
       className={cn(
-        "flex min-h-[116px] flex-col justify-between rounded-[8px] border border-(--color-border) bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] transition-shadow hover:shadow-[0_4px_20px_rgba(0,0,0,0.05)]",
+        "flex min-h-[7.25rem] flex-col justify-between rounded-lg border border-(--color-border) bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.03)] transition-shadow hover:shadow-[0_4px_20px_rgba(0,0,0,0.05)]",
         className,
       )}
     >
@@ -63,7 +63,7 @@ export const StatCard = memo(function StatCard({
         {icon && (
           <span
             className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px]",
+              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
               status
                 ? statusColor[status]
                 : "bg-(--color-bg-subtle) text-(--color-text-secondary)",
@@ -79,7 +79,7 @@ export const StatCard = memo(function StatCard({
           variant="display"
           color="primary"
           weight="semibold"
-          className="text-[28px] leading-[34px] tracking-[-0.02em]"
+          className="text-[1.75rem] leading-[2.125rem] tracking-[-0.02em]"
         >
           {value}
         </Text>

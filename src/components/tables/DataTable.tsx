@@ -65,7 +65,7 @@ function TableSkeleton({ columns }: { columns: number }) {
         <tr key={rowIndex} className="border-b border-(--color-border)">
           {Array.from({ length: columns }).map((__, cellIndex) => (
             <td key={cellIndex} className="px-4 py-3">
-              <div className="h-3 w-full max-w-[140px] animate-pulse rounded bg-(--color-border)" />
+              <div className="h-3 w-full max-w-[8.75rem] animate-pulse rounded bg-(--color-border)" />
             </td>
           ))}
         </tr>
@@ -156,7 +156,7 @@ export function DataTable<TData>({
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
-                className="h-[36px] border-b border-(--color-border)"
+                className="h-9 border-b border-(--color-border)"
               >
                 {headerGroup.headers.map((header) => (
                   <th
@@ -169,7 +169,7 @@ export function DataTable<TData>({
                     )}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <span className="font-geom text-[10px] font-semibold uppercase leading-none tracking-[0.04em] text-(--color-text-tertiary)">
+                      <span className="font-geom text-[0.625rem] font-semibold uppercase leading-none tracking-[0.04em] text-(--color-text-tertiary)">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
@@ -192,7 +192,7 @@ export function DataTable<TData>({
             ) : error ? (
               <tr>
                 <td colSpan={columns.length} className="px-4 py-10 text-center">
-                  <Text variant="caption" color="danger" className="text-[12px]">
+                  <Text variant="caption" color="danger" className="text-xs">
                     {error}
                   </Text>
                 </td>
@@ -200,11 +200,11 @@ export function DataTable<TData>({
             ) : table.getRowModel().rows.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="px-4 py-10 text-center">
-                  <Text variant="subtitle" color="primary" weight="semibold" className="text-[13px]">
+                  <Text variant="subtitle" color="primary" weight="semibold" className="text-[0.8125rem]">
                     {emptyTitle}
                   </Text>
 
-                  <Text variant="caption" color="tertiary" className="mt-1 text-[11px]">
+                  <Text variant="caption" color="tertiary" className="mt-1 text-[0.6875rem]">
                     {emptyMessage}
                   </Text>
                 </td>
@@ -214,7 +214,7 @@ export function DataTable<TData>({
                 <tr
                   key={row.id}
                   className={cn(
-                    "h-[44px] border-b border-(--color-border) last:border-b-0",
+                    "h-11 border-b border-(--color-border) last:border-b-0",
                     "transition-colors hover:bg-(--color-bg-subtle)",
                     row.getIsSelected() && "bg-[rgba(78,43,204,0.04)]",
                   )}
@@ -222,7 +222,7 @@ export function DataTable<TData>({
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="whitespace-nowrap px-4 py-2 align-middle text-[12px]"
+                      className="whitespace-nowrap px-4 py-2 align-middle text-xs"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -239,7 +239,7 @@ export function DataTable<TData>({
 
       {onPageChange && (
         <div className="flex items-center justify-between gap-4 border-t border-(--color-border) bg-white px-4 py-3">
-          <Text variant="caption" color="tertiary" className="text-[11px]">
+          <Text variant="caption" color="tertiary" className="text-[0.6875rem]">
             {total
               ? `Showing ${(page - 1) * pageSize + 1}–${Math.min(
                   page * pageSize,
@@ -254,13 +254,13 @@ export function DataTable<TData>({
               size="sm"
               onClick={handlePrev}
               disabled={page <= 1}
-              className="h-[32px] px-3"
+              className="h-8 px-3"
             >
               <ChevronLeft size={14} />
               Previous
             </Button>
 
-            <span className="flex h-[32px] min-w-[32px] items-center justify-center rounded-(--radius-sm) bg-(--color-brand) px-2 font-geom text-[13px] font-semibold text-white shadow-sm">
+            <span className="flex h-8 min-w-8 items-center justify-center rounded-(--radius-sm) bg-(--color-brand) px-2 font-geom text-[0.8125rem] font-semibold text-white shadow-sm">
               {page}
             </span>
 
@@ -269,7 +269,7 @@ export function DataTable<TData>({
               size="sm"
               onClick={handleNext}
               disabled={page >= totalPages}
-              className="h-[32px] px-3"
+              className="h-8 px-3"
             >
               Next
               <ChevronRight size={14} />

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 
@@ -21,7 +21,7 @@ export function NoteEditor({ onAdd, loading }: NoteEditorProps) {
     <Card className="mb-4">
       <Card.Header
         title="Add Note"
-        className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-[12px] [&_h4]:leading-4"
+        className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4"
       />
       <Card.Body className="px-4 pb-3 pt-0">
         <div className="overflow-hidden rounded-(--radius-sm) border border-(--color-border) bg-white">
@@ -30,7 +30,7 @@ export function NoteEditor({ onAdd, loading }: NoteEditorProps) {
             onChange={(event) => setContent(event.target.value)}
             placeholder="Add internal note about this user..."
             rows={3}
-            className="w-full resize-none px-3 py-2.5 font-geom text-[11px] leading-4 text-(--color-text-primary) outline-none placeholder:text-(--color-text-muted)"
+            className="w-full resize-none px-3 py-2.5 font-geom text-[0.6875rem] leading-4 text-(--color-text-primary) outline-none placeholder:text-(--color-text-muted)"
           />
         </div>
         <div className="mt-2">
@@ -39,7 +39,7 @@ export function NoteEditor({ onAdd, loading }: NoteEditorProps) {
             onClick={handleAdd}
             loading={loading}
             disabled={!content.trim()}
-            className="h-[30px] px-3 text-[11px]"
+            className="h-[1.875rem] px-3 text-[0.6875rem]"
           >
             Add Note
           </Button>

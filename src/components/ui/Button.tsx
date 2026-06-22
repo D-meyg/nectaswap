@@ -22,9 +22,9 @@ const variantStyles: Record<Variant, string> = {
 };
 
 const sizeStyles: Record<Size, string> = {
-  sm: "h-[32px] px-3 text-[12px]",
-  md: "h-[36px] px-4 text-[13px]",
-  lg: "h-[40px] px-5 text-[14px]",
+  sm: "h-8 px-3 text-xs",
+  md: "h-9 px-4 text-[0.8125rem]",
+  lg: "h-10 px-5 text-sm",
   icon: "h-8 w-8 p-0",
 };
 

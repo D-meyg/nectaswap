@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { ArrowLeft, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -33,13 +33,13 @@ export function DetailPageHeader({
   className,
 }: DetailPageHeaderProps) {
   return (
-    <section className={cn("mb-8", className)}>
+    <section className={cn("mb-4", className)}>
       {backTo && (
         <Link
           to={backTo}
-          className="mb-4 inline-flex w-fit items-center gap-2 font-geom text-sm font-medium text-(--color-text-secondary) transition-colors hover:text-(--color-text-primary)"
+          className="mb-3 inline-flex w-fit items-center gap-1.5 font-geom text-[0.6875rem] font-medium leading-4 text-(--color-text-secondary) transition-colors hover:text-(--color-text-primary)"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={12} />
           {backLabel || "Back"}
         </Link>
       )}
@@ -51,7 +51,7 @@ export function DetailPageHeader({
         className="flex-col sm:flex-row"
       >
         <div className="min-w-0">
-          <Row align="center" gap={3} className="mb-1.5 min-w-0 flex-wrap">
+          <Row align="center" gap={2} className="mb-1 min-w-0 flex-wrap">
             {typeof title === "string" ? (
               <Text
                 as="h2"
@@ -59,7 +59,7 @@ export function DetailPageHeader({
                 color="primary"
                 weight="semibold"
                 truncate
-                className="text-[28px] tracking-tight leading-[34px]"
+                className="text-[1.375rem] leading-7"
               >
                 {title}
               </Text>
@@ -75,7 +75,7 @@ export function DetailPageHeader({
                 color="secondary"
                 weight="medium"
                 as="span"
-                className="ml-1"
+                className="ml-1 text-[0.6875rem]"
               >
                 {idLabel}
               </Text>
@@ -86,20 +86,20 @@ export function DetailPageHeader({
             <Text
               variant="caption"
               color="secondary"
-              className="mb-1 max-w-[680px]"
+              className="mb-1 max-w-[42.5rem] text-[0.6875rem] leading-4"
             >
               {subtitle}
             </Text>
           )}
 
           {meta && (
-            <Row align="center" gap={3} className="flex-wrap">
+            <Row align="center" gap={2} className="flex-wrap [&_p]:text-[0.6875rem] [&_span]:text-[0.6875rem]">
               {meta}
             </Row>
           )}
         </div>
 
-        <Row align="center" gap={3} className="w-full sm:w-auto mt-4 sm:mt-0">
+        <Row align="center" gap={2} className="w-full sm:w-auto mt-3 sm:mt-0">
           {actions}
 
           {onExport && (
@@ -107,9 +107,9 @@ export function DetailPageHeader({
               variant="secondary"
               size="md"
               onClick={onExport}
-              className="h-[40px] px-4 w-full sm:w-auto"
+              className="h-8 px-3 text-[0.6875rem] w-full sm:w-auto"
             >
-              <Download size={16} />
+              <Download size={13} />
               Export Details
             </Button>
           )}

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
@@ -51,7 +51,7 @@ export function KYCReviewQueue({ items }: { items: any[] }) {
             <Button
               size="sm"
               onClick={() => reviewModal.open({ kycId: item.id })}
-              className="h-[28px] shrink-0 rounded-sm px-3 text-[11px]"
+              className="h-7 shrink-0 rounded-sm px-3 text-[0.6875rem]"
             >
               Review
             </Button>

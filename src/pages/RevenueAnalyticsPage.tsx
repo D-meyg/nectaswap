@@ -59,7 +59,7 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[140px]">
+    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[8.75rem]">
       <Text variant="micro" color="muted" className="mb-1 block">{label}</Text>
       {payload.map((p) => (
         <div key={String(p.name)} className="flex items-center gap-2">
@@ -101,7 +101,7 @@ export default function RevenueAnalyticsPage() {
             <button
               key={f}
               onClick={() => setActiveDate(f)}
-              className={`px-3 py-[6px] text-[12px] font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
                 activeDate === f
                   ? "bg-(--color-brand) text-white"
                   : "bg-white text-(--color-text-secondary) hover:bg-(--color-bg-subtle)"
@@ -200,7 +200,7 @@ export default function RevenueAnalyticsPage() {
                 <Row key={f.name} justify="between" align="center">
                   <Text variant="caption" color="primary">{f.name}</Text>
                   <Row gap={3} align="center">
-                    <div className="relative h-1.5 w-[120px] bg-(--color-border) rounded-full overflow-hidden">
+                    <div className="relative h-1.5 w-[7.5rem] bg-(--color-border) rounded-full overflow-hidden">
                       <div className="absolute left-0 top-0 h-full rounded-full" style={{ width: `${f.share}%`, background: f.color }} />
                     </div>
                     <Text variant="caption" color="primary" weight="semibold" className="w-10 text-right">{f.amount}</Text>

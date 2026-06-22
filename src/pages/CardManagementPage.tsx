@@ -29,7 +29,7 @@ function CardTypePill({ type }: { type: "Virtual" | "Physical" }) {
   return (
     <span
       className={[
-        "inline-flex px-2 py-0.5 rounded-full text-[12px] font-medium",
+        "inline-flex px-2 py-0.5 rounded-full text-xs font-medium",
         style,
       ].join(" ")}
     >
@@ -47,7 +47,7 @@ function CardStatus({ status }: { status: CardRow["status"] }) {
     Blocked: "text-(--color-danger)",
   };
   return (
-    <span className={["text-[13px] font-medium", colors[status]].join(" ")}>
+    <span className={["text-[0.8125rem] font-medium", colors[status]].join(" ")}>
       {status}
     </span>
   );
@@ -233,7 +233,7 @@ export default function CardManagementPage() {
                 setPage(1);
               }}
               placeholder="Search by card number, user, or ID..."
-              className="flex-1 max-w-[380px]"
+              className="flex-1 max-w-[23.75rem]"
             />
             <Row gap={2} align="center">
               <FilterButton

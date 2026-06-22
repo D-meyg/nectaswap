@@ -207,7 +207,7 @@ export default function AdminUsersPage() {
               value={search}
               onChange={setSearch}
               placeholder="Search admin users..."
-              className="max-w-[320px]"
+              className="max-w-80"
             />
             <Button size="sm">
               <Plus size={13} />

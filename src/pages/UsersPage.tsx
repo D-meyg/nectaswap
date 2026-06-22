@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+﻿import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Ban, Mail, UserPlus, SlidersHorizontal } from "lucide-react";
 
@@ -190,7 +190,7 @@ export default function UsersPage() {
   );
 
   return (
-    <Box p={6} className="mx-auto w-full max-w-[1600px] lg:p-8">
+    <Box p={6} className="mx-auto w-full max-w-[100rem] lg:p-8">
       <Card className="mb-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Box px={5} py={4}>
           <Row
@@ -206,7 +206,7 @@ export default function UsersPage() {
                 setPage(1);
               }}
               placeholder="Search by name, email, or user ID..."
-              className="w-full sm:max-w-[380px]"
+              className="w-full sm:max-w-[23.75rem]"
             />
 
             <Row

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+﻿import { useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   User,
@@ -49,7 +49,7 @@ type TabValue =
   | "audit";
 
 const userDetailTabClassName =
-  "h-[38px] gap-1.5 px-1 text-[12px] [&_p]:text-[12px] [&_p]:leading-4";
+  "h-[2.375rem] gap-1.5 px-1 text-xs [&_p]:text-xs [&_p]:leading-4";
 
 export default function UserDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
@@ -84,11 +84,11 @@ export default function UserDetailPage() {
 
   return (
     <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
-      <BackLink label="Back to Users" to="/users" className="mb-3 text-[11px]" />
+      <BackLink label="Back to Users" to="/users" className="mb-3 text-[0.6875rem]" />
 
       {isLoading && !apiUser ? (
         <Stack gap={3} className="mb-8">
-          <Skeleton className="h-[34px] w-64 rounded-(--radius-md)" />
+          <Skeleton className="h-[2.125rem] w-64 rounded-(--radius-md)" />
           <Skeleton className="h-5 w-80 rounded-(--radius-sm)" />
         </Stack>
       ) : (
@@ -103,7 +103,7 @@ export default function UserDetailPage() {
         value={activeTab}
         onChange={(value) => setActiveTab(value as TabValue)}
       >
-        <TabsList className="min-h-[38px] gap-5">
+        <TabsList className="min-h-[2.375rem] gap-5">
           <Tab
             value="overview"
             icon={<User size={14} />}
