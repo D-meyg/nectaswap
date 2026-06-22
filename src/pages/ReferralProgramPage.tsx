@@ -14,12 +14,11 @@ import { CodeBadge } from "@/components/ui/CodeBadge";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { useDebounce } from "@/hooks/ui/useDebounce";
-import { DUMMY_REFERRERS, DUMMY_REFERRED_USERS_FULL } from "@/lib/dummyData";
 import { useReferralStats, useReferrers, useReferredUsers } from "@/hooks/queries/useReferrals";
 import type { ColumnDef } from "@tanstack/react-table";
 
-type Referrer = (typeof DUMMY_REFERRERS)[0];
-type ReferredUser = (typeof DUMMY_REFERRED_USERS_FULL)[0];
+type Referrer = Record<string, any>;
+type ReferredUser = Record<string, any>;
 type TabValue = "referrers" | "referred";
 
 function ReferrerStatus({ status }: { status: string }) {
@@ -50,8 +49,8 @@ export default function ReferralProgramPage() {
   const { data: stats = {} } = useReferralStats();
   const { data: apiReferrers = [], isLoading: loadingReferrers } = useReferrers();
   const { data: apiReferred = [], isLoading: loadingReferred } = useReferredUsers();
-  const referrers = apiReferrers.length ? (apiReferrers as Referrer[]) : DUMMY_REFERRERS;
-  const referredUsers = apiReferred.length ? (apiReferred as ReferredUser[]) : DUMMY_REFERRED_USERS_FULL;
+  const referrers = apiReferrers as Referrer[];
+  const referredUsers = apiReferred as ReferredUser[];
 
   const filteredReferrers = useMemo(
     () =>

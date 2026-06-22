@@ -111,30 +111,6 @@ function TimelineEvent({
   );
 }
 
-// ── Submitted documents (mock for now) ────────────────────
-const MOCK_DOCS: KYCDocument[] = [
-  {
-    id: "1",
-    type: "National ID",
-    status: "approved",
-    reviewed_by: "Sarah Chen",
-    reviewed_at: "2024-01-15",
-  },
-  {
-    id: "2",
-    type: "Selfie",
-    status: "approved",
-    reviewed_by: "Sarah Chen",
-    reviewed_at: "2024-01-15",
-  },
-  {
-    id: "3",
-    type: "Utility Bill",
-    status: "approved",
-    reviewed_by: "Sarah Chen",
-    reviewed_at: "2024-01-15",
-  },
-];
 
 interface KYCTabProps {
   userId: string;
@@ -142,6 +118,7 @@ interface KYCTabProps {
 
 export function KYCTab({ userId }: KYCTabProps) {
   const { data: history, isLoading } = useKYCHistory(userId);
+  const docs: KYCDocument[] = (history as any)?.documents ?? [];
 
   return (
     <Stack gap={4}>
@@ -151,7 +128,9 @@ export function KYCTab({ userId }: KYCTabProps) {
           className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[0.8125rem] [&_h4]:leading-4"
         />
         <Card.Body className="space-y-3 px-4 pb-4 pt-0">
-          {MOCK_DOCS.map((doc) => (
+          {docs.length === 0 ? (
+            <Text variant="caption" color="muted">No documents submitted</Text>
+          ) : docs.map((doc) => (
             <DocRow key={doc.id} doc={doc} />
           ))}
         </Card.Body>

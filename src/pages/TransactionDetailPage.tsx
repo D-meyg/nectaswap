@@ -15,7 +15,6 @@ import { CryptoLabel } from "@/components/ui/CryptoBadge";
 import { useClipboard } from "@/hooks/ui/useClipboard";
 import { DataTable } from "@/components/tables/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
-import { DUMMY_TX_DETAIL } from "@/lib/dummyData";
 import { useTransactionDetail } from "@/hooks/queries/useTransactions";
 
 type TabValue = "overview" | "technical" | "ledger" | "timeline";
@@ -71,8 +70,7 @@ function TxStatusPill({ status }: { status: string }) {
 }
 
 // ── Right sidebar panels (shared across all tabs) ─────────
-function RightSidebar() {
-  const tx = DUMMY_TX_DETAIL;
+function RightSidebar({ tx }: { tx: any }) {
   return (
     <Stack gap={4}>
       {/* Quick Actions */}
@@ -171,8 +169,7 @@ function RightSidebar() {
 }
 
 // ── Overview tab — image 2 ────────────────────────────────
-function OverviewTab() {
-  const tx = DUMMY_TX_DETAIL;
+function OverviewTab({ tx }: { tx: any }) {
   return (
     <Stack gap={4}>
       {/* Transaction Summary */}
@@ -260,8 +257,7 @@ function OverviewTab() {
 }
 
 // ── Technical Details tab — image 3 ──────────────────────
-function TechnicalTab() {
-  const tx = DUMMY_TX_DETAIL;
+function TechnicalTab({ tx }: { tx: any }) {
   const { copy: copyHash } = useClipboard();
   const { copy: copyWallet } = useClipboard();
 
@@ -341,8 +337,7 @@ function TechnicalTab() {
 }
 
 // ── Ledger Entries tab — image 4 ─────────────────────────
-function LedgerTab() {
-  const tx = DUMMY_TX_DETAIL;
+function LedgerTab({ tx }: { tx: any }) {
   type LedgerEntry = (typeof tx.ledger_entries)[0];
 
   const cols = useMemo<ColumnDef<LedgerEntry, unknown>[]>(
@@ -412,8 +407,7 @@ function LedgerTab() {
 }
 
 // ── Timeline tab — image 5 ────────────────────────────────
-function TimelineTab() {
-  const tx = DUMMY_TX_DETAIL;
+function TimelineTab({ tx }: { tx: any }) {
   return (
     <Card className="border-0 bg-transparent shadow-none">
       <Card.Body className="p-0">
@@ -471,8 +465,8 @@ export default function TransactionDetailPage() {
 
   const { id = "" } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabValue>("overview");
-  const { data: apiTx } = useTransactionDetail(id);
-  const tx = (apiTx as unknown as typeof DUMMY_TX_DETAIL) || DUMMY_TX_DETAIL;
+  const { data: apiTx, isLoading } = useTransactionDetail(id);
+  const tx = apiTx as any;
 
   return (
     <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
@@ -513,7 +507,7 @@ export default function TransactionDetailPage() {
       <TabsWithSidebar
         value={activeTab}
         onChange={(v) => setActiveTab(v as TabValue)}
-        sidebar={<RightSidebar />}
+        sidebar={<RightSidebar tx={tx} />}
         sidebarWidth="300px"
       >
         <TabsList>
@@ -524,16 +518,16 @@ export default function TransactionDetailPage() {
         </TabsList>
 
         <TabPanel value="overview">
-          <OverviewTab />
+          <OverviewTab tx={tx} />
         </TabPanel>
         <TabPanel value="technical">
-          <TechnicalTab />
+          <TechnicalTab tx={tx} />
         </TabPanel>
         <TabPanel value="ledger">
-          <LedgerTab />
+          <LedgerTab tx={tx} />
         </TabPanel>
         <TabPanel value="timeline">
-          <TimelineTab />
+          <TimelineTab tx={tx} />
         </TabPanel>
       </TabsWithSidebar>
     </Box>

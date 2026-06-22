@@ -18,7 +18,6 @@ import {
 
 import { useKYCQueue } from "@/hooks/queries/useKYC";
 import { useModal } from "@/hooks/ui/useModal";
-import { DUMMY_KYC_QUEUE } from "@/lib/dummyData";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { KYCSubmission } from "@/api/types";
 
@@ -58,8 +57,7 @@ export default function KYCPage() {
   const { data: apiQueue, isLoading } = useKYCQueue();
   const reviewModal = useModal(KYC_REVIEW_MODAL_ID);
 
-  // Use dummy data as fallback
-  const queue = apiQueue && apiQueue.length > 0 ? apiQueue : DUMMY_KYC_QUEUE;
+  const queue = apiQueue ?? [];
 
   const filtered = useMemo(
     () => (filter === "all" ? queue : queue.filter((k) => k.status === filter)),

@@ -15,7 +15,6 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { TabsWithSidebar, TabsList, Tab, TabPanel } from "@/components/ui/Tabs";
 import { DataTable } from "@/components/tables/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
-import { DUMMY_CARD_DETAIL } from "@/lib/dummyData";
 import { useCardDetail } from "@/hooks/queries/useCards";
 
 type TabValue = "overview" | "transactions" | "limits" | "activity";
@@ -45,8 +44,7 @@ function CardStatusPill({ status }: { status: string }) {
 }
 
 // ── Right sidebar — shared across all tabs ────────────────
-function CardSidebar() {
-  const card = DUMMY_CARD_DETAIL;
+function CardSidebar({ card }: { card: any }) {
   return (
     <Stack gap={4}>
       {/* Quick Actions */}
@@ -124,8 +122,7 @@ function CardSidebar() {
 }
 
 // ── Overview tab — cd2.PNG ────────────────────────────────
-function OverviewTab() {
-  const card = DUMMY_CARD_DETAIL;
+function OverviewTab({ card }: { card: any }) {
   const [showCVV, setShowCVV] = useState(false);
 
   return (
@@ -278,11 +275,11 @@ function OverviewTab() {
                 of ₦ {card.daily_limit.toLocaleString()}
               </Text>
               <Text variant="micro" color="muted">
-                {((card.daily_spend / card.daily_limit) * 100).toFixed(1)}%
+                {card.daily_limit ? ((card.daily_spend / card.daily_limit) * 100).toFixed(1) : "0"}%
               </Text>
             </Row>
             <ProgressBar
-              value={(card.daily_spend / card.daily_limit) * 100}
+              value={card.daily_limit ? (card.daily_spend / card.daily_limit) * 100 : 0}
               max={100}
               className="h-1.5"
             />
@@ -301,11 +298,11 @@ function OverviewTab() {
                 of ₦ {card.monthly_limit.toLocaleString()}
               </Text>
               <Text variant="micro" color="muted">
-                {((card.monthly_spend / card.monthly_limit) * 100).toFixed(1)}%
+                {card.monthly_limit ? ((card.monthly_spend / card.monthly_limit) * 100).toFixed(1) : "0"}%
               </Text>
             </Row>
             <ProgressBar
-              value={(card.monthly_spend / card.monthly_limit) * 100}
+              value={card.monthly_limit ? (card.monthly_spend / card.monthly_limit) * 100 : 0}
               max={100}
               className="h-1.5"
             />
@@ -317,9 +314,8 @@ function OverviewTab() {
 }
 
 // ── Transactions tab — cd3.PNG ────────────────────────────
-function TransactionsTab() {
-  const card = DUMMY_CARD_DETAIL;
-  type Tx = (typeof card.transactions)[0];
+function TransactionsTab({ card }: { card: any }) {
+  type Tx = Record<string, any>;
   const cols = useMemo<ColumnDef<Tx, unknown>[]>(
     () => [
       {
@@ -405,8 +401,7 @@ function TransactionsTab() {
 }
 
 // ── Limits & Controls tab — cd4.PNG ──────────────────────
-function LimitsTab() {
-  const card = DUMMY_CARD_DETAIL;
+function LimitsTab({ card }: { card: any }) {
   return (
     <Card>
       <Card.Header title="Transaction Limits" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
@@ -445,8 +440,7 @@ function LimitsTab() {
 }
 
 // ── Activity Log tab — cd5.PNG ────────────────────────────
-function ActivityLogTab() {
-  const card = DUMMY_CARD_DETAIL;
+function ActivityLogTab({ card }: { card: any }) {
   return (
     <Card noPadding>
       {card.activity_log.map((entry, i) => {
@@ -523,8 +517,8 @@ export default function CardDetailPage() {
 
   const { id = "" } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabValue>("overview");
-  const { data: apiCard } = useCardDetail(id);
-  const card = (apiCard as typeof DUMMY_CARD_DETAIL) || DUMMY_CARD_DETAIL;
+  const { data: apiCard, isLoading } = useCardDetail(id);
+  const card = apiCard as any;
 
   return (
     <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
@@ -580,7 +574,7 @@ export default function CardDetailPage() {
       <TabsWithSidebar
         value={activeTab}
         onChange={(v) => setActiveTab(v as TabValue)}
-        sidebar={<CardSidebar />}
+        sidebar={<CardSidebar card={card} />}
         sidebarWidth="320px"
       >
         <TabsList>
@@ -591,16 +585,16 @@ export default function CardDetailPage() {
         </TabsList>
 
         <TabPanel value="overview">
-          <OverviewTab />
+          <OverviewTab card={card} />
         </TabPanel>
         <TabPanel value="transactions">
-          <TransactionsTab />
+          <TransactionsTab card={card} />
         </TabPanel>
         <TabPanel value="limits">
-          <LimitsTab />
+          <LimitsTab card={card} />
         </TabPanel>
         <TabPanel value="activity">
-          <ActivityLogTab />
+          <ActivityLogTab card={card} />
         </TabPanel>
       </TabsWithSidebar>
     </Box>

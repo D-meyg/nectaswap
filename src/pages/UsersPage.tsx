@@ -21,7 +21,6 @@ import { Stack } from "@/components/ui/Stack";
 import { useDebounce } from "@/hooks/ui/useDebounce";
 import { useFreezeAccount } from "@/hooks/mutations/useUserMutations";
 import { useUsers } from "@/hooks/queries/useUsers";
-import { DUMMY_USERS_EXTENDED } from "@/lib/dummyData";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface UserRow {
@@ -57,7 +56,7 @@ export default function UsersPage() {
     kyc_status: kycFilter || undefined,
   });
 
-  const users = apiUsers.length ? (apiUsers as UserRow[]) : DUMMY_USERS_EXTENDED;
+  const users = apiUsers as UserRow[];
 
   const filtered = useMemo(
     () =>

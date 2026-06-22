@@ -18,33 +18,6 @@ export interface AuditEntry {
   created_at: string; // "2024-01-25 11:25"
 }
 
-// Dummy audit entries matching image 10
-const DUMMY_AUDIT: AuditEntry[] = [
-  {
-    id: "au1",
-    action: "Manual credit",
-    by: "James Wilson",
-    description: "₦ 50,000 credited - compensation for failed txn",
-    ip: "102.89.2.45",
-    created_at: "2024-01-25 11:25",
-  },
-  {
-    id: "au2",
-    action: "KYC approved",
-    by: "Sarah Chen",
-    description: "Tier 2 verification approved",
-    ip: "102.89.2.41",
-    created_at: "2024-01-20 15:50",
-  },
-  {
-    id: "au3",
-    action: "Account created",
-    by: "System",
-    description: "User registration completed",
-    ip: "N/A",
-    created_at: "2024-01-15 10:30",
-  },
-];
 
 interface AuditEntryRowProps {
   entry: AuditEntry;
@@ -93,8 +66,7 @@ interface AuditLogTabProps {
 }
 
 export function AuditLogTab({ entries }: AuditLogTabProps) {
-  // Use passed entries or fall back to dummy data
-  const data = entries && entries.length > 0 ? entries : DUMMY_AUDIT;
+  const data = entries ?? [];
 
   if (!data.length) {
     return (

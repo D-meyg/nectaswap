@@ -17,11 +17,6 @@ import {
 } from "@/components/ui/SeverityBadge";
 import { TabsRoot, TabsList, Tab } from "@/components/ui/Tabs";
 import { DataTable } from "@/components/tables/DataTable";
-import {
-  DUMMY_FLAGGED_USERS,
-  DUMMY_FLAGGED_TRANSACTIONS,
-  DUMMY_RISK_RULES,
-} from "@/lib/dummyData";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   useComplianceStats,
@@ -32,9 +27,9 @@ import {
 
 type TabValue = "flagged-users" | "flagged-transactions" | "risk-rules";
 
-type FlaggedUser = (typeof DUMMY_FLAGGED_USERS)[0];
-type FlaggedTx = (typeof DUMMY_FLAGGED_TRANSACTIONS)[0];
-type RiskRule = (typeof DUMMY_RISK_RULES)[0];
+type FlaggedUser = Record<string, any>;
+type FlaggedTx = Record<string, any>;
+type RiskRule = Record<string, any>;
 
 // ── Link-style action button ──────────────────────────────
 function LinkButton({ label, danger }: { label: string; danger?: boolean }) {
@@ -60,9 +55,9 @@ export default function CompliancePage() {
   const { data: apiFlaggedTransactions = [], isLoading: loadingTransactions } = useFlaggedTransactions();
   const { data: apiRiskRules = [], isLoading: loadingRules } = useRiskRules();
 
-  const flaggedUsers = apiFlaggedUsers.length ? (apiFlaggedUsers as FlaggedUser[]) : DUMMY_FLAGGED_USERS;
-  const flaggedTransactions = apiFlaggedTransactions.length ? (apiFlaggedTransactions as FlaggedTx[]) : DUMMY_FLAGGED_TRANSACTIONS;
-  const riskRules = apiRiskRules.length ? (apiRiskRules as RiskRule[]) : DUMMY_RISK_RULES;
+  const flaggedUsers = apiFlaggedUsers as FlaggedUser[];
+  const flaggedTransactions = apiFlaggedTransactions as FlaggedTx[];
+  const riskRules = apiRiskRules as RiskRule[];
 
   // ── Flagged Users columns ───────────────────────────────
   const flaggedUserCols = useMemo<ColumnDef<FlaggedUser, unknown>[]>(

@@ -16,7 +16,6 @@ import { FilterButton } from "@/components/ui/FilterButton";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { useDebounce } from "@/hooks/ui/useDebounce";
-import { DUMMY_ALL_CARDS, type CardRow } from "@/lib/dummyData";
 import { useCards, useCardStats } from "@/hooks/queries/useCards";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -77,7 +76,7 @@ export default function CardManagementPage() {
     type: typeFilter || undefined,
   });
   const { data: cardStats = {} } = useCardStats();
-  const cards = apiCards.length ? (apiCards as CardRow[]) : DUMMY_ALL_CARDS;
+  const cards = apiCards as CardRow[];
 
   const filtered = useMemo(
     () =>

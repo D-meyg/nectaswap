@@ -6,7 +6,6 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Activity } from "lucide-react";
 import { useUserActivity } from "@/hooks/queries/useUserDetail";
-import { DUMMY_ACTIVITY } from "@/lib/dummyData";
 import type { ActivityEvent } from "@/api/types";
 
 interface ActivityTabProps {
@@ -67,8 +66,7 @@ function ActivityEntry({
 export function ActivityTab({ userId }: ActivityTabProps) {
   const { data: apiEvents, isLoading } = useUserActivity(userId);
 
-  // Fall back to dummy data while API not connected
-  const events = apiEvents && apiEvents.length > 0 ? apiEvents : DUMMY_ACTIVITY;
+  const events = apiEvents ?? [];
 
   if (isLoading && !apiEvents) {
     return (

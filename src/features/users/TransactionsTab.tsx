@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { useTransactions } from "@/hooks/queries/useTransactions";
-import { DUMMY_USER_TRANSACTIONS } from "@/lib/dummyData";
 import { formatDateTime, formatNGN } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { Transaction } from "@/api/types";
@@ -69,8 +68,7 @@ export function TransactionsTab({ userId }: TransactionsTabProps) {
     [],
   );
 
-  const rows: Transaction[] =
-    Array.isArray(data) && data.length ? (data as Transaction[]) : DUMMY_USER_TRANSACTIONS;
+  const rows: Transaction[] = Array.isArray(data) ? (data as Transaction[]) : [];
 
   return (
     <Card noPadding>

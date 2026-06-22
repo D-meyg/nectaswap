@@ -13,13 +13,10 @@ import { CryptoBadge } from "@/components/ui/CryptoBadge";
 import { DataTable } from "@/components/tables/DataTable";
 import { useClipboard } from "@/hooks/ui/useClipboard";
 import { useDashboardLiquidity } from "@/hooks/queries/useDashboard";
-import {
-  DUMMY_WALLETS_V2,
-  DUMMY_REBALANCE_HISTORY,
-  type WalletRow,
-  type RebalanceEntry,
-} from "@/lib/dummyData";
 import type { ColumnDef } from "@tanstack/react-table";
+
+type WalletRow = Record<string, any>;
+type RebalanceEntry = Record<string, any>;
 
 function ThresholdBar({
   value,
@@ -80,20 +77,18 @@ export default function WalletsPage() {
 
   const wallets = useMemo<WalletRow[]>(
     () =>
-      apiLiquidity.length
-        ? apiLiquidity.map((item: any, index: number) => ({
-            id: String(item.id ?? item.wallet_id ?? index),
-            type: item.type ?? item.wallet_type ?? "Hot Wallet",
-            network: item.network ?? item.chain ?? "Unknown Network",
-            asset: item.asset ?? item.symbol ?? item.currency ?? "USDT",
-            address: item.address ?? item.wallet_address ?? "—",
-            balance: String(item.balance ?? item.amount ?? "0"),
-            unit: item.unit ?? item.asset ?? item.symbol ?? "",
-            usd_value: item.usd_value ?? item.value_usd ?? item.value ?? "$0",
-            threshold: Number(item.threshold ?? item.threshold_percent ?? 0),
-            status: item.status ?? "healthy",
-          }))
-        : DUMMY_WALLETS_V2,
+      apiLiquidity.map((item: any, index: number) => ({
+        id: String(item.id ?? item.wallet_id ?? index),
+        type: item.type ?? item.wallet_type ?? "Hot Wallet",
+        network: item.network ?? item.chain ?? "—",
+        asset: item.asset ?? item.symbol ?? item.currency ?? "—",
+        address: item.address ?? item.wallet_address ?? "—",
+        balance: String(item.balance ?? item.amount ?? "0"),
+        unit: item.unit ?? item.asset ?? item.symbol ?? "",
+        usd_value: item.usd_value ?? item.value_usd ?? item.value ?? "—",
+        threshold: Number(item.threshold ?? item.threshold_percent ?? 0),
+        status: item.status ?? "healthy",
+      })),
     [apiLiquidity],
   );
 
@@ -302,10 +297,10 @@ export default function WalletsPage() {
           </Text>
         </Box>
         <DataTable
-          data={DUMMY_REBALANCE_HISTORY}
+          data={[]}
           columns={rebalanceCols}
           emptyTitle="No history"
-          emptyMessage="No rebalancing history"
+          emptyMessage="No rebalancing history available"
         />
       </Card>
     </Box>

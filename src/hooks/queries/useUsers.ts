@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
+import { unwrapApiData } from "@/utils/apiData";
 
 interface UseUsersParams {
   page?: number;
@@ -17,5 +18,17 @@ export function useUsers(params?: UseUsersParams) {
       return res.data;
     },
     staleTime: 30_000,
+  });
+}
+
+export function useUserReferrals(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["user-referrals", userId],
+    queryFn: async () => {
+      const res = await userService.getUserReferrals(userId!);
+      return unwrapApiData(res, null);
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
   });
 }

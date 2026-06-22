@@ -36,7 +36,6 @@ import {
   useFreezeAccount,
   useUnfreezeAccount,
 } from "@/hooks/mutations/useUserMutations";
-import { DUMMY_USER_DETAIL, DUMMY_CARDS } from "@/lib/dummyData";
 
 type TabValue =
   | "overview"
@@ -64,8 +63,8 @@ export default function UserDetailPage() {
   const { data: apiUser, isLoading } = useUserDetail(id);
   const { data: apiCards = [] } = useUserCards(id);
 
-  const user = apiUser ?? DUMMY_USER_DETAIL;
-  const cards = apiCards.length ? apiCards : DUMMY_CARDS;
+  const user = apiUser ?? null;
+  const cards = apiCards;
 
   const freezeMutation = useFreezeAccount();
   const unfreezeMutation = useUnfreezeAccount();

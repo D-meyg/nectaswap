@@ -22,7 +22,11 @@ import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { Modal } from "@/components/ui/Modal";
-import { DUMMY_TRANSACTIONS, type TransactionRow } from "@/lib/dummyData";
+import {
+  useTransactions,
+  usePendingTransactionApprovals,
+  useFailedTransactions,
+} from "@/hooks/queries/useTransactions";
 
 type PageMode = "all" | "pending" | "failed";
 
@@ -50,121 +54,6 @@ interface FailedTx {
   retryable: boolean;
 }
 
-const failedTransactions: FailedTx[] = [
-  {
-    id: "TX-001230",
-    timestamp: "2024-01-29 14:12:19",
-    user: "Chukwuma Eze",
-    userId: "2934",
-    amount: "₦500,000",
-    crypto: "0.50 ETH",
-    failureReason: "Bank transfer timeout",
-    errorCode: "E-504",
-    retryable: true,
-  },
-  {
-    id: "TX-001224",
-    timestamp: "2024-01-29 13:35:45",
-    user: "Blessing Solomon",
-    userId: "8812",
-    amount: "₦850,000",
-    crypto: "0.85 ETH",
-    failureReason: "Insufficient wallet balance",
-    errorCode: "E-101",
-    retryable: false,
-  },
-  {
-    id: "TX-001219",
-    timestamp: "2024-01-29 13:10:22",
-    user: "Anita Mohammed",
-    userId: "5410",
-    amount: "₦2,200,000",
-    crypto: "0.052 BTC",
-    failureReason: "User bank account verification failed",
-    errorCode: "E-203",
-    retryable: true,
-  },
-  {
-    id: "TX-001215",
-    timestamp: "2024-01-29 12:45:10",
-    user: "Tunde Bakare",
-    userId: "3374",
-    amount: "₦1,200,000",
-    crypto: "1,200 USDT",
-    failureReason: "Transaction limit exceeded",
-    errorCode: "E-402",
-    retryable: false,
-  },
-  {
-    id: "TX-001210",
-    timestamp: "2024-01-29 12:20:33",
-    user: "Chioma Okonkwo",
-    userId: "9021",
-    amount: "₦350,000",
-    crypto: "0.35 ETH",
-    failureReason: "Network congestion - timeout",
-    errorCode: "E-503",
-    retryable: true,
-  },
-  {
-    id: "TX-001205",
-    timestamp: "2024-01-29 11:55:18",
-    user: "Olumeseun Adeyemi",
-    userId: "7841",
-    amount: "₦650,000",
-    crypto: "350 USDT",
-    failureReason: "Invalid recipient bank details",
-    errorCode: "E-204",
-    retryable: false,
-  },
-];
-
-const pendingTransactions: PendingTx[] = [
-  {
-    id: "TX-001232",
-    timestamp: "2024-01-29 14:18:33",
-    user: "Yusuf Ibrahim",
-    userId: "5621",
-    amount: "₦750,000",
-    crypto: "500 USDT",
-    reason: "Large transaction amount",
-    risk: "medium",
-    waitTime: "45 minutes",
-  },
-  {
-    id: "TX-001228",
-    timestamp: "2024-01-29 14:05:22",
-    user: "Ngozi Achebe",
-    userId: "6712",
-    amount: "₦210,500",
-    crypto: "0.005 BTC",
-    reason: "First transaction for user",
-    risk: "low",
-    waitTime: "1 hour 3 minutes",
-  },
-  {
-    id: "TX-001225",
-    timestamp: "2024-01-29 13:45:18",
-    user: "Emeka Obi",
-    userId: "5234",
-    amount: "₦2,500,000",
-    crypto: "2.5 ETH",
-    reason: "Unusual activity pattern",
-    risk: "high",
-    waitTime: "1 hour 23 minutes",
-  },
-  {
-    id: "TX-001220",
-    timestamp: "2024-01-29 13:20:12",
-    user: "Fatima Abdullahi",
-    userId: "8134",
-    amount: "₦2,250,000",
-    crypto: "1,500 USDT",
-    reason: "Large transaction amount",
-    risk: "high",
-    waitTime: "1 hour 48 minutes",
-  },
-];
 
 function getMode(pathname: string): PageMode {
   if (pathname.endsWith("/pending")) return "pending";
@@ -363,16 +252,13 @@ export default function TransactionsPage() {
 
   usePageTitle(title, subtitle);
 
-  const allRows = useMemo(
-    () =>
-      DUMMY_TRANSACTIONS.filter(
-        (tx) =>
-          !search ||
-          tx.id.toLowerCase().includes(search.toLowerCase()) ||
-          tx.user_name.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [search],
-  );
+  const { data: apiAll = [], isLoading: loadingAll } = useTransactions({ search: search || undefined });
+  const { data: apiPending = [], isLoading: loadingPending } = usePendingTransactionApprovals();
+  const { data: apiFailed = [], isLoading: loadingFailed } = useFailedTransactions();
+
+  const allRows = apiAll as any[];
+  const pendingTransactions = apiPending as any[];
+  const failedTransactions = apiFailed as any[];
 
   const pendingCols = useMemo<ColumnDef<PendingTx, unknown>[]>(
     () => [
@@ -525,19 +411,16 @@ export default function TransactionsPage() {
     <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
       {mode === "pending" && (
         <div className="mb-4 grid grid-cols-4 gap-4">
-          <StatCard label="Pending Approval" value={4} icon={<Clock size={20} className="text-(--color-warning)" />} />
-          <StatCard label="Total Value" value="₦5.7M" />
-          <StatCard label="High Risk" value={2} icon={<AlertTriangle size={20} className="text-(--color-danger)" />} />
-          <StatCard label="Avg Wait Time" value="1h 5m" icon={<Clock size={20} className="text-(--color-text-muted)" />} />
+          <StatCard label="Pending Approval" value={pendingTransactions.length} icon={<Clock size={20} className="text-(--color-warning)" />} />
+          <StatCard label="High Risk" value={(pendingTransactions as any[]).filter((t) => t.risk === "high").length} icon={<AlertTriangle size={20} className="text-(--color-danger)" />} />
         </div>
       )}
 
       {mode === "failed" && (
         <div className="mb-4 grid grid-cols-4 gap-4">
-          <StatCard label="Failed Transactions" value={6} icon={<XCircle size={20} className="text-(--color-danger)" />} />
-          <StatCard label="Retryable" value={3} icon={<RotateCcw size={20} className="text-(--color-success-dark)" />} />
-          <StatCard label="Non-Retryable" value={3} icon={<AlertTriangle size={20} className="text-[#C2410C]" />} />
-          <StatCard label="Total Value" value="₦4.9M" />
+          <StatCard label="Failed Transactions" value={failedTransactions.length} icon={<XCircle size={20} className="text-(--color-danger)" />} />
+          <StatCard label="Retryable" value={(failedTransactions as any[]).filter((t) => t.retryable).length} icon={<RotateCcw size={20} className="text-(--color-success-dark)" />} />
+          <StatCard label="Non-Retryable" value={(failedTransactions as any[]).filter((t) => !t.retryable).length} icon={<AlertTriangle size={20} className="text-(--color-warning-dark)" />} />
         </div>
       )}
 
@@ -552,7 +435,7 @@ export default function TransactionsPage() {
             {mode === "pending"
               ? "Transactions requiring manual review and approval"
               : mode === "failed"
-                ? "6 failed transactions requiring attention"
+                ? `${failedTransactions.length} failed transactions requiring attention`
                 : `${allRows.length} transactions found`}
           </Text>
         </Box>

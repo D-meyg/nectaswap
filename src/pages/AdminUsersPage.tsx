@@ -26,53 +26,6 @@ interface AdminUser {
   last_login: string;
 }
 
-const ADMIN_USERS: AdminUser[] = [
-  {
-    name: "Sarah Chen",
-    email: "sarah.chen@nectaswap.com",
-    role: "Super Admin",
-    role_color: "text-[#8B5CF6]",
-    permissions: "View (1)",
-    status: "Active",
-    last_login: "2 hours ago",
-  },
-  {
-    name: "James Wilson",
-    email: "james.wilson@nectaswap.com",
-    role: "Admin",
-    role_color: "text-(--color-brand)",
-    permissions: "View (3)",
-    status: "Active",
-    last_login: "5 hours ago",
-  },
-  {
-    name: "Maria Garcia",
-    email: "maria.garcia@nectaswap.com",
-    role: "Compliance Officer",
-    role_color: "text-(--color-warning-dark)",
-    permissions: "View (3)",
-    status: "Active",
-    last_login: "1 day ago",
-  },
-  {
-    name: "David Park",
-    email: "david.park@nectaswap.com",
-    role: "Support Agent",
-    role_color: "text-(--color-success-mid)",
-    permissions: "View (3)",
-    status: "Active",
-    last_login: "3 hours ago",
-  },
-  {
-    name: "Lisa Anderson",
-    email: "lisa.anderson@nectaswap.com",
-    role: "Finance Manager",
-    role_color: "text-(--color-text-secondary)",
-    permissions: "View (3)",
-    status: "Suspended",
-    last_login: "1 week ago",
-  },
-];
 
 export default function AdminUsersPage() {
   usePageTitle("Admin Users", "Manage admin accounts, roles, and permissions");
@@ -80,7 +33,7 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const debounced = useDebounce(search, 300);
   const { data: apiAdmins = [], isLoading } = useAdmins();
-  const admins = apiAdmins.length ? (apiAdmins as AdminUser[]) : ADMIN_USERS;
+  const admins = apiAdmins as AdminUser[];
 
   const filtered = useMemo(
     () =>

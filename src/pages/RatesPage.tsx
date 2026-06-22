@@ -10,12 +10,11 @@ import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/tables/DataTable";
-import { DUMMY_EXCHANGE_RATES, DUMMY_FEE_TIERS } from "@/lib/dummyData";
 import { useExchangeRates, useFeeConfig, useFeeRevenue } from "@/hooks/queries/useRates";
 import type { ColumnDef } from "@tanstack/react-table";
 
-type RateRow = (typeof DUMMY_EXCHANGE_RATES)[0];
-type FeeRow = (typeof DUMMY_FEE_TIERS)[0];
+type RateRow = Record<string, any>;
+type FeeRow = Record<string, any>;
 
 function LinkButton({ label }: { label: string }) {
   return (
@@ -35,8 +34,8 @@ export default function RatesPage() {
   const { data: apiFees = [], isLoading: loadingFees } = useFeeConfig();
   const { data: feeRevenue = {} } = useFeeRevenue();
 
-  const rates = apiRates.length ? (apiRates as RateRow[]) : DUMMY_EXCHANGE_RATES;
-  const fees = apiFees.length ? (apiFees as FeeRow[]) : DUMMY_FEE_TIERS;
+  const rates = apiRates as RateRow[];
+  const fees = apiFees as FeeRow[];
 
   const rateCols = useMemo<ColumnDef<RateRow, unknown>[]>(
     () => [
