@@ -1,5 +1,5 @@
 ﻿import { usePageTitle } from "@/layouts/AppLayout";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { Clock, CheckCircle, XCircle, FileText, Eye } from "lucide-react";
 
 import { StatCard } from "@/components/ui/StatCard";
@@ -50,6 +50,38 @@ function cn(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+function splitSubmittedAt(value?: string | null) {
+  const normalized = String(value || "").replace("T", " ");
+  const [date = ""] = normalized.split(".");
+  const [datePart = "", timePart = ""] = date.split(" ");
+  return { date: datePart, time: timePart };
+}
+
+function normalizeKyc(value: unknown): KYCSubmission {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const user =
+    item.user && typeof item.user === "object"
+      ? (item.user as Record<string, unknown>)
+      : {};
+  const tier = item.tier ?? item.tier_requested;
+  const documents = item.documents ?? item.documents_submitted;
+  const totalDocs = item.total_docs ?? item.documents_total;
+
+  return {
+    id: String(item.id ?? ""),
+    user_id: String(item.user_id ?? user.user_id ?? user.id ?? "N/A"),
+    user_name: String(item.user_name ?? user.full_name ?? user.name ?? "Unknown User"),
+    user_email: String(item.user_email ?? user.email ?? "N/A"),
+    tier: typeof tier === "number" ? `Tier ${tier}` : String(tier ?? "N/A"),
+    submitted_at: String(item.submitted_at ?? item.submitted ?? "N/A"),
+    documents: Number(documents ?? 0),
+    total_docs: Number(totalDocs ?? documents ?? 0),
+    priority: String(item.priority ?? "normal"),
+    status: String(item.status ?? "pending"),
+  };
+}
+
 export default function KYCPage() {
   usePageTitle("KYC Management", "Identity verification and compliance review");
 
@@ -57,7 +89,10 @@ export default function KYCPage() {
   const { data: apiQueue, isLoading } = useKYCQueue();
   const reviewModal = useModal(KYC_REVIEW_MODAL_ID);
 
-  const queue = apiQueue ?? [];
+  const queue = useMemo(
+    () => (Array.isArray(apiQueue) ? apiQueue.map(normalizeKyc) : []),
+    [apiQueue],
+  );
 
   const filtered = useMemo(
     () => (filter === "all" ? queue : queue.filter((k) => k.status === filter)),
@@ -67,13 +102,6 @@ export default function KYCPage() {
   const pending = queue.filter((k) => k.status === "pending").length;
   const approved = queue.filter((k) => k.status === "approved").length;
   const rejected = queue.filter((k) => k.status === "rejected").length;
-
-  const handleReview = useCallback(
-    (kycId: string) => {
-      reviewModal.open({ kycId });
-    },
-    [reviewModal],
-  );
 
   const columns = useMemo<ColumnDef<KYCSubmission, unknown>[]>(
     () => [
@@ -97,17 +125,20 @@ export default function KYCPage() {
       {
         accessorKey: "submitted_at",
         header: "Submitted",
-        cell: ({ row }) => (
-          <Stack gap={0}>
-            <Text variant="caption" color="primary" as="p">
-              {row.original.submitted_at.split(" ")[1] ||
-                row.original.submitted_at}
-            </Text>
-            <Text variant="micro" color="muted" as="p">
-              {row.original.submitted_at.split(" ")[0] || ""}
-            </Text>
-          </Stack>
-        ),
+        cell: ({ row }) => {
+          const submitted = splitSubmittedAt(row.original.submitted_at);
+
+          return (
+            <Stack gap={0}>
+              <Text variant="caption" color="primary" as="p">
+                {submitted.time || submitted.date || "N/A"}
+              </Text>
+              <Text variant="micro" color="muted" as="p">
+                {submitted.time ? submitted.date : ""}
+              </Text>
+            </Stack>
+          );
+        },
       },
       {
         accessorKey: "tier",
@@ -182,14 +213,19 @@ export default function KYCPage() {
         id: "action",
         header: "Action",
         cell: ({ row }) => (
-          <Button size="sm" onClick={() => handleReview(row.original.id)}>
+          <Button
+            size="sm"
+            onClick={() =>
+              reviewModal.open({ kycId: row.original.id, application: row.original })
+            }
+          >
             <Eye size={13} />
             Review
           </Button>
         ),
       },
     ],
-    [handleReview],
+    [reviewModal],
   );
 
   return (

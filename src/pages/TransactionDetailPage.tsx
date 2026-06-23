@@ -1,6 +1,6 @@
 ﻿import { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Copy, ExternalLink, Download, CheckCircle } from "lucide-react";
+import { Copy, ExternalLink, CheckCircle } from "lucide-react";
 
 import { usePageTitle } from "@/layouts/AppLayout";
 import { DetailPageHeader } from "@/components/common/DetailPageHeader";
@@ -16,8 +16,116 @@ import { useClipboard } from "@/hooks/ui/useClipboard";
 import { DataTable } from "@/components/tables/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTransactionDetail } from "@/hooks/queries/useTransactions";
+import { DUMMY_TX_DETAIL, type TransactionDetail } from "@/lib/dummyData";
 
 type TabValue = "overview" | "technical" | "ledger" | "timeline";
+type TransactionStatus = TransactionDetail["status"];
+
+function normalizeStatus(value: unknown): TransactionStatus {
+  const status = String(value ?? "").toLowerCase();
+  if (status === "success" || status === "completed") {
+    return "completed";
+  }
+  if (status === "failed" || status === "pending") return status;
+  return "pending";
+}
+
+function text(value: unknown, fallback = "N/A") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function toNumber(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatNaira(value: unknown) {
+  return `₦ ${toNumber(value).toLocaleString()}`;
+}
+
+function splitDate(value: unknown) {
+  const raw = text(value, "").replace("T", " ");
+  const [withoutMs = ""] = raw.split(".");
+  const [date = "N/A", time = ""] = withoutMs.split(" ");
+  return { date, time };
+}
+
+function normalizeTransactionDetail(value: unknown, id: string): TransactionDetail {
+  const item =
+    value && typeof value === "object"
+      ? (value as Partial<TransactionDetail> & Record<string, unknown>)
+      : {};
+  const receipt =
+    item.receipt && typeof item.receipt === "object"
+      ? (item.receipt as Record<string, unknown>)
+      : {};
+  const created = splitDate(item.created_at ?? item.date ?? receipt.date);
+  const updated = splitDate(item.updated_at ?? item.completed_at ?? receipt.date);
+  const amount = item.amount ?? receipt.amount;
+  const fee = item.fee ?? receipt.fee;
+  const title = text(item.title ?? receipt.title, DUMMY_TX_DETAIL.title);
+  const status = normalizeStatus(item.status ?? receipt.status);
+  const sender = text(item.sender ?? receipt.sender ?? item.user_name, DUMMY_TX_DETAIL.user_name);
+
+  return {
+    ...DUMMY_TX_DETAIL,
+    ...item,
+    id: text(item.reference ?? receipt.reference ?? item.transaction_id ?? item.id ?? id, DUMMY_TX_DETAIL.id),
+    title,
+    status,
+    user_name: sender,
+    date: `${created.date} ${created.time}`.trim(),
+    processing_time: text(item.processing_time, status === "completed" ? "Completed" : "Pending"),
+    from_crypto: text(item.crypto_currency ?? item.kind ?? item.method, "NGN").toUpperCase(),
+    from_amount: text(item.asset_value ?? item.crypto_amount, "0"),
+    from_ngn_equiv: formatNaira(amount),
+    to_ngn: formatNaira(amount),
+    exchange_rate: text(item.exchange_rate, "N/A"),
+    tx_fee: formatNaira(fee),
+    user_email: text(item.user_email, "N/A"),
+    user_id: text(item.user_id, "N/A"),
+    ip_address: text(item.ip_address, "N/A"),
+    bank_name: text(receipt.beneficiary_bank ?? item.bank_name, "N/A"),
+    account_number: text(receipt.beneficiary_account ?? item.account_number, "N/A"),
+    account_name: text(receipt.beneficiary ?? item.receiver ?? item.account_name, "N/A"),
+    bank_reference: text(receipt.reference ?? item.reference, "N/A"),
+    settlement_status: status === "completed" ? "Settled" : status,
+    tx_hash: text(item.crypto_transaction_hash ?? item.provider_transaction_id ?? item.session_id ?? receipt.session_id, "N/A"),
+    network: text(item.crypto_network ?? item.payment_method, "N/A"),
+    confirmations: text(item.crypto_status, "N/A"),
+    from_wallet: text(item.crypto_address ?? item.beneficiary_id, "N/A"),
+    blockchain: status === "completed" ? "Confirmed" : "Pending",
+    settlement: status === "completed" ? "Settled" : "Pending",
+    started: created.time || "N/A",
+    completed: status === "completed" ? updated.time || created.time || "N/A" : "Pending",
+    total_time: text(item.processing_time, status === "completed" ? "Completed" : "Pending"),
+    ledger_entries: Array.isArray(item.ledger_entries)
+      ? item.ledger_entries
+      : [
+          {
+            account: "Wallet Balance",
+            operation: "Debit",
+            amount: formatNaira(amount),
+            balance_after: formatNaira(item.balance_after),
+          },
+          {
+            account: "Fee",
+            operation: "Debit",
+            amount: formatNaira(fee),
+            balance_after: formatNaira(item.balance_after),
+          },
+        ],
+    timeline: Array.isArray(item.timeline)
+      ? item.timeline
+      : [
+          {
+            event: title,
+            description: text(item.description ?? receipt.note, "Transaction created"),
+            timestamp: `${created.date} ${created.time}`.trim(),
+          },
+        ],
+  };
+}
 
 // ── Shared helpers ────────────────────────────────────────
 function InfoField({
@@ -70,62 +178,59 @@ function TxStatusPill({ status }: { status: string }) {
 }
 
 // ── Right sidebar panels (shared across all tabs) ─────────
-function RightSidebar({ tx }: { tx: any }) {
+function RightSidebar({ tx }: { tx: TransactionDetail }) {
   return (
-    <Stack gap={4}>
-      {/* Quick Actions */}
-      <Card>
+    <Stack gap={5}>
+      <Card className="rounded-[6px]">
         <Card.Header title="Quick Actions" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
-        <Card.Body className="px-4 pb-4 pt-0">
-          <Stack gap={2}>
+        <Card.Body className="px-5 pb-5 pt-0">
+          <Stack gap={3}>
             <Button
               variant="primary"
-              size="sm"
+              size="md"
               className="h-8 w-full justify-center text-[0.6875rem]"
             >
               View User Profile
             </Button>
             <Button
               variant="secondary"
-              size="sm"
+              size="md"
               className="h-8 w-full justify-center text-[0.6875rem]"
             >
-              <Download size={13} />
               Export Details
             </Button>
           </Stack>
         </Card.Body>
       </Card>
 
-      {/* Status */}
-      <Card>
+      <Card className="rounded-[6px]">
         <Card.Header title="Status" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
         <Card.Body className="space-y-2 px-4 pb-4 pt-0">
-            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) px-3">
+            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) bg-white px-3">
               <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Transaction
               </Text>
-              <Text variant="caption" color="success" weight="medium" className="text-[0.625rem]">
+              <Text variant="caption" color="success" weight="semibold" className="rounded-(--radius-sm) bg-(--color-success-bg) px-2 py-0.5 text-[0.625rem]">
                 Completed
               </Text>
             </Row>
-            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) px-3">
+            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) bg-white px-3">
               <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Blockchain
               </Text>
               <Text
                 variant="caption"
-                weight="medium"
+                weight="semibold"
                 className="text-[0.625rem] text-(--color-success-dark)"
               >
                 {tx.blockchain}
               </Text>
             </Row>
-            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) px-3">
+            <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) bg-white px-3">
               <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Settlement
               </Text>
-              <Text variant="caption" color="success" weight="medium" className="text-[0.625rem]">
+              <Text variant="caption" color="success" weight="semibold" className="text-[0.625rem]">
                 {tx.settlement}
               </Text>
             </Row>
@@ -133,15 +238,15 @@ function RightSidebar({ tx }: { tx: any }) {
       </Card>
 
       {/* Timing */}
-      <Card>
+      <Card className="rounded-[6px]">
         <Card.Header title="Timing" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
         <Card.Body className="px-4 pb-4 pt-0">
-          <Stack gap={3}>
+          <Stack gap={3} className="[&>div]:min-h-7">
             <Row justify="between" align="center">
               <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Started
               </Text>
-              <Text variant="caption" color="primary" weight="medium" className="text-[0.6875rem]">
+              <Text variant="caption" color="primary" weight="semibold" className="text-[0.6875rem]">
                 {tx.started}
               </Text>
             </Row>
@@ -153,7 +258,7 @@ function RightSidebar({ tx }: { tx: any }) {
                 {tx.completed}
               </Text>
             </Row>
-            <Row justify="between" align="center">
+            <Row justify="between" align="center" className="border-t border-(--color-border) pt-3">
               <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Total Time
               </Text>
@@ -169,18 +274,17 @@ function RightSidebar({ tx }: { tx: any }) {
 }
 
 // ── Overview tab — image 2 ────────────────────────────────
-function OverviewTab({ tx }: { tx: any }) {
+function OverviewTab({ tx }: { tx: TransactionDetail }) {
   return (
     <Stack gap={4}>
-      {/* Transaction Summary */}
-      <Card>
-        <Card.Header title="Transaction Summary" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
-        <Card.Body padded>
+      <Card className="rounded-[6px]">
+        <Card.Header title="Transaction Summary" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-[0.8125rem] [&_h4]:leading-4" />
+        <Card.Body className="px-4 pb-4 pt-0">
           {/* From/To row */}
           <Row gap={4} className="mb-4">
             {/* From */}
-            <Box className="flex-1 rounded-(--radius-sm) border border-(--color-border) p-4">
-              <Text variant="micro" color="muted" className="mb-2 block text-[0.625rem] leading-3">
+            <Box className="flex-1 rounded-(--radius-sm) border border-(--color-border) bg-white p-4">
+              <Text variant="micro" color="muted" className="mb-2 block text-[0.75rem] leading-4">
                 From
               </Text>
               <Row gap={2} align="center">
@@ -194,8 +298,8 @@ function OverviewTab({ tx }: { tx: any }) {
               </Text>
             </Box>
             {/* To */}
-            <Box className="flex-1 rounded-(--radius-sm) border border-(--color-border) p-4">
-              <Text variant="micro" color="muted" className="mb-2 block text-[0.625rem] leading-3">
+            <Box className="flex-1 rounded-(--radius-sm) border border-(--color-border) bg-white p-4">
+              <Text variant="micro" color="muted" className="mb-2 block text-[0.75rem] leading-4">
                 To (Naira)
               </Text>
               <Row gap={2} align="center">
@@ -209,7 +313,7 @@ function OverviewTab({ tx }: { tx: any }) {
             </Box>
           </Row>
           {/* Exchange rate + fee */}
-          <Row gap={8}>
+          <Row gap={8} className="border-t border-(--color-border) pt-4">
             <InfoField label="Exchange Rate" value={tx.exchange_rate} />
             <InfoField label="Transaction Fee" value={tx.tx_fee} />
           </Row>
@@ -217,9 +321,9 @@ function OverviewTab({ tx }: { tx: any }) {
       </Card>
 
       {/* User Information */}
-      <Card>
-        <Card.Header title="User Information" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
-        <Card.Body padded>
+      <Card className="rounded-[6px]">
+        <Card.Header title="User Information" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-[0.8125rem] [&_h4]:leading-4" />
+        <Card.Body className="px-4 pb-4 pt-1">
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <InfoField label="Name" value={tx.user_name} />
             <InfoField
@@ -234,9 +338,9 @@ function OverviewTab({ tx }: { tx: any }) {
       </Card>
 
       {/* Bank Transfer Details */}
-      <Card>
-        <Card.Header title="Bank Transfer Details" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
-        <Card.Body padded>
+      <Card className="rounded-[6px]">
+        <Card.Header title="Bank Transfer Details" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-[0.8125rem] [&_h4]:leading-4" />
+        <Card.Body className="px-4 pb-4 pt-1">
           <div className="grid grid-cols-2 gap-x-8 gap-y-4">
             <InfoField label="Bank Name" value={tx.bank_name} />
             <InfoField label="Account Number" value={tx.account_number} />
@@ -257,7 +361,7 @@ function OverviewTab({ tx }: { tx: any }) {
 }
 
 // ── Technical Details tab — image 3 ──────────────────────
-function TechnicalTab({ tx }: { tx: any }) {
+function TechnicalTab({ tx }: { tx: TransactionDetail }) {
   const { copy: copyHash } = useClipboard();
   const { copy: copyWallet } = useClipboard();
 
@@ -337,7 +441,7 @@ function TechnicalTab({ tx }: { tx: any }) {
 }
 
 // ── Ledger Entries tab — image 4 ─────────────────────────
-function LedgerTab({ tx }: { tx: any }) {
+function LedgerTab({ tx }: { tx: TransactionDetail }) {
   type LedgerEntry = (typeof tx.ledger_entries)[0];
 
   const cols = useMemo<ColumnDef<LedgerEntry, unknown>[]>(
@@ -407,52 +511,59 @@ function LedgerTab({ tx }: { tx: any }) {
 }
 
 // ── Timeline tab — image 5 ────────────────────────────────
-function TimelineTab({ tx }: { tx: any }) {
+function TimelineTab({ tx }: { tx: TransactionDetail }) {
   return (
-    <Card className="border-0 bg-transparent shadow-none">
-      <Card.Body className="p-0">
-        <Stack gap={0}>
-          {tx.timeline.map((event, i) => {
-            const isLast = i === tx.timeline.length - 1;
-            return (
-              <div key={i} className="flex gap-4">
-                {/* Left: icon + vertical line */}
-                <div className="flex flex-col items-center">
-                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-(--color-success-subtle) border border-(--color-success-mid)">
-                    <CheckCircle
-                      size={12}
-                      className="text-(--color-success-mid)"
-                    />
-                  </div>
-                  {!isLast && (
-                  <div className="w-px flex-1 bg-(--color-border) my-1" />
-                  )}
-                </div>
+    <Box className="w-full pt-1">
+      {tx.timeline.map((event, i) => {
+        const isLast = i === tx.timeline.length - 1;
 
-                {/* Right: content */}
-                <Box className={!isLast ? "pb-5" : ""}>
-                  <Row justify="between" align="start" gap={4}>
-                    <Text variant="caption" color="primary" weight="semibold" className="text-xs leading-4">
-                      {event.event}
-                    </Text>
-                    <Text variant="micro" color="muted" className="shrink-0 text-[0.625rem] leading-4">
-                      {event.timestamp}
-                    </Text>
-                  </Row>
-                  <Text
-                    variant="micro"
-                    color="secondary"
-                    className="mt-0.5 block text-[0.6875rem] leading-4"
-                  >
-                    {event.description}
-                  </Text>
-                </Box>
+        return (
+          <div key={i} className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-4">
+            <div className="flex flex-col items-center">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-(--color-success-bg)">
+                <CheckCircle size={18} className="text-(--color-success-mid)" />
               </div>
-            );
-          })}
-        </Stack>
-      </Card.Body>
-    </Card>
+              {!isLast && (
+                <div className="mt-1 h-[4.125rem] w-px bg-(--color-border)" />
+              )}
+            </div>
+
+            <Row
+              justify="between"
+              align="start"
+              gap={4}
+              className={isLast ? "pb-1" : "min-h-[5.625rem] pb-5"}
+            >
+              <Stack gap={1} className="min-w-0">
+                <Text
+                  variant="caption"
+                  color="primary"
+                  weight="semibold"
+                  className="text-[0.8125rem] leading-5"
+                >
+                  {event.event}
+                </Text>
+                <Text
+                  variant="caption"
+                  color="secondary"
+                  className="text-[0.8125rem] leading-5"
+                >
+                  {event.description}
+                </Text>
+              </Stack>
+
+              <Text
+                variant="caption"
+                color="secondary"
+                className="shrink-0 pt-0.5 text-[0.75rem] leading-4"
+              >
+                {event.timestamp}
+              </Text>
+            </Row>
+          </div>
+        );
+      })}
+    </Box>
   );
 }
 
@@ -465,8 +576,8 @@ export default function TransactionDetailPage() {
 
   const { id = "" } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabValue>("overview");
-  const { data: apiTx, isLoading } = useTransactionDetail(id);
-  const tx = apiTx as any;
+  const { data: apiTx } = useTransactionDetail(id);
+  const tx = normalizeTransactionDetail(apiTx, id);
 
   return (
     <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
@@ -497,7 +608,6 @@ export default function TransactionDetailPage() {
         }
         actions={
           <Button variant="secondary" size="sm" className="h-8 px-3 text-[0.6875rem]">
-            <Download size={13} />
             Export Details
           </Button>
         }
@@ -508,7 +618,8 @@ export default function TransactionDetailPage() {
         value={activeTab}
         onChange={(v) => setActiveTab(v as TabValue)}
         sidebar={<RightSidebar tx={tx} />}
-        sidebarWidth="300px"
+        sidebarWidth="320px"
+        className="w-full"
       >
         <TabsList>
           <Tab value="overview">Overview</Tab>
@@ -517,16 +628,16 @@ export default function TransactionDetailPage() {
           <Tab value="timeline">Timeline</Tab>
         </TabsList>
 
-        <TabPanel value="overview">
+        <TabPanel value="overview" className="pt-0">
           <OverviewTab tx={tx} />
         </TabPanel>
-        <TabPanel value="technical">
+        <TabPanel value="technical" className="pt-0">
           <TechnicalTab tx={tx} />
         </TabPanel>
-        <TabPanel value="ledger">
+        <TabPanel value="ledger" className="pt-0">
           <LedgerTab tx={tx} />
         </TabPanel>
-        <TabPanel value="timeline">
+        <TabPanel value="timeline" className="pt-0">
           <TimelineTab tx={tx} />
         </TabPanel>
       </TabsWithSidebar>

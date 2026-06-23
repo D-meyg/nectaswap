@@ -5,8 +5,8 @@ import {
   Clock,
   Download,
   Eye,
+  Filter,
   RotateCcw,
-  Search,
   XCircle,
 } from "lucide-react";
 import type { ReactNode } from "react";
@@ -52,6 +52,115 @@ interface FailedTx {
   failureReason: string;
   errorCode: string;
   retryable: boolean;
+}
+
+interface TransactionRow {
+  id: string;
+  time: string;
+  user_name: string;
+  user_id: string;
+  type: string;
+  rate: string;
+  crypto_amount: string;
+  ngn_amount: string;
+  fee: string;
+  status: "completed" | "pending" | "failed";
+  date: string;
+}
+
+function toNumber(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatNaira(value: unknown) {
+  return `₦${toNumber(value).toLocaleString()}`;
+}
+
+function stringValue(value: unknown, fallback = "N/A") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function dateParts(value: unknown) {
+  const raw = stringValue(value, "");
+  const [date = ""] = raw.replace("T", " ").split(".");
+  const [datePart = "", timePart = ""] = date.split(" ");
+  return { date: datePart || "N/A", time: timePart || "" };
+}
+
+function normalizeTransaction(value: unknown): TransactionRow {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const user =
+    item.user && typeof item.user === "object"
+      ? (item.user as Record<string, unknown>)
+      : {};
+  const created = dateParts(item.created_at ?? item.timestamp ?? item.date);
+  const receipt =
+    item.receipt && typeof item.receipt === "object"
+      ? (item.receipt as Record<string, unknown>)
+      : {};
+  const status = stringValue(item.status ?? receipt.status, "pending").toLowerCase();
+  const rawType = stringValue(
+    item.kind ?? item.method ?? item.transaction_type ?? receipt.method,
+    "transaction",
+  );
+  const amount = item.amount ?? receipt.amount ?? item.ngn_amount ?? item.amount_ngn;
+  const fee = item.fee ?? receipt.fee;
+
+  return {
+    id: stringValue(item.reference ?? receipt.reference ?? item.transaction_id ?? item.id, "TX-N/A"),
+    time: created.time,
+    user_name: stringValue(item.sender ?? receipt.sender ?? item.user_name ?? item.customer_name ?? user.full_name ?? user.name, "Unknown User"),
+    user_id: stringValue(item.user_id ?? user.user_id ?? user.id, "N/A"),
+    type: rawType.toUpperCase(),
+    rate: stringValue(item.crypto_currency ?? item.payment_method ?? item.beneficiary_type, "to NGN"),
+    crypto_amount: stringValue(item.crypto_amount ?? item.amount_crypto ?? item.asset_value, "0"),
+    ngn_amount: formatNaira(amount),
+    fee: `Fee: ${formatNaira(fee)}`,
+    status: (status === "success" ? "completed" : status) as TransactionRow["status"],
+    date: created.date,
+  };
+}
+
+function normalizePending(value: unknown): PendingTx {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const user =
+    item.user && typeof item.user === "object"
+      ? (item.user as Record<string, unknown>)
+      : {};
+  const created = dateParts(item.created_at ?? item.timestamp ?? item.date);
+
+  return {
+    id: stringValue(item.id ?? item.transaction_id, "TX-N/A"),
+    timestamp: `${created.date} ${created.time}`.trim(),
+    user: stringValue(item.user_name ?? user.full_name ?? user.name, "Unknown User"),
+    userId: stringValue(item.user_id ?? user.user_id ?? user.id, "N/A"),
+    amount: item.amount ?? item.ngn_amount ? formatNaira(item.amount ?? item.ngn_amount) : "₦0",
+    crypto: stringValue(item.crypto ?? item.crypto_amount ?? item.asset, "N/A"),
+    reason: stringValue(item.reason ?? item.review_reason, "Manual review required"),
+    risk: stringValue(item.risk ?? item.risk_level, "medium").toLowerCase() as PendingTx["risk"],
+    waitTime: stringValue(item.wait_time ?? item.waitTime, "N/A"),
+  };
+}
+
+function normalizeFailed(value: unknown): FailedTx {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const created = dateParts(item.created_at ?? item.timestamp ?? item.date);
+
+  return {
+    id: stringValue(item.id ?? item.transaction_id, "TX-N/A"),
+    timestamp: `${created.date} ${created.time}`.trim(),
+    user: stringValue(item.user_name ?? item.user, "Unknown User"),
+    userId: stringValue(item.user_id, "N/A"),
+    amount: item.amount ?? item.ngn_amount ? formatNaira(item.amount ?? item.ngn_amount) : "₦0",
+    crypto: stringValue(item.crypto ?? item.crypto_amount ?? item.asset, "N/A"),
+    failureReason: stringValue(item.failureReason ?? item.failure_reason ?? item.reason, "N/A"),
+    errorCode: stringValue(item.errorCode ?? item.error_code, "N/A"),
+    retryable: Boolean(item.retryable),
+  };
 }
 
 
@@ -120,22 +229,31 @@ function FilterBar({
   showExport?: boolean;
 }) {
   return (
-    <Card className="mb-4">
-      <Box px={4} py={3}>
-        <Row gap={3} align="center">
+    <Card className="mb-4 rounded-[8px] shadow-[0_2px_8px_rgba(15,23,42,0.04)]">
+      <Box px={5} py={5}>
+        <Row gap={4} align="center">
           <SearchInput
             value={search}
             onChange={setSearch}
-            placeholder="Search by transaction ID, user, or error code..."
-            className="min-w-0 flex-1"
+            placeholder="Search by transaction ID or user..."
+            className="min-w-0 flex-1 [&_input]:bg-(--color-bg-subtle)"
           />
-          <input className="h-8 w-[9.375rem] rounded-(--radius-sm) border border-(--color-border) bg-white px-3 text-[0.6875rem] outline-none" />
+          <Button variant="secondary" size="sm" className="h-9 min-w-[7.5rem] justify-center text-[0.75rem]">
+            All Status
+          </Button>
+          <Button variant="secondary" size="sm" className="h-9 min-w-[7.5rem] justify-center text-[0.75rem]">
+            All Types
+          </Button>
           {showExport && (
-            <Button variant="secondary" size="sm" className="h-8 px-3 text-[0.6875rem]">
+            <Button variant="secondary" size="sm" className="h-9 px-4 text-[0.75rem]">
               <Download size={13} />
               Export
             </Button>
           )}
+          <Button variant="secondary" size="sm" className="h-9 px-4 text-[0.75rem]">
+            <Filter size={13} />
+            More Filters
+          </Button>
         </Row>
       </Box>
     </Card>
@@ -252,13 +370,25 @@ export default function TransactionsPage() {
 
   usePageTitle(title, subtitle);
 
-  const { data: apiAll = [], isLoading: loadingAll } = useTransactions({ search: search || undefined });
-  const { data: apiPending = [], isLoading: loadingPending } = usePendingTransactionApprovals();
-  const { data: apiFailed = [], isLoading: loadingFailed } = useFailedTransactions();
+  const { data: apiAll = [] } = useTransactions({ search: search || undefined });
+  const { data: apiPending = [] } = usePendingTransactionApprovals();
+  const { data: apiFailed = [] } = useFailedTransactions();
 
-  const allRows = apiAll as any[];
-  const pendingTransactions = apiPending as any[];
-  const failedTransactions = apiFailed as any[];
+  const allRows = useMemo(
+    () => (Array.isArray(apiAll) ? apiAll.map(normalizeTransaction) : []),
+    [apiAll],
+  );
+  const pendingTransactions = useMemo(
+    () => (Array.isArray(apiPending) ? apiPending.map(normalizePending) : []),
+    [apiPending],
+  );
+  const failedTransactions = useMemo(
+    () => (Array.isArray(apiFailed) ? apiFailed.map(normalizeFailed) : []),
+    [apiFailed],
+  );
+
+
+  console.log(failedTransactions);
 
   const pendingCols = useMemo<ColumnDef<PendingTx, unknown>[]>(
     () => [
@@ -377,10 +507,46 @@ export default function TransactionsPage() {
           </Stack>
         ),
       },
-      { accessorKey: "user_name", header: "User" },
-      { accessorKey: "crypto", header: "Type" },
-      { accessorKey: "crypto_amount", header: "Crypto Amount" },
-      { accessorKey: "ngn_amount", header: "NGN Amount" },
+      {
+        accessorKey: "user_name",
+        header: "User",
+        cell: ({ row }) => (
+          <Stack gap={0}>
+            <Text variant="caption" color="primary" weight="semibold" className="text-xs">{row.original.user_name}</Text>
+            <Text variant="micro" color="muted" className="text-[0.625rem]">ID: {row.original.user_id.slice(0, 8)}</Text>
+          </Stack>
+        ),
+      },
+      {
+        accessorKey: "type",
+        header: "Type",
+        cell: ({ row }) => (
+          <Stack gap={0}>
+            <Text variant="caption" color="primary" weight="semibold" className="text-xs">{row.original.type}</Text>
+            <Text variant="micro" color="muted" className="text-[0.625rem]">{row.original.rate}</Text>
+          </Stack>
+        ),
+      },
+      {
+        accessorKey: "crypto_amount",
+        header: "Crypto Amount",
+        cell: ({ row }) => (
+          <Stack gap={0}>
+            <Text variant="caption" color="primary" weight="semibold" className="text-xs">{row.original.crypto_amount}</Text>
+            <Text variant="micro" color="muted" className="text-[0.625rem]">{row.original.rate}</Text>
+          </Stack>
+        ),
+      },
+      {
+        accessorKey: "ngn_amount",
+        header: "NGN Amount",
+        cell: ({ row }) => (
+          <Stack gap={0}>
+            <Text variant="caption" color="primary" weight="semibold" className="text-xs">{row.original.ngn_amount}</Text>
+            <Text variant="micro" color="muted" className="text-[0.625rem]">{row.original.fee}</Text>
+          </Stack>
+        ),
+      },
       {
         accessorKey: "status",
         header: "Status",
@@ -388,6 +554,16 @@ export default function TransactionsPage() {
           const value = getValue<TransactionRow["status"]>();
           return <StatusPill tone={value === "completed" ? "success" : value === "pending" ? "warning" : "danger"}>{value}</StatusPill>;
         },
+      },
+      {
+        accessorKey: "date",
+        header: "Date",
+        cell: ({ row }) => (
+          <Stack gap={0}>
+            <Text variant="caption" color="primary" className="text-xs">{row.original.date}</Text>
+            <Text variant="micro" color="muted" className="text-[0.625rem]">{row.original.time}</Text>
+          </Stack>
+        ),
       },
       {
         id: "actions",
@@ -408,26 +584,29 @@ export default function TransactionsPage() {
   );
 
   return (
-    <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
+    <Box className="min-h-full w-full px-4 py-6 lg:px-5 xl:px-6">
       {mode === "pending" && (
         <div className="mb-4 grid grid-cols-4 gap-4">
           <StatCard label="Pending Approval" value={pendingTransactions.length} icon={<Clock size={20} className="text-(--color-warning)" />} />
-          <StatCard label="High Risk" value={(pendingTransactions as any[]).filter((t) => t.risk === "high").length} icon={<AlertTriangle size={20} className="text-(--color-danger)" />} />
+          <StatCard label="Total Value" value={formatNaira(pendingTransactions.reduce((sum, tx) => sum + toNumber(tx.amount.replace(/[^\d.]/g, "")), 0))} />
+          <StatCard label="High Risk" value={pendingTransactions.filter((t) => t.risk === "high").length} icon={<AlertTriangle size={20} className="text-(--color-danger)" />} />
+          <StatCard label="Avg Wait Time" value={pendingTransactions[0]?.waitTime ?? "N/A"} icon={<Clock size={20} className="text-(--color-text-secondary)" />} />
         </div>
       )}
 
       {mode === "failed" && (
         <div className="mb-4 grid grid-cols-4 gap-4">
           <StatCard label="Failed Transactions" value={failedTransactions.length} icon={<XCircle size={20} className="text-(--color-danger)" />} />
-          <StatCard label="Retryable" value={(failedTransactions as any[]).filter((t) => t.retryable).length} icon={<RotateCcw size={20} className="text-(--color-success-dark)" />} />
-          <StatCard label="Non-Retryable" value={(failedTransactions as any[]).filter((t) => !t.retryable).length} icon={<AlertTriangle size={20} className="text-(--color-warning-dark)" />} />
+          <StatCard label="Retryable" value={failedTransactions.filter((t) => t.retryable).length} icon={<RotateCcw size={20} className="text-(--color-success-dark)" />} />
+          <StatCard label="Non-Retryable" value={failedTransactions.filter((t) => !t.retryable).length} icon={<AlertTriangle size={20} className="text-(--color-warning-dark)" />} />
+          <StatCard label="Total Value" value={formatNaira(failedTransactions.reduce((sum, tx) => sum + toNumber(tx.amount.replace(/[^\d.]/g, "")), 0))} />
         </div>
       )}
 
       {mode !== "pending" && <FilterBar search={search} setSearch={setSearch} />}
 
-      <Card noPadding>
-        <Box px={4} py={3} className="border-b border-(--color-border)">
+      <Card noPadding className="rounded-[8px]">
+        <Box px={5} py={4} className="border-b border-(--color-border)">
           <Text variant="subtitle" color="primary" weight="semibold" className="text-xs leading-4">
             {mode === "pending" ? "Pending Approvals" : mode === "failed" ? "Failed Transactions" : "All Transactions"}
           </Text>
@@ -445,17 +624,6 @@ export default function TransactionsPage() {
           <DataTable data={failedTransactions} columns={failedCols} />
         ) : (
           <>
-            <Box px={4} py={3} className="border-b border-(--color-border)">
-              <Row gap={2} align="center" className="h-8 rounded-(--radius-sm) border border-(--color-border) px-3">
-                <Search size={13} className="text-(--color-text-muted)" />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search users, transactions, cards..."
-                  className="min-w-0 flex-1 bg-transparent font-geom text-[0.6875rem] outline-none"
-                />
-              </Row>
-            </Box>
             <DataTable data={allRows} columns={allCols} />
           </>
         )}

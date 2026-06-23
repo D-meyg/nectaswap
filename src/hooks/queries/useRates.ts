@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/api/client";
 import { ENDPOINTS } from "@/api/endpoints";
+import { unwrapApiList, unwrapApiObject } from "@/utils/apiData";
 
 export function useExchangeRates() {
   return useQuery<unknown[]>({
     queryKey: ["rates", "exchange"],
     queryFn: async () => {
       const { data } = await client.get(ENDPOINTS.RATES.EXCHANGE);
-      return data.data;
+      return unwrapApiList(data, ["exchange_rates", "rates"]);
     },
     staleTime: 30_000,
   });
@@ -18,7 +19,7 @@ export function useFeeConfig() {
     queryKey: ["rates", "fee-config"],
     queryFn: async () => {
       const { data } = await client.get(ENDPOINTS.RATES.FEE_CONFIG);
-      return data.data;
+      return unwrapApiList(data, ["fee_tiers", "fees"]);
     },
     staleTime: 60_000,
   });
@@ -29,7 +30,7 @@ export function useFeeRevenue() {
     queryKey: ["rates", "fee-revenue"],
     queryFn: async () => {
       const { data } = await client.get(ENDPOINTS.RATES.FEE_REVENUE);
-      return data.data;
+      return unwrapApiObject(data, {});
     },
     staleTime: 60_000,
   });

@@ -3,7 +3,7 @@
 type AvatarSize = "xs" | "sm" | "md" | "lg";
 
 interface AvatarProps {
-  name: string;
+  name?: string | null;
   src?: string;
   size?: AvatarSize;
   className?: string;
@@ -16,9 +16,12 @@ const sizeMap: Record<AvatarSize, { wrapper: string; text: string }> = {
   lg: { wrapper: "h-12 w-12", text: "text-base" },
 };
 
-function getInitials(name: string) {
-  return name
+function getInitials(name?: string | null) {
+  const safeName = name?.trim() || "Admin";
+
+  return safeName
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .slice(0, 2)
@@ -27,12 +30,13 @@ function getInitials(name: string) {
 
 export function Avatar({ name, src, size = "md", className }: AvatarProps) {
   const { wrapper, text } = sizeMap[size];
+  const label = name?.trim() || "Admin";
 
   if (src) {
     return (
       <img
         src={src}
-        alt={name}
+        alt={label}
         className={cn("rounded-full object-cover shrink-0", wrapper, className)}
       />
     );
@@ -47,7 +51,7 @@ export function Avatar({ name, src, size = "md", className }: AvatarProps) {
       )}
     >
       <span className={cn("font-semibold text-white tracking-wide", text)}>
-        {getInitials(name)}
+        {getInitials(label)}
       </span>
     </div>
   );

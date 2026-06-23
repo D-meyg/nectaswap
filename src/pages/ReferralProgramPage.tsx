@@ -21,6 +21,15 @@ type Referrer = Record<string, any>;
 type ReferredUser = Record<string, any>;
 type TabValue = "referrers" | "referred";
 
+function toNumber(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function text(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
 function ReferrerStatus({ status }: { status: string }) {
   return (
     <Text
@@ -33,8 +42,8 @@ function ReferrerStatus({ status }: { status: string }) {
   );
 }
 
-function fmt(n: number) {
-  return `₦ ${n.toLocaleString()}`;
+function fmt(value: unknown) {
+  return `₦ ${toNumber(value).toLocaleString()}`;
 }
 
 export default function ReferralProgramPage() {
@@ -49,16 +58,22 @@ export default function ReferralProgramPage() {
   const { data: stats = {} } = useReferralStats();
   const { data: apiReferrers = [], isLoading: loadingReferrers } = useReferrers();
   const { data: apiReferred = [], isLoading: loadingReferred } = useReferredUsers();
-  const referrers = apiReferrers as Referrer[];
-  const referredUsers = apiReferred as ReferredUser[];
+  const referrers = useMemo(
+    () => (Array.isArray(apiReferrers) ? apiReferrers : []),
+    [apiReferrers],
+  ) as Referrer[];
+  const referredUsers = useMemo(
+    () => (Array.isArray(apiReferred) ? apiReferred : []),
+    [apiReferred],
+  ) as ReferredUser[];
 
   const filteredReferrers = useMemo(
     () =>
       referrers.filter(
         (r) =>
           !debounced ||
-          r.name.toLowerCase().includes(debounced.toLowerCase()) ||
-          r.code.toLowerCase().includes(debounced.toLowerCase()),
+          text(r.name ?? r.full_name).toLowerCase().includes(debounced.toLowerCase()) ||
+          text(r.code ?? r.referral_code).toLowerCase().includes(debounced.toLowerCase()),
       ),
     [referrers, debounced],
   );
@@ -68,8 +83,8 @@ export default function ReferralProgramPage() {
       referredUsers.filter(
         (r) =>
           !debounced ||
-          r.name.toLowerCase().includes(debounced.toLowerCase()) ||
-          r.referred_by.toLowerCase().includes(debounced.toLowerCase()),
+          text(r.name ?? r.full_name).toLowerCase().includes(debounced.toLowerCase()) ||
+          text(r.referred_by ?? r.referrer_name).toLowerCase().includes(debounced.toLowerCase()),
       ),
     [referredUsers, debounced],
   );
@@ -225,9 +240,9 @@ export default function ReferralProgramPage() {
     [],
   );
 
-  const totalEarnings = (stats as any).earnings_paid ?? referrers.reduce((s, r) => s + r.earnings, 0);
-  const totalPending = (stats as any).pending_payouts ?? referrers.reduce((s, r) => s + r.pending, 0);
-  const avgReferrals = ((stats as any).avg_referrals ?? (referrers.reduce((s, r) => s + r.total, 0) / Math.max(referrers.length, 1))).toFixed(1);
+  const totalEarnings = (stats as any).earnings_paid ?? referrers.reduce((s, r) => s + toNumber(r.earnings), 0);
+  const totalPending = (stats as any).pending_payouts ?? referrers.reduce((s, r) => s + toNumber(r.pending), 0);
+  const avgReferrals = toNumber((stats as any).avg_referrals ?? (referrers.reduce((s, r) => s + toNumber(r.total), 0) / Math.max(referrers.length, 1))).toFixed(1);
 
   return (
     <Box p={6} className="space-y-5">
@@ -240,12 +255,12 @@ export default function ReferralProgramPage() {
         />
         <StatCard
           label="Earnings Paid"
-          value={`₦ ${(totalEarnings / 1_000_000).toFixed(1)}M`}
+          value={`₦ ${(toNumber(totalEarnings) / 1_000_000).toFixed(1)}M`}
           status="success"
         />
         <StatCard
           label="Pending Payouts"
-          value={`₦ ${(totalPending / 1000).toFixed(0)}K`}
+          value={`₦ ${(toNumber(totalPending) / 1000).toFixed(0)}K`}
           status="warning"
         />
         <StatCard label="Avg Referrals" value={avgReferrals} />

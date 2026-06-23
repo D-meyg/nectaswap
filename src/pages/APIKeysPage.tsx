@@ -1,5 +1,5 @@
 ﻿import { usePageTitle } from "@/layouts/AppLayout";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Eye, Copy, RotateCcw, Trash2, Info } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
@@ -8,6 +8,7 @@ import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { DataTable } from "@/components/tables/DataTable";
 import { useClipboard } from "@/hooks/ui/useClipboard";
@@ -110,6 +111,70 @@ function MaskedKey({ value }: { value: string }) {
   );
 }
 
+function GenerateKeyModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Modal open={open} onClose={onClose} size="md" className="max-w-[27rem]">
+      <Modal.Header
+        title="Generate New API Key"
+        onClose={onClose}
+        className="border-b-0 px-5 pb-2 pt-5 [&_h4]:text-[1rem] [&_h4]:leading-5"
+      />
+      <Modal.Body className="px-5 pb-3 pt-0">
+        <Stack gap={4}>
+          <Stack gap={1}>
+            <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
+              Key Name
+            </Text>
+            <input
+              className="h-9 w-full rounded-(--radius-sm) border border-(--color-border) px-3 font-geom text-[0.75rem] outline-none transition-colors placeholder:text-(--color-text-tertiary) focus:border-(--color-brand)"
+              placeholder="e.g., Production API Key"
+            />
+          </Stack>
+
+          <Stack gap={1}>
+            <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
+              Service
+            </Text>
+            <input className="h-9 w-full rounded-(--radius-sm) border border-(--color-border) px-3 font-geom text-[0.75rem] outline-none transition-colors focus:border-(--color-brand)" />
+          </Stack>
+
+          <Stack gap={2}>
+            <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
+              Permissions
+            </Text>
+            {["Read", "Write", "Delete"].map((permission) => (
+              <label
+                key={permission}
+                className="flex w-fit items-center gap-2 font-geom text-[0.75rem] font-medium text-(--color-text-primary)"
+              >
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5 rounded border-(--color-border) accent-(--color-brand)"
+                />
+                {permission}
+              </label>
+            ))}
+          </Stack>
+        </Stack>
+      </Modal.Body>
+      <Modal.Footer className="grid grid-cols-2 gap-3 border-t-0 bg-white px-5 pb-5 pt-2">
+        <Button variant="secondary" size="sm" className="h-9 justify-center text-[0.75rem]" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button size="sm" className="h-9 justify-center text-[0.75rem]" onClick={onClose}>
+          Generate Key
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
 export default function APIKeysPage() {
   usePageTitle(
     "API Keys",
@@ -117,6 +182,7 @@ export default function APIKeysPage() {
   );
 
   const { data: apiKeys = [], isLoading } = useApiKeys();
+  const [generateOpen, setGenerateOpen] = useState(false);
   const keys = apiKeys.length ? (apiKeys as APIKey[]) : API_KEYS;
 
   const columns = useMemo<ColumnDef<APIKey, unknown>[]>(
@@ -239,7 +305,7 @@ export default function APIKeysPage() {
           <Text variant="caption" color="secondary">
             Manage API keys for external integrations and services
           </Text>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setGenerateOpen(true)}>
             <Plus size={13} />
             Generate New Key
           </Button>
@@ -283,6 +349,8 @@ export default function APIKeysPage() {
           </Text>
         ))}
       </Box>
+
+      <GenerateKeyModal open={generateOpen} onClose={() => setGenerateOpen(false)} />
     </Box>
   );
 }

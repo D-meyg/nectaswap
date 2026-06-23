@@ -19,6 +19,18 @@ import { useDebounce } from "@/hooks/ui/useDebounce";
 import { useCards, useCardStats } from "@/hooks/queries/useCards";
 import type { ColumnDef } from "@tanstack/react-table";
 
+type CardRow = {
+  id: string;
+  masked: string;
+  expiry: string;
+  user_name: string;
+  user_email: string;
+  type: "Virtual" | "Physical";
+  balance: number;
+  spend_30d: number;
+  status: "Active" | "Frozen" | "Pending" | "Blocked";
+};
+
 // Card type pill — "Virtual" purple, "Physical" brand blue
 function CardTypePill({ type }: { type: "Virtual" | "Physical" }) {
   const style =
@@ -53,7 +65,13 @@ function CardStatus({ status }: { status: CardRow["status"] }) {
 }
 
 // Format NGN compact
-function fmt(n: number) {
+function toNumber(value: unknown) {
+  const numberValue = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function fmt(value: unknown) {
+  const n = toNumber(value);
   if (n === 0) return "₦ 0";
   if (n >= 1_000_000) return `₦ ${(n / 1_000_000).toFixed(1)}M`;
   return `₦ ${n.toLocaleString()}`;
@@ -76,16 +94,19 @@ export default function CardManagementPage() {
     type: typeFilter || undefined,
   });
   const { data: cardStats = {} } = useCardStats();
-  const cards = apiCards as CardRow[];
+  const cards = useMemo(
+    () => (Array.isArray(apiCards) ? (apiCards as CardRow[]) : []),
+    [apiCards],
+  );
 
   const filtered = useMemo(
     () =>
       cards.filter((c) => {
         const matchSearch =
           !debounced ||
-          c.masked.includes(debounced) ||
-          c.user_name.toLowerCase().includes(debounced.toLowerCase()) ||
-          c.id.includes(debounced);
+          String(c.masked || "").includes(debounced) ||
+          String(c.user_name || "").toLowerCase().includes(debounced.toLowerCase()) ||
+          String(c.id || "").includes(debounced);
         const matchType = !typeFilter || c.type === typeFilter;
         return matchSearch && matchType;
       }),
@@ -100,7 +121,7 @@ export default function CardManagementPage() {
   const totalCards = (cardStats as any).total_cards ?? cards.length;
   const activeCards = (cardStats as any).active_cards ?? cards.filter((c) => c.status === "Active").length;
   const blockedCards = (cardStats as any).blocked_cards ?? cards.filter((c) => c.status === "Blocked" || c.status === "Frozen").length;
-  const totalSpend = (cardStats as any).total_spend_24h ?? cards.reduce((s, c) => s + c.spend_30d, 0);
+  const totalSpend = (cardStats as any).total_spend_24h ?? cards.reduce((s, c) => s + toNumber(c.spend_30d), 0);
 
   const columns = useMemo<ColumnDef<CardRow, unknown>[]>(
     () => [
@@ -217,7 +238,7 @@ export default function CardManagementPage() {
         <StatCard label="Blocked Cards" value={blockedCards} status="danger" />
         <StatCard
           label="Total Spend (24h)"
-          value={`₦ ${(totalSpend / 1_000_000).toFixed(1)}M`}
+          value={`₦ ${(toNumber(totalSpend) / 1_000_000).toFixed(1)}M`}
         />
       </div>
 

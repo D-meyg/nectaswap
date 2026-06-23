@@ -217,20 +217,20 @@ export default function RatesPage() {
         {[
           {
             label: "Total Fee Revenue (24h)",
-            value: (feeRevenue as any).total_fee_revenue_24h || "₦ 2.4M",
-            delta: "↑ +10.5% vs yesterday",
+            value: (feeRevenue as any).total_fee_revenue_24h || "₦ 0",
+            delta: "",
             pos: true,
           },
           {
             label: "Avg Fee per Transaction",
-            value: (feeRevenue as any).avg_fee_per_transaction || "₦ 8,420",
-            delta: "↓ -2.1% vs yesterday",
+            value: (feeRevenue as any).avg_fee_per_transaction || "₦ 0",
+            delta: "",
             pos: false,
           },
           {
             label: "Fee Revenue (MTD)",
-            value: (feeRevenue as any).fee_revenue_mtd || "₦ 68.3M",
-            delta: "↑ +18.3% vs last month",
+            value: (feeRevenue as any).fee_revenue_mtd || "₦ 0",
+            delta: "",
             pos: true,
           },
         ].map((s, i) => (
@@ -242,18 +242,20 @@ export default function RatesPage() {
               <Text variant="heading" color="primary" weight="semibold" as="p">
                 {s.value}
               </Text>
-              <Text
-                variant="micro"
-                weight="medium"
-                className={[
-                  "mt-1 block",
-                  s.pos
-                    ? "text-(--color-success-mid)"
-                    : "text-(--color-danger)",
-                ].join(" ")}
-              >
-                {s.delta}
-              </Text>
+              {s.delta && (
+                <Text
+                  variant="micro"
+                  weight="medium"
+                  className={[
+                    "mt-1 block",
+                    s.pos
+                      ? "text-(--color-success-mid)"
+                      : "text-(--color-danger)",
+                  ].join(" ")}
+                >
+                  {s.delta}
+                </Text>
+              )}
             </Box>
           </Card>
         ))}

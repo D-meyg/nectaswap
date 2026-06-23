@@ -24,7 +24,6 @@ import {
   useSystemHealth,
 } from "@/hooks/queries/useDashboard";
 
-
 export default function DashboardPage() {
   usePageTitle(
     "Control Room",
@@ -39,6 +38,7 @@ export default function DashboardPage() {
   const { data: kycQueue = [] } = useDashboardKYCQueue(10);
   const { data: health = [] } = useSystemHealth();
 
+ 
 
   return (
     <Box p={6} className="max-w-400 mx-auto w-full lg:p-8">
@@ -48,7 +48,11 @@ export default function DashboardPage() {
         <Grid cols={1} sm={2} lg={4} gap={6}>
           <StatCard
             label="24h Volume"
-            value={(stats as any).volume_24h ?? (stats as any).total_volume_24h ?? "—"}
+            value={
+              (stats as any).volume_24h ??
+              (stats as any).total_volume_24h ??
+              "—"
+            }
             delta={(stats as any).volume_change}
             deltaLabel="vs yesterday"
             icon={<TrendingUp size={20} />}
@@ -63,7 +67,11 @@ export default function DashboardPage() {
           />
           <StatCard
             label="Pending Transactions"
-            value={(stats as any).pending_transactions ?? (stats as any).pending_txns ?? "—"}
+            value={
+              (stats as any).pending_transactions ??
+              (stats as any).pending_txns ??
+              "—"
+            }
             icon={<ArrowLeftRight size={20} />}
             status="warning"
           />

@@ -94,10 +94,11 @@ export function DataTable<TData>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const tableData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
   const memoColumns = useMemo(() => columns, [columns]);
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns: memoColumns,
     state: {
       sorting,
@@ -114,7 +115,7 @@ export function DataTable<TData>({
 
       const selectedRows = Object.keys(next)
         .filter((key) => next[key])
-        .map((key) => data[Number(key)])
+        .map((key) => tableData[Number(key)])
         .filter(Boolean);
 
       onSelectionChange(selectedRows);

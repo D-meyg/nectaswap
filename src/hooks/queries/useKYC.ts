@@ -1,13 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { kycService } from "@/services/kycService";
 import type { KYCSubmission } from "@/api/types";
+import { unwrapApiList } from "@/utils/apiData";
 
 export function useKYCQueue(params?: Record<string, unknown>) {
   return useQuery<KYCSubmission[]>({
     queryKey: ["kyc", "queue", params],
     queryFn: async () => {
       const res = await kycService.getApplications(params);
-      return res.data;
+      return unwrapApiList<KYCSubmission>(res, ["applications"]);
     },
     staleTime: 60_000,
   });

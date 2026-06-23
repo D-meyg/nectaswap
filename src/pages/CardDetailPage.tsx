@@ -16,8 +16,38 @@ import { TabsWithSidebar, TabsList, Tab, TabPanel } from "@/components/ui/Tabs";
 import { DataTable } from "@/components/tables/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useCardDetail } from "@/hooks/queries/useCards";
+import { DUMMY_CARD_DETAIL, type CardDetail } from "@/lib/dummyData";
 
 type TabValue = "overview" | "transactions" | "limits" | "activity";
+
+function toNumber(value: unknown) {
+  const numberValue = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function formatNumber(value: unknown) {
+  return toNumber(value).toLocaleString();
+}
+
+function normalizeCardDetail(card: unknown): CardDetail {
+  const value =
+    card && typeof card === "object" ? (card as Partial<CardDetail>) : {};
+
+  return {
+    ...DUMMY_CARD_DETAIL,
+    ...value,
+    features: {
+      ...DUMMY_CARD_DETAIL.features,
+      ...(value.features ?? {}),
+    },
+    transactions: Array.isArray(value.transactions)
+      ? value.transactions
+      : DUMMY_CARD_DETAIL.transactions,
+    activity_log: Array.isArray(value.activity_log)
+      ? value.activity_log
+      : DUMMY_CARD_DETAIL.activity_log,
+  };
+}
 
 // ── Status pill ───────────────────────────────────────────
 function CardStatusPill({ status }: { status: string }) {
@@ -44,7 +74,7 @@ function CardStatusPill({ status }: { status: string }) {
 }
 
 // ── Right sidebar — shared across all tabs ────────────────
-function CardSidebar({ card }: { card: any }) {
+function CardSidebar({ card }: { card: CardDetail }) {
   return (
     <Stack gap={4}>
       {/* Quick Actions */}
@@ -122,7 +152,7 @@ function CardSidebar({ card }: { card: any }) {
 }
 
 // ── Overview tab — cd2.PNG ────────────────────────────────
-function OverviewTab({ card }: { card: any }) {
+function OverviewTab({ card }: { card: CardDetail }) {
   const [showCVV, setShowCVV] = useState(false);
 
   return (
@@ -149,7 +179,7 @@ function OverviewTab({ card }: { card: any }) {
               Balance (NGN)
             </Text>
             <Text variant="title" className="text-2xl font-bold leading-7 text-white" as="p">
-              ₦ {card.balance.toLocaleString()}
+              ₦ {formatNumber(card.balance)}
             </Text>
           </Stack>
         </Row>
@@ -268,18 +298,18 @@ function OverviewTab({ card }: { card: any }) {
               Daily Spending
             </Text>
             <Text variant="heading" color="primary" weight="semibold" as="p" className="text-[1.375rem] leading-7">
-              ₦ {card.daily_spend.toLocaleString()}
+              ₦ {formatNumber(card.daily_spend)}
             </Text>
             <Row justify="between" align="center" className="mt-0.5 mb-2">
               <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
-                of ₦ {card.daily_limit.toLocaleString()}
+                of ₦ {formatNumber(card.daily_limit)}
               </Text>
               <Text variant="micro" color="muted">
-                {card.daily_limit ? ((card.daily_spend / card.daily_limit) * 100).toFixed(1) : "0"}%
+                {toNumber(card.daily_limit) ? ((toNumber(card.daily_spend) / toNumber(card.daily_limit)) * 100).toFixed(1) : "0"}%
               </Text>
             </Row>
             <ProgressBar
-              value={card.daily_limit ? (card.daily_spend / card.daily_limit) * 100 : 0}
+              value={toNumber(card.daily_limit) ? (toNumber(card.daily_spend) / toNumber(card.daily_limit)) * 100 : 0}
               max={100}
               className="h-1.5"
             />
@@ -291,18 +321,18 @@ function OverviewTab({ card }: { card: any }) {
               Monthly Spending
             </Text>
             <Text variant="heading" color="primary" weight="semibold" as="p" className="text-[1.375rem] leading-7">
-              ₦ {card.monthly_spend.toLocaleString()}
+              ₦ {formatNumber(card.monthly_spend)}
             </Text>
             <Row justify="between" align="center" className="mt-0.5 mb-2">
               <Text variant="micro" color="muted">
-                of ₦ {card.monthly_limit.toLocaleString()}
+                of ₦ {formatNumber(card.monthly_limit)}
               </Text>
               <Text variant="micro" color="muted">
-                {card.monthly_limit ? ((card.monthly_spend / card.monthly_limit) * 100).toFixed(1) : "0"}%
+                {toNumber(card.monthly_limit) ? ((toNumber(card.monthly_spend) / toNumber(card.monthly_limit)) * 100).toFixed(1) : "0"}%
               </Text>
             </Row>
             <ProgressBar
-              value={card.monthly_limit ? (card.monthly_spend / card.monthly_limit) * 100 : 0}
+              value={toNumber(card.monthly_limit) ? (toNumber(card.monthly_spend) / toNumber(card.monthly_limit)) * 100 : 0}
               max={100}
               className="h-1.5"
             />
@@ -314,8 +344,8 @@ function OverviewTab({ card }: { card: any }) {
 }
 
 // ── Transactions tab — cd3.PNG ────────────────────────────
-function TransactionsTab({ card }: { card: any }) {
-  type Tx = Record<string, any>;
+function TransactionsTab({ card }: { card: CardDetail }) {
+  type Tx = CardDetail["transactions"][number];
   const cols = useMemo<ColumnDef<Tx, unknown>[]>(
     () => [
       {
@@ -359,7 +389,7 @@ function TransactionsTab({ card }: { card: any }) {
             weight="medium"
             color={row.original.status === "Failed" ? "danger" : "primary"}
           >
-            - ₦ {row.original.amount.toLocaleString()}
+            - ₦ {formatNumber(row.original.amount)}
           </Text>
         ),
       },
@@ -401,7 +431,7 @@ function TransactionsTab({ card }: { card: any }) {
 }
 
 // ── Limits & Controls tab — cd4.PNG ──────────────────────
-function LimitsTab({ card }: { card: any }) {
+function LimitsTab({ card }: { card: CardDetail }) {
   return (
     <Card>
       <Card.Header title="Transaction Limits" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
@@ -410,11 +440,11 @@ function LimitsTab({ card }: { card: any }) {
           {[
             {
               label: "Daily Limit",
-              value: `₦ ${card.daily_limit.toLocaleString()}`,
+              value: `₦ ${formatNumber(card.daily_limit)}`,
             },
             {
               label: "Monthly Limit",
-              value: `₦ ${card.monthly_limit.toLocaleString()}`,
+              value: `₦ ${formatNumber(card.monthly_limit)}`,
             },
             { label: "Per Transaction", value: "₦ 100,000" },
           ].map((row) => (
@@ -440,71 +470,77 @@ function LimitsTab({ card }: { card: any }) {
 }
 
 // ── Activity Log tab — cd5.PNG ────────────────────────────
-function ActivityLogTab({ card }: { card: any }) {
+function ActivityLogTab({ card }: { card: CardDetail }) {
   return (
-    <Card noPadding>
+    <Stack gap={2}>
       {card.activity_log.map((entry, i) => {
-        const isLast = i === card.activity_log.length - 1;
-        const isDeclined = entry.title.toLowerCase().includes("declined");
+        const title = String(entry.title || "");
+        const isDeclined = title.toLowerCase().includes("declined");
+
         return (
-          <Box
+          <Card
             key={i}
-            px={4}
-            py={3}
-            className={!isLast ? "border-b border-(--color-border)" : ""}
+            className="rounded-[6px] border-(--color-border) bg-white shadow-none"
           >
-            {/* Title + timestamp */}
-            <Row justify="between" align="start" gap={4}>
-              <Text
-                variant="caption"
-                weight="semibold"
-                color={isDeclined ? "danger" : "primary"}
-                className="text-xs leading-4"
-              >
-                {entry.title}
-              </Text>
-              <Text variant="micro" color="muted" className="shrink-0 text-[0.625rem] leading-4">
-                {entry.timestamp}
-              </Text>
-            </Row>
-            {/* Description */}
-            <Text variant="caption" color="secondary" className="mt-0.5 block text-[0.6875rem] leading-4">
-              {entry.description}
-            </Text>
-            {/* IP • location • admin action */}
-            <Row gap={1} align="center" className="mt-1">
-              <Text variant="micro" color="muted">
-                IP: {entry.ip}
-              </Text>
-              {entry.location && (
-                <>
-                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
-                    •
+            <Box px={4} py={3}>
+              <Row justify="between" align="start" gap={4}>
+                <Stack gap={1} className="min-w-0">
+                  <Text
+                    variant="caption"
+                    weight="semibold"
+                    color={isDeclined ? "danger" : "primary"}
+                    className="text-xs leading-4"
+                  >
+                    {title || "Activity"}
                   </Text>
-                  <MapPin
-                    size={10}
-                    className="text-(--color-text-muted)"
-                  />
-                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
-                    {entry.location}
+                  <Text
+                    variant="caption"
+                    color="secondary"
+                    className="text-[0.6875rem] leading-4"
+                  >
+                    {entry.description}
                   </Text>
-                </>
-              )}
-              {entry.is_admin && (
-                <>
-                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
-                    •
-                  </Text>
-                  <Text variant="micro" color="brand" className="text-[0.625rem] leading-4">
-                    Admin Action
-                  </Text>
-                </>
-              )}
-            </Row>
-          </Box>
+                  <Row gap={2} align="center" className="mt-0.5 flex-wrap">
+                    <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                      IP: {entry.ip}
+                    </Text>
+                    {entry.location && (
+                      <>
+                        <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                          •
+                        </Text>
+                        <MapPin size={10} className="text-(--color-text-muted)" />
+                        <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                          {entry.location}
+                        </Text>
+                      </>
+                    )}
+                    {entry.is_admin && (
+                      <>
+                        <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                          •
+                        </Text>
+                        <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                          Admin Action
+                        </Text>
+                      </>
+                    )}
+                  </Row>
+                </Stack>
+
+                <Text
+                  variant="caption"
+                  color="secondary"
+                  className="shrink-0 text-[0.6875rem] leading-4"
+                >
+                  {entry.timestamp}
+                </Text>
+              </Row>
+            </Box>
+          </Card>
         );
       })}
-    </Card>
+    </Stack>
   );
 }
 
@@ -517,8 +553,8 @@ export default function CardDetailPage() {
 
   const { id = "" } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState<TabValue>("overview");
-  const { data: apiCard, isLoading } = useCardDetail(id);
-  const card = apiCard as any;
+  const { data: apiCard } = useCardDetail(id);
+  const card = normalizeCardDetail(apiCard);
 
   return (
     <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
@@ -576,6 +612,7 @@ export default function CardDetailPage() {
         onChange={(v) => setActiveTab(v as TabValue)}
         sidebar={<CardSidebar card={card} />}
         sidebarWidth="320px"
+        className="w-full"
       >
         <TabsList>
           <Tab value="overview">Overview</Tab>
@@ -584,16 +621,16 @@ export default function CardDetailPage() {
           <Tab value="activity">Activity Log</Tab>
         </TabsList>
 
-        <TabPanel value="overview">
+        <TabPanel value="overview" className="pt-0">
           <OverviewTab card={card} />
         </TabPanel>
-        <TabPanel value="transactions">
+        <TabPanel value="transactions" className="pt-0">
           <TransactionsTab card={card} />
         </TabPanel>
-        <TabPanel value="limits">
+        <TabPanel value="limits" className="pt-0">
           <LimitsTab card={card} />
         </TabPanel>
-        <TabPanel value="activity">
+        <TabPanel value="activity" className="pt-0">
           <ActivityLogTab card={card} />
         </TabPanel>
       </TabsWithSidebar>

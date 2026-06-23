@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Box } from "@/components/ui/Box";
-import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { FilterButton } from "@/components/ui/FilterButton";
@@ -35,6 +34,44 @@ interface UserRow {
   kyc_tier: string;
 }
 
+function toNumber(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function stringValue(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function normalizeUser(value: unknown): UserRow {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const nestedUser =
+    item.user && typeof item.user === "object"
+      ? (item.user as Record<string, unknown>)
+      : {};
+  const id = stringValue(
+    item.id ?? item.user_id ?? nestedUser.id ?? nestedUser.user_id,
+    "unknown",
+  );
+  const name = stringValue(
+    item.name ?? item.full_name ?? nestedUser.name ?? nestedUser.full_name,
+    "Unknown User",
+  );
+
+  return {
+    id,
+    name,
+    email: stringValue(item.email ?? nestedUser.email, "N/A"),
+    kyc_status: stringValue(item.kyc_status ?? item.kycStatus, "pending"),
+    balance: toNumber(item.balance ?? item.wallet_balance),
+    total_volume: toNumber(item.total_volume ?? item.totalVolume ?? item.transactions_count),
+    risk_score: toNumber(item.risk_score ?? item.riskScore),
+    status: stringValue(item.status, "active"),
+    kyc_tier: stringValue(item.kyc_tier ?? item.kyc_level ?? item.tier, "N/A"),
+  };
+}
+
 export default function UsersPage() {
   usePageTitle(
     "Users & Accounts",
@@ -56,7 +93,11 @@ export default function UsersPage() {
     kyc_status: kycFilter || undefined,
   });
 
-  const users = apiUsers as UserRow[];
+  const users = useMemo(
+    () => (Array.isArray(apiUsers) ? apiUsers.map(normalizeUser) : []),
+    [apiUsers],
+  );
+
 
   const filtered = useMemo(
     () =>
@@ -65,7 +106,7 @@ export default function UsersPage() {
           !debouncedSearch ||
           u.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
           u.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-          u.id.includes(debouncedSearch);
+          u.id.toLowerCase().includes(debouncedSearch.toLowerCase());
         const matchStatus =
           !statusFilter ||
           u.status.toLowerCase() === statusFilter.toLowerCase();
@@ -93,7 +134,6 @@ export default function UsersPage() {
             className="flex items-center gap-3.5 text-left hover:opacity-80 transition-opacity outline-none"
             onClick={() => handleView(row.original.id)}
           >
-            <Avatar name={row.original.name} size="md" />
             <Stack gap={0}>
               <Text variant="caption" color="primary" weight="semibold">
                 {row.original.name}

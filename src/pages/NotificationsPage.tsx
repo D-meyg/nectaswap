@@ -12,6 +12,16 @@ import { useCreateNotification, useNotifications } from "@/hooks/queries/useNoti
 
 type Segment = "all" | "kyc-completed" | "kyc-pending";
 type Priority = "info" | "warning" | "urgent";
+type NotificationItem = {
+  title: string;
+  body: string;
+  segment: string;
+  recipients: number;
+  count: number;
+  sent_by: string;
+  sent_at: string;
+  priority: Priority;
+};
 
 // Priority tag pill — info/warning/urgent
 function PriorityTag({ p }: { p: Priority }) {
@@ -40,6 +50,9 @@ const RECENT_NOTIFS = [
     body: "Our platform will undergo maintenance on Feb 5th from 2AM-4AM WAT.",
     segment: "All Users",
     count: 12453,
+    recipients: 12453,
+    sent_by: "System",
+    sent_at: "2024-02-01 10:30",
     priority: "info" as Priority,
   },
   {
@@ -47,6 +60,9 @@ const RECENT_NOTIFS = [
     body: "You're almost there! Complete your KYC to unlock full platform features.",
     segment: "KYC Pending",
     count: 4219,
+    recipients: 4219,
+    sent_by: "System",
+    sent_at: "2024-01-31 14:00",
     priority: "warning" as Priority,
   },
   {
@@ -54,9 +70,12 @@ const RECENT_NOTIFS = [
     body: "You can now instantly fund your Naira card from your crypto wallet!",
     segment: "KYC Completed",
     count: 8234,
+    recipients: 8234,
+    sent_by: "System",
+    sent_at: "2024-01-30 09:15",
     priority: "info" as Priority,
   },
-];
+] satisfies NotificationItem[];
 
 const NOTIF_HISTORY = [
   {
@@ -109,6 +128,41 @@ const SEGMENT_DATA = {
   },
 };
 
+function formatCount(value: unknown) {
+  const count = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(count) ? count.toLocaleString() : "0";
+}
+
+function stringValue(value: unknown, fallback: string) {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function normalizeNotification(value: unknown): NotificationItem {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const recipients = Number(
+    item.recipients ?? item.recipient_count ?? item.count ?? 0,
+  );
+  const count = Number.isFinite(recipients) ? recipients : 0;
+
+  return {
+    title: stringValue(item.title ?? item.heading, "Untitled notification"),
+    body: stringValue(
+      item.message ?? item.body ?? item.content,
+      "No message provided",
+    ),
+    segment: stringValue(
+      item.segment ?? item.audience ?? item.target,
+      "All Users",
+    ),
+    recipients: count,
+    count,
+    sent_by: stringValue(item.sent_by ?? item.created_by ?? item.admin_name, "Admin"),
+    sent_at: stringValue(item.sent_at ?? item.created_at ?? item.date, "—"),
+    priority: (item.priority ?? "info") as Priority,
+  };
+}
+
 export default function NotificationsPage() {
   usePageTitle(
     "Notifications",
@@ -123,20 +177,11 @@ export default function NotificationsPage() {
   const { data: apiNotifications = [] } = useNotifications();
   const createNotification = useCreateNotification();
 
-  const notifications = useMemo(
+  const notifications = useMemo<NotificationItem[]>(
     () =>
       apiNotifications.length
-        ? apiNotifications.map((item: any) => ({
-            title: item.title ?? item.heading ?? "Untitled notification",
-            body: item.message ?? item.body ?? item.content ?? "No message provided",
-            segment: item.segment ?? item.audience ?? item.target ?? "All Users",
-            recipients: Number(item.recipients ?? item.recipient_count ?? item.count ?? 0),
-            count: Number(item.recipients ?? item.recipient_count ?? item.count ?? 0),
-            sent_by: item.sent_by ?? item.created_by ?? item.admin_name ?? "Admin",
-            sent_at: item.sent_at ?? item.created_at ?? item.date ?? "—",
-            priority: (item.priority ?? "info") as Priority,
-          }))
-        : NOTIF_HISTORY,
+        ? apiNotifications.map(normalizeNotification)
+        : NOTIF_HISTORY.map(normalizeNotification),
     [apiNotifications],
   );
 
@@ -216,7 +261,7 @@ export default function NotificationsPage() {
                         as="p"
                         className="text-xl leading-tight"
                       >
-                        {data.count.toLocaleString()}
+                        {formatCount(data.count)}
                       </Text>
                       <Text variant="micro" color="muted">
                         {data.desc}
@@ -333,7 +378,7 @@ export default function NotificationsPage() {
                 {/* Send to N Users button */}
                 <Button className="w-full justify-center" onClick={handleSend} disabled={createNotification.isPending}>
                   <Send size={13} />
-                  {createNotification.isPending ? "Sending..." : `Send to ${selectedData.count.toLocaleString()} Users`}
+                  {createNotification.isPending ? "Sending..." : `Send to ${formatCount(selectedData.count)} Users`}
                 </Button>
               </Stack>
             </Card.Body>
@@ -405,7 +450,7 @@ export default function NotificationsPage() {
                       </td>
                       <td className="px-5 py-3.5">
                         <Text variant="caption" color="primary" weight="medium">
-                          {n.recipients.toLocaleString()}
+                          {formatCount(n.recipients)}
                         </Text>
                       </td>
                       <td className="px-5 py-3.5">
@@ -475,7 +520,7 @@ export default function NotificationsPage() {
                     as="p"
                     className="text-xl"
                   >
-                    {selectedData.count.toLocaleString()}
+                    {formatCount(selectedData.count)}
                   </Text>
                   <Text variant="micro" color="muted">
                     Recipients
@@ -535,7 +580,7 @@ export default function NotificationsPage() {
                         {n.segment}
                       </Text>
                       <Text variant="micro" color="muted">
-                        {n.count.toLocaleString()} sent
+                        {formatCount(n.count)} sent
                       </Text>
                     </Row>
                   </Box>

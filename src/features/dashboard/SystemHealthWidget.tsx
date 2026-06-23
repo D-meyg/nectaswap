@@ -12,6 +12,8 @@ const statusDot: Record<string, string> = {
 };
 
 export function SystemHealthWidget({ items }: { items: any[] }) {
+  const safeItems = Array.isArray(items) ? items : [];
+
   return (
     <Card noPadding>
       <Box
@@ -25,7 +27,7 @@ export function SystemHealthWidget({ items }: { items: any[] }) {
       </Box>
 
       <Stack gap={3} className="p-5">
-        {items.map((item, index) => {
+        {safeItems.map((item, index) => {
           const status = String(item.status || "operational").toLowerCase();
           const dotColor = statusDot[status] ?? "var(--color-text-muted)";
 
@@ -63,7 +65,7 @@ export function SystemHealthWidget({ items }: { items: any[] }) {
           );
         })}
 
-        {!items.length && (
+        {!safeItems.length && (
           <Box className="rounded-md border border-border bg-bg-card px-4 py-8 text-center">
             <Text variant="caption" color="secondary">
               No system health data available.

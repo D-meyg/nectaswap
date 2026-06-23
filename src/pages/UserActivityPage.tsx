@@ -42,101 +42,6 @@ interface ActivityLog {
   status: LogStatus;
 }
 
-// ── Dummy data matching image 1 ───────────────────────────
-const BEHAVIOR_PATTERNS: BehaviorPattern[] = [
-  {
-    id: "b1",
-    severity: "high",
-    title: "Multiple Failed Login Attempts",
-    instances: 5,
-    description: "3+ failed logins within 10 minutes",
-    affected: ["User #5621", "User #2389"],
-  },
-  {
-    id: "b2",
-    severity: "medium",
-    title: "Unusual Transaction Volume",
-    instances: 3,
-    description: "Transaction volume 3x above average",
-    affected: ["User #4521", "User #7234"],
-  },
-  {
-    id: "b3",
-    severity: "low",
-    title: "New Device Login",
-    instances: 12,
-    description: "Login from previously unseen device",
-    affected: ["User #8923", "User #3892"],
-  },
-  {
-    id: "b4",
-    severity: "high",
-    title: "Location Anomaly",
-    instances: 2,
-    description: "Login from different countries within 1 hour",
-    affected: ["User #6712"],
-  },
-  {
-    id: "b5",
-    severity: "medium",
-    title: "High-Value Transactions",
-    instances: 8,
-    description: "Transactions >₦500,000",
-    affected: ["User #4521", "User #3892"],
-  },
-];
-
-const ACTIVITY_LOGS: ActivityLog[] = [
-  {
-    id: "l1",
-    timestamp: "2024-01-29 14:25:12",
-    user_name: "Adewale Johnson",
-    user_id: "4521",
-    action: "Login",
-    action_icon: "→",
-    device: "iPhone 13 Pro",
-    location: "Lagos, Nigeria",
-    ip: "197.210.70.34",
-    status: "success",
-  },
-  {
-    id: "l2",
-    timestamp: "2024-01-29 14:20:45",
-    user_name: "Chiamaka Nnamdi",
-    user_id: "3892",
-    action: "Transaction",
-    action_icon: "⇄",
-    device: "Samsung Galaxy S21",
-    location: "Abuja, Nigeria",
-    ip: "197.210.84.21",
-    status: "success",
-  },
-  {
-    id: "l3",
-    timestamp: "2024-01-29 14:15:33",
-    user_name: "Yusuf Ibrahim",
-    user_id: "5621",
-    action: "Failed Login",
-    action_icon: "→",
-    device: "Windows PC",
-    location: "Kano, Nigeria",
-    ip: "197.210.55.18",
-    status: "failed",
-  },
-  {
-    id: "l4",
-    timestamp: "2024-01-29 14:10:22",
-    user_name: "Funke Olawale",
-    user_id: "7234",
-    action: "Card Used",
-    action_icon: "▣",
-    device: "Virtual Card",
-    location: "Lagos, Nigeria",
-    ip: "197.210.91.47",
-    status: "success",
-  },
-];
-
 // ── Severity badge ────────────────────────────────────────
 const severityStyle: Record<SeverityLevel, string> = {
   high: "bg-(--color-danger-subtle) text-(--color-danger) border border-(--color-danger-muted)",
@@ -161,23 +66,53 @@ export default function UserActivityPage() {
   const [search, setSearch] = useState("");
   const { data: apiLogs = [], isLoading } = useDashboardRecentActivity(100);
 
+
+  console.log("Activity", apiLogs)
+
   const logs = useMemo<ActivityLog[]>(
     () =>
-      apiLogs.length
-        ? apiLogs.map((item: any, index: number) => ({
-            id: String(item.id ?? item.log_id ?? index),
-            timestamp: item.timestamp ?? item.created_at ?? item.date ?? "—",
-            user_name: item.user_name ?? item.name ?? item.user?.name ?? item.user?.email ?? "Unknown user",
-            user_id: String(item.user_id ?? item.user?.id ?? "—"),
-            action: item.action ?? item.event ?? item.type ?? "Activity",
-            action_icon: item.action_icon ?? "→",
-            device: item.device ?? item.device_name ?? "Unknown device",
-            location: item.location ?? item.country ?? "Unknown location",
-            ip: item.ip ?? item.ip_address ?? "—",
-            status: (item.status ?? "success") as LogStatus,
-          }))
-        : ACTIVITY_LOGS,
+      Array.isArray(apiLogs)
+        ? apiLogs.map((value: unknown, index: number) => {
+            const item =
+              value && typeof value === "object"
+                ? (value as Record<string, unknown>)
+                : {};
+            const user =
+              item.user && typeof item.user === "object"
+                ? (item.user as Record<string, unknown>)
+                : {};
+
+            return {
+              id: String(item.id ?? item.log_id ?? index),
+              timestamp: String(item.timestamp ?? item.created_at ?? item.date ?? "—"),
+              user_name: String(item.user_name ?? item.name ?? user.name ?? user.email ?? "Unknown user"),
+              user_id: String(item.user_id ?? user.id ?? "—"),
+              action: String(item.action ?? item.event ?? item.type ?? "Activity"),
+              action_icon: String(item.action_icon ?? "→"),
+              device: String(item.device ?? item.device_name ?? "Unknown device"),
+              location: String(item.location ?? item.country ?? "Unknown location"),
+              ip: String(item.ip ?? item.ip_address ?? "—"),
+              status: String(item.status ?? "success") as LogStatus,
+            };
+          })
+        : [],
     [apiLogs],
+  );
+
+  const behaviorPatterns = useMemo<BehaviorPattern[]>(
+    () =>
+      logs
+        .filter((log) => log.status === "failed")
+        .slice(0, 5)
+        .map((log) => ({
+          id: log.id,
+          severity: "high",
+          title: log.action,
+          instances: 1,
+          description: `${log.action} from ${log.device}`,
+          affected: [`User #${log.user_id}`],
+        })),
+    [logs],
   );
 
   const filteredLogs = useMemo(
@@ -301,7 +236,7 @@ export default function UserActivityPage() {
         />
         <StatCard
           label="Flagged Patterns"
-          value="5"
+          value={behaviorPatterns.length}
           icon={<Sparkles size={16} className="text-(--color-warning)" />}
           status="warning"
         />
@@ -315,7 +250,7 @@ export default function UserActivityPage() {
         />
         <Card.Body padded>
           <Stack gap={4}>
-            {BEHAVIOR_PATTERNS.map((pattern) => (
+            {behaviorPatterns.map((pattern) => (
               <Row
                 key={pattern.id}
                 justify="between"
@@ -365,6 +300,11 @@ export default function UserActivityPage() {
                 </Button>
               </Row>
             ))}
+            {!behaviorPatterns.length && (
+              <Text variant="caption" color="muted">
+                No behavioral patterns detected.
+              </Text>
+            )}
           </Stack>
         </Card.Body>
       </Card>

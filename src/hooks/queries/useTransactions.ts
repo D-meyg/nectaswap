@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { transactionService } from "@/services/transactionService";
+import { unwrapApiList, unwrapApiObject } from "@/utils/apiData";
 
 interface UseTransactionsParams {
   page?: number;
@@ -16,7 +17,7 @@ export function useTransactions(params?: UseTransactionsParams) {
       const res = await transactionService.getTransactions(
         params as Record<string, unknown>,
       );
-      return res.data;
+      return unwrapApiList(res, ["transactions"]);
     },
     staleTime: 30_000,
   });
@@ -27,7 +28,7 @@ export function useTransactionDetail(id: string) {
     queryKey: ["transactions", id, "detail"],
     queryFn: async () => {
       const res = await transactionService.getTransactionDetail(id);
-      return res.data;
+      return unwrapApiObject(res, {});
     },
     enabled: !!id,
   });
@@ -38,7 +39,7 @@ export function usePendingTransactionApprovals() {
     queryKey: ["transactions", "pending-approvals"],
     queryFn: async () => {
       const res = await transactionService.getPendingApprovals();
-      return res.data;
+      return unwrapApiList(res, ["transactions", "approvals"]);
     },
     staleTime: 30_000,
   });
@@ -49,7 +50,7 @@ export function useFailedTransactions() {
     queryKey: ["transactions", "failed"],
     queryFn: async () => {
       const res = await transactionService.getFailedList();
-      return res.data;
+      return unwrapApiList(res, ["transactions", "failed_transactions"]);
     },
     staleTime: 30_000,
   });

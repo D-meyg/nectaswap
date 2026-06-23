@@ -48,7 +48,7 @@ function ModalRoot({ open, onClose, size = 'md', className, children, closeable 
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-[0.125rem]"
+        className="absolute inset-0 bg-(--color-modal-overlay)"
         onClick={closeable ? onClose : undefined}
       />
       {/* Dialog */}
@@ -56,7 +56,7 @@ function ModalRoot({ open, onClose, size = 'md', className, children, closeable 
         role="dialog"
         aria-modal="true"
         className={cn(
-          'card relative w-full flex flex-col max-h-[90vh]',
+          'relative w-full flex flex-col max-h-[90vh] overflow-hidden rounded-[6px] border border-(--color-border) bg-(--color-modal-surface) shadow-[0_20px_45px_rgba(15,23,42,0.16)]',
           sizeMap[size],
           className
         )}

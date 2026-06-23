@@ -15,6 +15,8 @@ export const TopBar = memo(function TopBar() {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const { title, subtitle } = useCurrentPageTitle();
+  const displayName = user?.name?.trim() || "Admin";
+  const firstName = displayName.split(" ")[0] || "Admin";
 
   return (
     <Row
@@ -80,9 +82,9 @@ export const TopBar = memo(function TopBar() {
                 size="sm"
                 className="flex h-8 items-center gap-2 pl-1.5 pr-2 py-1"
               >
-                <Avatar name={user.name} size="sm" />
+                <Avatar name={displayName} size="sm" />
                 <Text variant="caption" color="primary" weight="medium" className="text-[0.6875rem]">
-                  {user.name.split(" ")[0]}
+                  {firstName}
                 </Text>
                 <ChevronDown
                   size={12}
@@ -104,7 +106,7 @@ export const TopBar = memo(function TopBar() {
                     truncate
                     as="p"
                   >
-                    {user.name}
+                    {displayName}
                   </Text>
                   <Text variant="micro" color="muted" truncate as="p">
                     {user.email}

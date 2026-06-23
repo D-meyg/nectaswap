@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
-import { unwrapApiData } from "@/utils/apiData";
+import { unwrapApiData, unwrapApiList } from "@/utils/apiData";
 
 interface UseUsersParams {
   page?: number;
@@ -15,7 +15,7 @@ export function useUsers(params?: UseUsersParams) {
     queryKey: ["users", params],
     queryFn: async () => {
       const res = await userService.getUsers(params as Record<string, unknown>);
-      return res.data;
+      return unwrapApiList(res, ["users"]);
     },
     staleTime: 30_000,
   });

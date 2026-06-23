@@ -5,22 +5,26 @@ import {
   CreditCard as CardIcon,
   MapPin,
   ExternalLink,
+  Mail,
+  Phone,
 } from "lucide-react";
+import type { ElementType, ReactNode } from "react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Text } from "@/components/ui/Text";
 import { useModal } from "@/hooks/ui/useModal";
+import type { KYCSubmission } from "@/api/types";
 
 export const KYC_REVIEW_MODAL_ID = "kyc-review";
 
-function InfoRow({ label, value }: { label: string; value?: string }) {
+function InfoRow({ label, value }: { label: string; value?: ReactNode }) {
   return (
     <div>
-      <Text variant="micro" color="muted" uppercase className="mb-1 block">
+      <Text variant="micro" color="muted" className="mb-0.5 block text-[0.6875rem] leading-4">
         {label}
       </Text>
-      <Text variant="caption" color="primary" weight="medium">
+      <Text variant="caption" color="primary" weight="semibold" className="text-[0.8125rem] leading-4">
         {value ?? "—"}
       </Text>
     </div>
@@ -32,91 +36,110 @@ function Section({
   title,
   children,
 }: {
-  icon: React.ElementType;
+  icon: ElementType;
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-(--color-border) p-5 mb-5 bg-white shadow-sm">
-      <div className="flex items-center gap-2 mb-4 pb-3 border-b border-(--color-border)">
-        <Icon size={18} className="text-(--color-text-muted)" />
+    <section className="mb-5 rounded-(--radius-md) border border-(--color-border) bg-(--color-bg-subtle) p-4">
+      <div className="mb-4 flex items-center gap-2">
+        <Icon size={14} className="text-(--color-text-secondary)" />
         <Text
           variant="label"
-          color="secondary"
+          color="primary"
           weight="semibold"
-          className="font-geom"
+          className="font-geom text-[0.8125rem]"
         >
           {title}
         </Text>
       </div>
       {children}
+    </section>
+  );
+}
+
+function DocButton({ label, submitted = true }: { label: string; submitted?: boolean }) {
+  return (
+    <div
+      className={
+        submitted
+          ? "flex min-h-[4.75rem] flex-1 flex-col gap-2 rounded-(--radius-sm) border border-(--color-success-muted) bg-(--color-success-bg) p-3"
+          : "flex min-h-[4.75rem] flex-1 flex-col gap-2 rounded-(--radius-sm) border border-(--color-border) bg-white p-3"
+      }
+    >
+      <div className="flex items-center gap-2">
+        <FileText size={13} className={submitted ? "text-(--color-success-mid)" : "text-(--color-text-muted)"} />
+        <Text variant="caption" color="primary" weight="medium" className="text-[0.75rem]">
+          {label}
+        </Text>
+      </div>
+      {submitted ? (
+        <Button size="sm" className="h-7 w-fit px-3 text-[0.6875rem]">
+          <ExternalLink size={12} />
+          View
+        </Button>
+      ) : (
+        <Text variant="micro" color="muted">Not submitted</Text>
+      )}
     </div>
   );
 }
 
-function DocButton({ label }: { label: string }) {
+function iconValue(icon: React.ReactNode, value: string) {
   return (
-    <div className="flex-1 rounded-lg border border-(--color-border) bg-(--color-bg-subtle) p-4 flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <FileText size={16} className="text-(--color-brand)" />
-        <Text variant="caption" color="secondary" weight="medium">
-          {label}
-        </Text>
-      </div>
-      <Button
-        variant="secondary"
-        size="sm"
-        className="w-full justify-center text-(--color-brand) bg-white border border-(--color-border) hover:bg-(--color-bg-subtle)"
-      >
-        <ExternalLink size={14} className="mr-1.5" />
-        View Document
-      </Button>
-    </div>
+    <span className="inline-flex items-center gap-1">
+      {icon}
+      {value}
+    </span>
   );
 }
 
 export function KYCReviewModal() {
-  const { isOpen, close } = useModal(KYC_REVIEW_MODAL_ID);
+  const { isOpen, close, props } = useModal(KYC_REVIEW_MODAL_ID);
   const [rejectReason, setRejectReason] = useState("");
   const [showReject, setShowReject] = useState(false);
+  const application = props?.application as KYCSubmission | undefined;
 
-  const mockKycData = {
-    full_name: "Jonathan Doe",
-    user_id: "US-99482",
-    email: "jonathan.doe@example.com",
-    phone: "+234 800 123 4567",
-    date_of_birth: "14 Aug 1990",
-    occupation: "Software Engineer",
-    tier_requested: "Tier 3 (Unlimited)",
-    submitted_date: "Oct 24, 2023",
-    priority: "high",
-    id_type: "National Identity Card",
-    id_number: "NIN-847294829",
-    residential_address: "14 Admiralty Way, Lekki Phase 1, Lagos",
-    proof_type: "Utility Bill",
+  const kycData = {
+    full_name: application?.user_name ?? "Unknown User",
+    user_id: application?.user_id ?? String(props?.kycId ?? "N/A"),
+    email: application?.user_email ?? "N/A",
+    phone: "N/A",
+    date_of_birth: "N/A",
+    occupation: "N/A",
+    tier_requested: application?.tier ?? "N/A",
+    submitted_date: application?.submitted_at ?? "N/A",
+    priority: application?.priority ?? "normal",
+    id_type: "National ID",
+    id_number: "N/A",
+    residential_address: "N/A",
+    proof_type: "N/A",
+    documents: application?.documents ?? 0,
+    total_docs: application?.total_docs ?? 0,
   };
 
   return (
-    <Modal open={isOpen} onClose={close} size="xl">
+    <Modal open={isOpen} onClose={close} size="xl" className="max-w-[46rem] rounded-[6px]">
       <Modal.Header
         title="KYC Application Review"
         subtitle="Review and verify user identity documents"
         onClose={close}
+        className="px-6 py-5 [&_h4]:text-[1.375rem] [&_h4]:leading-7 [&_span]:text-[0.8125rem]"
       />
 
-      <Modal.Body>
-        <div className="py-2">
+      <Modal.Body className="px-6 py-5">
+        <div>
           <Section icon={User} title="User Information">
-            <div className="grid grid-cols-2 gap-x-8 gap-y-5">
-              <InfoRow label="Full Name" value={mockKycData.full_name} />
-              <InfoRow label="User ID" value={mockKycData.user_id} />
-              <InfoRow label="Email" value={mockKycData.email} />
-              <InfoRow label="Phone" value={mockKycData.phone} />
+            <div className="grid grid-cols-2 gap-x-12 gap-y-4">
+              <InfoRow label="Full Name" value={kycData.full_name} />
+              <InfoRow label="User ID" value={`#${kycData.user_id}`} />
+              <InfoRow label="Email" value={iconValue(<Mail size={12} />, kycData.email)} />
+              <InfoRow label="Phone" value={iconValue(<Phone size={12} />, kycData.phone)} />
               <InfoRow
                 label="Date of Birth"
-                value={mockKycData.date_of_birth}
+                value={kycData.date_of_birth}
               />
-              <InfoRow label="Occupation" value={mockKycData.occupation} />
+              <InfoRow label="Occupation" value={kycData.occupation} />
             </div>
           </Section>
 
@@ -124,11 +147,11 @@ export function KYCReviewModal() {
             <div className="grid grid-cols-3 gap-x-6 gap-y-4">
               <InfoRow
                 label="Tier Requested"
-                value={mockKycData.tier_requested}
+                value={kycData.tier_requested}
               />
               <InfoRow
                 label="Submitted Date"
-                value={mockKycData.submitted_date}
+                value={kycData.submitted_date}
               />
               <div>
                 <Text
@@ -141,9 +164,9 @@ export function KYCReviewModal() {
                 </Text>
                 <Badge
                   variant={
-                    mockKycData.priority === "high" ? "danger" : "neutral"
+                    kycData.priority === "high" ? "danger" : "neutral"
                   }
-                  label={mockKycData.priority}
+                  label={kycData.priority}
                   dot={false}
                 />
               </div>
@@ -152,13 +175,13 @@ export function KYCReviewModal() {
 
           <Section icon={CardIcon} title="Identity Documents">
             <div className="grid grid-cols-2 gap-x-8 gap-y-5 mb-6">
-              <InfoRow label="ID Type" value={mockKycData.id_type} />
-              <InfoRow label="ID Number" value={mockKycData.id_number} />
+              <InfoRow label="ID Type" value={kycData.id_type} />
+              <InfoRow label="ID Number" value={kycData.id_number} />
             </div>
-            <div className="flex gap-4">
-              <DocButton label="ID Document" />
-              <DocButton label="Selfie" />
-              <DocButton label="Address Proof" />
+            <div className="grid grid-cols-3 gap-3">
+              <DocButton label="ID Document" submitted={kycData.documents >= 1} />
+              <DocButton label="Selfie" submitted={kycData.documents >= 2} />
+              <DocButton label="Address Proof" submitted={kycData.documents >= 3} />
             </div>
           </Section>
 
@@ -166,9 +189,9 @@ export function KYCReviewModal() {
             <div className="grid grid-cols-2 gap-x-8 gap-y-5">
               <InfoRow
                 label="Residential Address"
-                value={mockKycData.residential_address}
+                value={kycData.residential_address}
               />
-              <InfoRow label="Proof Type" value={mockKycData.proof_type} />
+              <InfoRow label="Proof Type" value={kycData.proof_type} />
             </div>
           </Section>
 
@@ -194,7 +217,7 @@ export function KYCReviewModal() {
         </div>
       </Modal.Body>
 
-      <Modal.Footer>
+      <Modal.Footer className="px-6 py-4">
         <Button variant="secondary" size="sm" onClick={close}>
           Cancel
         </Button>

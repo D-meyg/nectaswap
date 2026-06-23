@@ -15,8 +15,26 @@ import { useClipboard } from "@/hooks/ui/useClipboard";
 import { useDashboardLiquidity } from "@/hooks/queries/useDashboard";
 import type { ColumnDef } from "@tanstack/react-table";
 
-type WalletRow = Record<string, any>;
-type RebalanceEntry = Record<string, any>;
+type WalletRow = {
+  id: string;
+  type: string;
+  network: string;
+  asset: string;
+  address: string;
+  balance: string;
+  unit: string;
+  usd_value: string;
+  threshold: number;
+  status: string;
+};
+type RebalanceEntry = {
+  date: string;
+  from: string;
+  to: string;
+  amount: string;
+  reason: string;
+  initiated_by: string;
+};
 
 function ThresholdBar({
   value,
@@ -73,22 +91,31 @@ function WalletAddress({ address }: { address: string }) {
 export default function WalletsPage() {
   usePageTitle("Wallets & Liquidity", "Asset custody and operational safety");
 
-  const { data: apiLiquidity = [], isLoading } = useDashboardLiquidity();
+  const { data: apiLiquidity = [] } = useDashboardLiquidity();
 
   const wallets = useMemo<WalletRow[]>(
     () =>
-      apiLiquidity.map((item: any, index: number) => ({
-        id: String(item.id ?? item.wallet_id ?? index),
-        type: item.type ?? item.wallet_type ?? "Hot Wallet",
-        network: item.network ?? item.chain ?? "—",
-        asset: item.asset ?? item.symbol ?? item.currency ?? "—",
-        address: item.address ?? item.wallet_address ?? "—",
-        balance: String(item.balance ?? item.amount ?? "0"),
-        unit: item.unit ?? item.asset ?? item.symbol ?? "",
-        usd_value: item.usd_value ?? item.value_usd ?? item.value ?? "—",
-        threshold: Number(item.threshold ?? item.threshold_percent ?? 0),
-        status: item.status ?? "healthy",
-      })),
+      Array.isArray(apiLiquidity)
+        ? apiLiquidity.map((value: unknown, index: number) => {
+            const item =
+              value && typeof value === "object"
+                ? (value as Record<string, unknown>)
+                : {};
+
+            return {
+              id: String(item.id ?? item.wallet_id ?? index),
+              type: String(item.type ?? item.wallet_type ?? "Hot Wallet"),
+              network: String(item.network ?? item.chain ?? "—"),
+              asset: String(item.asset ?? item.symbol ?? item.currency ?? "—"),
+              address: String(item.address ?? item.wallet_address ?? "—"),
+              balance: String(item.balance ?? item.amount ?? "0"),
+              unit: String(item.unit ?? item.asset ?? item.symbol ?? ""),
+              usd_value: String(item.usd_value ?? item.value_usd ?? item.value ?? "—"),
+              threshold: Number(item.threshold ?? item.threshold_percent ?? 0),
+              status: String(item.status ?? "healthy"),
+            };
+          })
+        : [],
     [apiLiquidity],
   );
 
@@ -255,8 +282,8 @@ export default function WalletsPage() {
     <Box p={6} className="space-y-5">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Total Assets (USD)" value={wallets.length ? wallets[0]?.usd_value ?? "$0" : "$0"} />
-        <StatCard label="Hot Wallets" value={wallets.filter((wallet) => wallet.type === "Hot Wallet").length || 3} />
-        <StatCard label="Cold Storage" value={wallets.find((wallet) => wallet.type === "Cold Wallet")?.usd_value ?? "$37.6M"} />
+        <StatCard label="Hot Wallets" value={wallets.filter((wallet) => wallet.type === "Hot Wallet").length} />
+        <StatCard label="Cold Storage" value={wallets.find((wallet) => wallet.type === "Cold Wallet")?.usd_value ?? "$0"} />
         <StatCard label="Low Balance Alerts" value={wallets.filter((wallet) => wallet.status === "low").length} status="danger" />
       </div>
 

@@ -36,6 +36,8 @@ import {
   useFreezeAccount,
   useUnfreezeAccount,
 } from "@/hooks/mutations/useUserMutations";
+import { DUMMY_USER_DETAIL } from "@/lib/dummyData";
+import type { UserDetail } from "@/api/types";
 
 type TabValue =
   | "overview"
@@ -63,8 +65,8 @@ export default function UserDetailPage() {
   const { data: apiUser, isLoading } = useUserDetail(id);
   const { data: apiCards = [] } = useUserCards(id);
 
-  const user = apiUser ?? null;
-  const cards = apiCards;
+  const user = (apiUser ?? DUMMY_USER_DETAIL) as UserDetail;
+  const cards = Array.isArray(apiCards) ? apiCards : [];
 
   const freezeMutation = useFreezeAccount();
   const unfreezeMutation = useUnfreezeAccount();
@@ -193,7 +195,7 @@ export default function UserDetailPage() {
             </TabPanel>
 
             <TabPanel value="audit" className="pt-0">
-              <AuditLogTab />
+              <AuditLogTab userId={id} />
             </TabPanel>
           </Box>
 

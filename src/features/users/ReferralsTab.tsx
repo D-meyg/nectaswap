@@ -4,7 +4,6 @@ import { Text }        from '@/components/ui/Text'
 import { Row }         from '@/components/ui/Row'
 import { Stack }       from '@/components/ui/Stack'
 import { Box }         from '@/components/ui/Box'
-import { Avatar }      from '@/components/ui/Avatar'
 import { CodeBadge }   from '@/components/ui/CodeBadge'
 import { DataTable }   from '@/components/tables/DataTable'
 import { EmptyState }  from '@/components/ui/EmptyState'
@@ -39,11 +38,28 @@ function ReferralStat({ label, value, sub }: { label: string; value: string | nu
   )
 }
 
+function refText(ref: Record<string, unknown> | null, key: string, fallback = '—') {
+  const value = ref?.[key]
+  return typeof value === 'string' || typeof value === 'number' ? String(value) : fallback
+}
+
+function refNumber(ref: Record<string, unknown> | null, key: string) {
+  const value = Number(ref?.[key] ?? 0)
+  return Number.isFinite(value) ? value : 0
+}
+
 export function ReferralsTab({ userId }: ReferralsTabProps) {
   const { data, isLoading } = useUserReferrals(userId)
 
-  const ref = (data as any)?.referral ?? null
-  const referredUsers: ReferredUser[] = (data as any)?.referred_users ?? []
+  const referralData =
+    data && typeof data === 'object' ? (data as Record<string, unknown>) : {}
+  const ref =
+    referralData.referral && typeof referralData.referral === 'object'
+      ? (referralData.referral as Record<string, unknown>)
+      : null
+  const referredUsers: ReferredUser[] = Array.isArray(referralData.referred_users)
+    ? (referralData.referred_users as ReferredUser[])
+    : []
 
   const columns = useMemo<ColumnDef<ReferredUser, unknown>[]>(() => [
     {
@@ -51,7 +67,6 @@ export function ReferralsTab({ userId }: ReferralsTabProps) {
       header: 'User',
       cell: ({ row }) => (
         <Row gap={2} align="center">
-          <Avatar name={row.original.name} size="xs" />
           <Stack gap={0}>
             <Text variant="caption" color="primary" weight="medium" className="text-xs leading-4">
               {row.original.name}
@@ -122,16 +137,16 @@ export function ReferralsTab({ userId }: ReferralsTabProps) {
             <Text variant="micro" color="muted" className="mb-2 block text-[0.625rem] leading-3">
               Referral Code
             </Text>
-            <CodeBadge code={ref?.code ?? '—'} />
+            <CodeBadge code={refText(ref, 'code')} />
           </Box>
         </Card>
         <ReferralStat
           label="Total Referrals"
-          value={ref?.total_referrals ?? '—'}
-          sub={ref?.active_referrals != null ? `${ref.active_referrals} active` : undefined}
+          value={refText(ref, 'total_referrals')}
+          sub={ref?.active_referrals != null ? `${refNumber(ref, 'active_referrals')} active` : undefined}
         />
-        <ReferralStat label="Total Earnings" value={ref?.total_earnings != null ? formatNGN(ref.total_earnings) : '—'} />
-        <ReferralStat label="Pending Payout" value={ref?.pending_payout != null ? formatNGN(ref.pending_payout) : '—'} />
+        <ReferralStat label="Total Earnings" value={ref?.total_earnings != null ? formatNGN(refNumber(ref, 'total_earnings')) : '—'} />
+        <ReferralStat label="Pending Payout" value={ref?.pending_payout != null ? formatNGN(refNumber(ref, 'pending_payout')) : '—'} />
       </div>
 
       <Card noPadding>
@@ -161,7 +176,6 @@ export function ReferralsTab({ userId }: ReferralsTabProps) {
                 className={['py-2.5 px-4', i < referredUsers.length - 1 ? 'border-b border-(--color-border)' : ''].join(' ')}
               >
                 <Row gap={3} align="center">
-                  <Avatar name={u.name} size="sm" />
                   <Stack gap={0}>
                     <Text variant="caption" color="primary" weight="medium" as="p" className="text-xs leading-4">{u.name}</Text>
                     <Text variant="micro" color="muted" as="p" className="text-[0.625rem] leading-3">Joined {u.join_date}</Text>
