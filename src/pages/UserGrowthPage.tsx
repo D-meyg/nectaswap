@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Download } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -15,6 +15,7 @@ import { Card } from "@/components/ui/Card";
 import { StatCard } from "@/components/ui/StatCard";
 import { DataTable } from "@/components/tables/DataTable";
 import { usePageTitle } from "@/layouts/AppLayout";
+import { useDashboardStats } from "@/hooks/queries/useDashboard";
 
 // ── Data ─────────────────────────────────────────────────
 
@@ -90,7 +91,7 @@ const cohortData: CohortRow[] = [
 ];
 
 function CohortBadge({ value }: { value: number | null }) {
-  if (value === null) return <span className="text-[var(--color-text-muted)] text-[12px]">—</span>;
+  if (value === null) return <span className="text-(--color-text-muted) text-xs">—</span>;
   const bg =
     value >= 80 ? "rgba(78,43,204,0.85)" :
     value >= 60 ? "rgba(78,43,204,0.55)" :
@@ -98,7 +99,7 @@ function CohortBadge({ value }: { value: number | null }) {
                   "rgba(78,43,204,0.12)";
   return (
     <span
-      className="inline-block px-2.5 py-0.5 rounded-[3px] text-[12px] font-medium text-white"
+      className="inline-block px-2.5 py-0.5 rounded text-xs font-medium text-white"
       style={{ background: bg }}
     >
       {value}%
@@ -132,14 +133,14 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-card)] px-3 py-2 min-w-[130px]">
+    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[8.125rem]">
       <Text variant="micro" color="muted" className="mb-1 block">{label}</Text>
       {payload.map((p) => (
         <div key={String(p.name)} className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full shrink-0" style={{ background: String(p.color) }} />
           <Text variant="micro" color="secondary" as="span">
             {p.name}:{" "}
-            <span className="font-semibold text-[var(--color-text-primary)]">
+            <span className="font-semibold text-(--color-text-primary)">
               {typeof p.value === "number" ? p.value.toLocaleString() : p.value}
             </span>
           </Text>
@@ -156,20 +157,27 @@ const DATE_FILTERS = ["Last month", "Last 6 weeks", "Last 6 months", "Last 12 mo
 export default function UserGrowthPage() {
   usePageTitle("User Growth Analytics", "Analyse user acquisition, retention, and growth trends");
   const [activeDate, setActiveDate] = useState("Last 12 months");
+  const { data: dashboardStats = {} } = useDashboardStats();
+  const stats = dashboardStats as Record<string, any>;
+
+  const totalUsers = stats.total_users ?? stats.totalUsers ?? "26,153";
+  const newUsers = stats.new_users ?? stats.newUsers ?? "1,950";
+  const activeUsers = stats.active_users ?? stats.activeUsers ?? "7,680";
+  const churnRate = stats.churn_rate ?? stats.churnRate ?? "0.71%";
 
   return (
     <div className="p-6 space-y-5">
       {/* Toolbar */}
       <Row justify="between" align="center">
-        <div className="flex items-center border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden">
+        <div className="flex items-center border border-(--color-border) rounded-(--radius-sm) overflow-hidden">
           {DATE_FILTERS.map((f) => (
             <button
               key={f}
               onClick={() => setActiveDate(f)}
-              className={`px-3 py-[6px] text-[12px] font-medium border-r border-[var(--color-border)] last:border-r-0 transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
                 activeDate === f
-                  ? "bg-[var(--color-brand)] text-white"
-                  : "bg-white text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+                  ? "bg-(--color-brand) text-white"
+                  : "bg-white text-(--color-text-secondary) hover:bg-(--color-bg-subtle)"
               }`}
             >
               {f}
@@ -187,10 +195,10 @@ export default function UserGrowthPage() {
 
       {/* Top stats */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Total Users"  value="26,153" delta={9.5}  deltaLabel="vs last month"      status="success" />
-        <StatCard label="New Users"    value="1,950"  delta={13.8} deltaLabel="this month"         status="success" />
-        <StatCard label="Active Users" value="7,680"  delta={3.9}  deltaLabel="vs last 6 months"   status="info" />
-        <StatCard label="Churn Rate"   value="0.71%"  delta={-4.4} deltaLabel="improved"           status="danger" />
+        <StatCard label="Total Users"  value={String(totalUsers)} delta={9.5}  deltaLabel="vs last month"      status="success" />
+        <StatCard label="New Users"    value={String(newUsers)}  delta={13.8} deltaLabel="this month"         status="success" />
+        <StatCard label="Active Users" value={String(activeUsers)}  delta={3.9}  deltaLabel="vs last 6 months"   status="info" />
+        <StatCard label="Churn Rate"   value={String(churnRate)}  delta={-4.4} deltaLabel="improved"           status="danger" />
       </Grid>
 
       {/* Growth & Activity Trends */}
@@ -236,13 +244,13 @@ export default function UserGrowthPage() {
                     <Text variant="caption" color="primary">{r.region}</Text>
                     <Row gap={3} align="center">
                       <Text variant="caption" color="primary" weight="medium">{r.users.toLocaleString()}</Text>
-                      <span className={`text-[11px] font-medium ${r.growth > 0 ? "text-[var(--color-success-mid)]" : "text-[var(--color-danger)]"}`}>
+                      <span className={`text-[0.6875rem] font-medium ${r.growth > 0 ? "text-(--color-success-mid)" : "text-(--color-danger)"}`}>
                         {r.growth > 0 ? "+" : ""}{r.growth}%
                       </span>
                     </Row>
                   </Row>
-                  <div className="relative h-1.5 w-full bg-[var(--color-border)] rounded-full overflow-hidden">
-                    <div className="absolute left-0 top-0 h-full bg-[var(--color-brand)] rounded-full" style={{ width: `${(r.users / maxRegion) * 100}%` }} />
+                  <div className="relative h-1.5 w-full bg-(--color-border) rounded-full overflow-hidden">
+                    <div className="absolute left-0 top-0 h-full bg-(--color-brand) rounded-full" style={{ width: `${(r.users / maxRegion) * 100}%` }} />
                   </div>
                 </Stack>
               ))}
@@ -315,7 +323,7 @@ export default function UserGrowthPage() {
                     </Row>
                   </Row>
                   <div className="flex items-center gap-2">
-                    <div className="relative h-1 flex-1 bg-[var(--color-border)] rounded-full overflow-hidden">
+                    <div className="relative h-1 flex-1 bg-(--color-border) rounded-full overflow-hidden">
                       <div className="absolute left-0 top-0 h-full rounded-full" style={{ width: `${c.share}%`, background: c.color }} />
                     </div>
                     <Text variant="micro" color="muted" className="shrink-0">CAC: {c.cac}</Text>

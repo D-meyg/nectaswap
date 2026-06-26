@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 import { type ReactNode } from "react";
 import { Text } from "./Text";
 
@@ -12,7 +12,7 @@ function CardRoot({ className, children }: CardProps) {
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)]",
+        "overflow-hidden rounded-lg border border-(--color-border) bg-white shadow-[0_2px_12px_rgba(0,0,0,0.03)]",
         className,
       )}
     >
@@ -74,7 +74,7 @@ interface CardBodyProps {
 
 function CardBody({ className, children, padded }: CardBodyProps) {
   return (
-    <div className={cn(padded && "p-5 sm:p-6", className)}>{children}</div>
+    <div className={cn(padded && "p-4", className)}>{children}</div>
   );
 }
 
@@ -87,7 +87,7 @@ function CardFooter({ className, children }: CardFooterProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-3 border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-5 py-4",
+        "flex items-center justify-between gap-3 border-t border-(--color-border) bg-(--color-bg-subtle) px-5 py-4",
         className,
       )}
     >
@@ -105,7 +105,7 @@ function CardSection({ className, children }: CardSectionProps) {
   return (
     <div
       className={cn(
-        "border-b border-[var(--color-border)] px-5 py-4 last:border-b-0",
+        "border-b border-(--color-border) px-5 py-4 last:border-b-0",
         className,
       )}
     >

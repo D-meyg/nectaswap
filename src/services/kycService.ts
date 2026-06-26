@@ -1,23 +1,32 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type { KYCSubmission, KYCDetail, KYCHistoryEvent } from '@/api/types'
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 
 export const kycService = {
-  queue:    () =>
-    client.get<KYCSubmission[]>(ENDPOINTS.KYC.QUEUE).then(r => r.data),
+  getStats: async () => {
+    const { data } = await client.get(ENDPOINTS.KYC.STATS);
+    return data;
+  },
 
-  get:      (id: string) =>
-    client.get<KYCDetail>(ENDPOINTS.KYC.DETAIL(id)).then(r => r.data),
+  getApplications: async (params?: Record<string, unknown>) => {
+    const { data } = await client.get(ENDPOINTS.KYC.APPLICATIONS, { params });
+    return data;
+  },
 
-  history:  (userId: string) =>
-    client.get<KYCHistoryEvent[]>(ENDPOINTS.KYC.HISTORY(userId)).then(r => r.data),
+  getApplicationDetail: async (id: string) => {
+    const { data } = await client.get(ENDPOINTS.KYC.DETAIL(id));
+    return data;
+  },
 
-  approve:  (id: string) =>
-    client.post(ENDPOINTS.KYC.APPROVE(id)).then(r => r.data),
+  reviewApplication: async (
+    id: string,
+    payload: { action: "approve" | "reject"; rejection_reason?: string },
+  ) => {
+    const { data } = await client.patch(ENDPOINTS.KYC.REVIEW(id), payload);
+    return data;
+  },
 
-  reject:   (id: string, reason: string) =>
-    client.post(ENDPOINTS.KYC.REJECT(id), { reason }).then(r => r.data),
-
-  resubmit: (id: string, message: string) =>
-    client.post(ENDPOINTS.KYC.RESUBMIT(id), { message }).then(r => r.data),
-}
+  getGeneralKYC: async () => {
+    const { data } = await client.get(ENDPOINTS.KYC.GENERAL);
+    return data;
+  },
+};

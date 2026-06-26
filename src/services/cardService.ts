@@ -1,20 +1,49 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type { Card } from '@/api/types'
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 
 export const cardService = {
-  list:     (userId: string) =>
-    client.get<Card[]>(ENDPOINTS.CARDS.LIST(userId)).then(r => r.data),
+  getStats: async () => {
+    const { data } = await client.get(ENDPOINTS.CARDS.STATS);
+    return data;
+  },
 
-  get:      (cardId: string) =>
-    client.get<Card>(ENDPOINTS.CARDS.DETAIL(cardId)).then(r => r.data),
+  getCards: async (params?: Record<string, unknown>) => {
+    const { data } = await client.get(ENDPOINTS.CARDS.LIST, { params });
+    return data;
+  },
 
-  freeze:   (cardId: string) =>
-    client.post(ENDPOINTS.CARDS.FREEZE(cardId)).then(r => r.data),
+  getCardDetail: async (id: string) => {
+    const { data } = await client.get(ENDPOINTS.CARDS.DETAIL(id));
+    return data;
+  },
 
-  unfreeze: (cardId: string) =>
-    client.post(ENDPOINTS.CARDS.UNFREEZE(cardId)).then(r => r.data),
+  getCardTransactions: async (id: string) => {
+    const { data } = await client.get(ENDPOINTS.CARDS.TRANSACTIONS(id));
+    return data;
+  },
 
-  issue:    (userId: string, payload: { network: string; variant: string }) =>
-    client.post<Card>(ENDPOINTS.CARDS.ISSUE(userId), payload).then(r => r.data),
-}
+  getCardActivity: async (id: string) => {
+    const { data } = await client.get(ENDPOINTS.CARDS.ACTIVITY(id));
+    return data;
+  },
+
+  freezeCard: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.FREEZE(id));
+    return data;
+  },
+
+  unfreezeCard: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.UNFREEZE(id));
+    return data;
+  },
+
+  updateLimits: async (payload: {
+    card_id: string;
+    daily_limit: number;
+    monthly_limit: number;
+    per_transaction_limit: number;
+  }) => {
+    const { data } = await client.patch(ENDPOINTS.CARDS.LIMITS, payload);
+    return data;
+  },
+};

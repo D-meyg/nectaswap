@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+﻿import { useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import {
   User,
@@ -15,6 +15,7 @@ import { usePageTitle } from "@/layouts/AppLayout";
 import { BackLink } from "@/components/common/BackLink";
 import { UserHeader } from "@/components/common/UserHeader";
 import { QuickActionsPanel } from "@/components/common/QuickActionsPanel";
+import { ReferralActionsPanel } from "@/components/common/ReferralActionsPanel";
 import { RiskIndicatorsPanel } from "@/components/common/RiskIndicatorsPanel";
 import { TabsRoot, TabsList, Tab, TabPanel } from "@/components/ui/Tabs";
 import { Stack } from "@/components/ui/Stack";
@@ -35,7 +36,8 @@ import {
   useFreezeAccount,
   useUnfreezeAccount,
 } from "@/hooks/mutations/useUserMutations";
-import { DUMMY_USER_DETAIL, DUMMY_CARDS } from "@/lib/dummyData";
+import { DUMMY_USER_DETAIL } from "@/lib/dummyData";
+import type { UserDetail } from "@/api/types";
 
 type TabValue =
   | "overview"
@@ -46,6 +48,9 @@ type TabValue =
   | "activity"
   | "notes"
   | "audit";
+
+const userDetailTabClassName =
+  "h-[2.375rem] gap-1.5 px-1 text-xs [&_p]:text-xs [&_p]:leading-4";
 
 export default function UserDetailPage() {
   const { id = "" } = useParams<{ id: string }>();
@@ -60,8 +65,8 @@ export default function UserDetailPage() {
   const { data: apiUser, isLoading } = useUserDetail(id);
   const { data: apiCards = [] } = useUserCards(id);
 
-  const user = apiUser ?? DUMMY_USER_DETAIL;
-  const cards = apiCards.length ? apiCards : DUMMY_CARDS;
+  const user = (apiUser ?? DUMMY_USER_DETAIL) as UserDetail;
+  const cards = Array.isArray(apiCards) ? apiCards : [];
 
   const freezeMutation = useFreezeAccount();
   const unfreezeMutation = useUnfreezeAccount();
@@ -79,12 +84,12 @@ export default function UserDetailPage() {
   const freezeLoading = freezeMutation.isPending || unfreezeMutation.isPending;
 
   return (
-    <Box p={6} className="mx-auto w-full max-w-[1600px] lg:p-8">
-      <BackLink label="Back to Users" to="/users" className="mb-4" />
+    <Box className="min-h-full w-full px-4 py-4 lg:px-5 xl:px-6">
+      <BackLink label="Back to Users" to="/users" className="mb-3 text-[0.6875rem]" />
 
       {isLoading && !apiUser ? (
         <Stack gap={3} className="mb-8">
-          <Skeleton className="h-[34px] w-64 rounded-(--radius-md)" />
+          <Skeleton className="h-[2.125rem] w-64 rounded-(--radius-md)" />
           <Skeleton className="h-5 w-80 rounded-(--radius-sm)" />
         </Stack>
       ) : (
@@ -99,39 +104,68 @@ export default function UserDetailPage() {
         value={activeTab}
         onChange={(value) => setActiveTab(value as TabValue)}
       >
-        <TabsList>
-          <Tab value="overview" icon={<User size={16} />}>
+        <TabsList className="min-h-[2.375rem] gap-5">
+          <Tab
+            value="overview"
+            icon={<User size={14} />}
+            className={userDetailTabClassName}
+          >
             Overview
           </Tab>
-          <Tab value="kyc" icon={<ShieldCheck size={16} />}>
+          <Tab
+            value="kyc"
+            icon={<ShieldCheck size={14} />}
+            className={userDetailTabClassName}
+          >
             KYC
           </Tab>
           <Tab
             value="cards"
-            icon={<CreditCard size={16} />}
+            icon={<CreditCard size={14} />}
             count={cards.length}
+            className={userDetailTabClassName}
           >
             Cards
           </Tab>
-          <Tab value="transactions" icon={<ArrowLeftRight size={16} />}>
+          <Tab
+            value="transactions"
+            icon={<ArrowLeftRight size={14} />}
+            className={userDetailTabClassName}
+          >
             Transactions
           </Tab>
-          <Tab value="referrals" icon={<Users size={16} />}>
+          <Tab
+            value="referrals"
+            icon={<Users size={14} />}
+            className={userDetailTabClassName}
+          >
             Referrals
           </Tab>
-          <Tab value="activity" icon={<Activity size={16} />}>
+          <Tab
+            value="activity"
+            icon={<Activity size={14} />}
+            className={userDetailTabClassName}
+          >
             Activity
           </Tab>
-          <Tab value="notes" icon={<MessageSquare size={16} />}>
+          <Tab
+            value="notes"
+            icon={<MessageSquare size={14} />}
+            className={userDetailTabClassName}
+          >
             Notes
           </Tab>
-          <Tab value="audit" icon={<ClipboardList size={16} />}>
+          <Tab
+            value="audit"
+            icon={<ClipboardList size={14} />}
+            className={userDetailTabClassName}
+          >
             Audit Log
           </Tab>
         </TabsList>
 
-        <div className="mt-6 grid grid-cols-1 lg:grid-cols-[1fr_320px] items-start gap-6">
-          <div className="min-w-0">
+        <Box className="mt-4 grid w-full grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_320px]">
+          <Box className="min-w-0">
             <TabPanel value="overview" className="pt-0">
               <OverviewTab user={user} loading={isLoading && !apiUser} />
             </TabPanel>
@@ -161,18 +195,19 @@ export default function UserDetailPage() {
             </TabPanel>
 
             <TabPanel value="audit" className="pt-0">
-              <AuditLogTab />
+              <AuditLogTab userId={id} />
             </TabPanel>
-          </div>
+          </Box>
 
-          <Stack gap={5} className="hidden lg:flex">
+          <Stack gap={4} className="hidden lg:flex">
             <QuickActionsPanel />
             <RiskIndicatorsPanel
               velocityCheck={user?.velocity_check}
               amlScreening={user?.aml_screening}
             />
+            {activeTab === "referrals" && <ReferralActionsPanel />}
           </Stack>
-        </div>
+        </Box>
       </TabsRoot>
     </Box>
   );

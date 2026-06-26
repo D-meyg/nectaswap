@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 
 type Variant = "primary" | "secondary" | "danger" | "ghost";
@@ -12,19 +12,19 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<Variant, string> = {
   primary:
-    "border border-[var(--color-brand)] bg-[var(--color-brand)] text-white hover:opacity-90",
+    "border border-(--color-brand) bg-(--color-brand) text-white hover:opacity-90",
   secondary:
-    "border border-[var(--color-border)] bg-white text-[var(--color-text-primary)] hover:bg-[var(--color-bg-subtle)]",
+    "border border-(--color-border) bg-white text-(--color-text-primary) hover:bg-(--color-bg-subtle)",
   danger:
-    "border border-[var(--color-danger-muted)] bg-white text-[var(--color-danger)] hover:bg-[var(--color-danger-subtle)]",
+    "border border-(--color-danger-muted) bg-white text-(--color-danger) hover:bg-(--color-danger-subtle)",
   ghost:
-    "border border-transparent bg-transparent text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)]",
+    "border border-transparent bg-transparent text-(--color-text-secondary) hover:bg-(--color-bg-subtle) hover:text-(--color-text-primary)",
 };
 
 const sizeStyles: Record<Size, string> = {
-  sm: "h-[32px] px-3 text-[12px]",
-  md: "h-[36px] px-4 text-[13px]",
-  lg: "h-[40px] px-5 text-[14px]",
+  sm: "h-8 px-3 text-xs",
+  md: "h-9 px-4 text-[0.8125rem]",
+  lg: "h-10 px-5 text-sm",
   icon: "h-8 w-8 p-0",
 };
 
@@ -47,9 +47,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       type={type}
       disabled={disabled || loading}
       className={cn(
-        "inline-flex shrink-0 items-center justify-center gap-2 rounded-[var(--radius-sm)] font-geom font-medium leading-none transition-all",
+        "inline-flex shrink-0 items-center justify-center gap-2 rounded-(--radius-sm) font-geom font-medium leading-none transition-all",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand)]/20",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--color-brand)/20",
         variantStyles[variant],
         sizeStyles[size],
         className,

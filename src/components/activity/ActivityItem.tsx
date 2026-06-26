@@ -1,4 +1,4 @@
-import { memo } from 'react'
+﻿import { memo } from 'react'
 import { ArrowLeftRight, LogIn, LogOut, ShieldCheck, CreditCard, Settings } from 'lucide-react'
 import { cn }          from '@/lib/utils'
 import { Text }        from '@/components/ui/Text'
@@ -15,12 +15,12 @@ const iconMap: Record<ActivityEventType, React.ElementType> = {
 }
 
 const iconColor: Record<ActivityEventType, string> = {
-  transaction: 'bg-[var(--color-brand)]/10 text-[var(--color-brand)]',
-  login:       'bg-[var(--color-success-subtle)] text-[var(--color-success-dark)]',
-  logout:      'bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)]',
-  kyc:         'bg-[var(--color-warning-subtle)] text-[var(--color-warning-dark)]',
-  card:        'bg-[var(--color-danger-subtle)] text-[var(--color-danger-dark)]',
-  settings:    'bg-[var(--color-bg-subtle)] text-[var(--color-text-muted)]',
+  transaction: 'bg-(--color-brand)/10 text-(--color-brand)',
+  login:       'bg-(--color-success-subtle) text-(--color-success-dark)',
+  logout:      'bg-(--color-bg-subtle) text-(--color-text-muted)',
+  kyc:         'bg-(--color-warning-subtle) text-(--color-warning-dark)',
+  card:        'bg-(--color-danger-subtle) text-(--color-danger-dark)',
+  settings:    'bg-(--color-bg-subtle) text-(--color-text-muted)',
 }
 
 interface ActivityItemProps {
@@ -34,7 +34,7 @@ export const ActivityItem = memo(function ActivityItem({ event, isLast }: Activi
   return (
     <div className={cn(
       'flex gap-3 p-4',
-      !isLast && 'border-b border-[var(--color-border)]'
+      !isLast && 'border-b border-(--color-border)'
     )}>
       <div className={cn(
         'flex h-8 w-8 shrink-0 items-center justify-center rounded-full mt-0.5',
@@ -55,7 +55,7 @@ export const ActivityItem = memo(function ActivityItem({ event, isLast }: Activi
         )}
         <div className="flex items-center gap-2 mt-1">
           <Text variant="micro" color="muted">{event.ip}</Text>
-          <span className="text-[var(--color-border)]">•</span>
+          <span className="text-(--color-border)">•</span>
           <Text variant="micro" color="muted">{event.device}</Text>
         </div>
       </div>

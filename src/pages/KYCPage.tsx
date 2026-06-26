@@ -1,5 +1,5 @@
-import { usePageTitle } from "@/layouts/AppLayout";
-import { useState, useMemo, useCallback } from "react";
+﻿import { usePageTitle } from "@/layouts/AppLayout";
+import { useState, useMemo } from "react";
 import { Clock, CheckCircle, XCircle, FileText, Eye } from "lucide-react";
 
 import { StatCard } from "@/components/ui/StatCard";
@@ -18,7 +18,6 @@ import {
 
 import { useKYCQueue } from "@/hooks/queries/useKYC";
 import { useModal } from "@/hooks/ui/useModal";
-import { DUMMY_KYC_QUEUE } from "@/lib/dummyData";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { KYCSubmission } from "@/api/types";
 
@@ -33,7 +32,7 @@ function DocIcons({ count, total }: { count: number; total: number }) {
         <span
           key={i}
           className={cn(
-            "text-[13px]",
+            "text-[0.8125rem]",
             i < count ? "opacity-100" : "opacity-30",
           )}
         >
@@ -51,6 +50,38 @@ function cn(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(" ");
 }
 
+function splitSubmittedAt(value?: string | null) {
+  const normalized = String(value || "").replace("T", " ");
+  const [date = ""] = normalized.split(".");
+  const [datePart = "", timePart = ""] = date.split(" ");
+  return { date: datePart, time: timePart };
+}
+
+function normalizeKyc(value: unknown): KYCSubmission {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const user =
+    item.user && typeof item.user === "object"
+      ? (item.user as Record<string, unknown>)
+      : {};
+  const tier = item.tier ?? item.tier_requested;
+  const documents = item.documents ?? item.documents_submitted;
+  const totalDocs = item.total_docs ?? item.documents_total;
+
+  return {
+    id: String(item.id ?? ""),
+    user_id: String(item.user_id ?? user.user_id ?? user.id ?? "N/A"),
+    user_name: String(item.user_name ?? user.full_name ?? user.name ?? "Unknown User"),
+    user_email: String(item.user_email ?? user.email ?? "N/A"),
+    tier: typeof tier === "number" ? `Tier ${tier}` : String(tier ?? "N/A"),
+    submitted_at: String(item.submitted_at ?? item.submitted ?? "N/A"),
+    documents: Number(documents ?? 0),
+    total_docs: Number(totalDocs ?? documents ?? 0),
+    priority: String(item.priority ?? "normal"),
+    status: String(item.status ?? "pending"),
+  };
+}
+
 export default function KYCPage() {
   usePageTitle("KYC Management", "Identity verification and compliance review");
 
@@ -58,8 +89,10 @@ export default function KYCPage() {
   const { data: apiQueue, isLoading } = useKYCQueue();
   const reviewModal = useModal(KYC_REVIEW_MODAL_ID);
 
-  // Use dummy data as fallback
-  const queue = apiQueue && apiQueue.length > 0 ? apiQueue : DUMMY_KYC_QUEUE;
+  const queue = useMemo(
+    () => (Array.isArray(apiQueue) ? apiQueue.map(normalizeKyc) : []),
+    [apiQueue],
+  );
 
   const filtered = useMemo(
     () => (filter === "all" ? queue : queue.filter((k) => k.status === filter)),
@@ -69,13 +102,6 @@ export default function KYCPage() {
   const pending = queue.filter((k) => k.status === "pending").length;
   const approved = queue.filter((k) => k.status === "approved").length;
   const rejected = queue.filter((k) => k.status === "rejected").length;
-
-  const handleReview = useCallback(
-    (kycId: string) => {
-      reviewModal.open({ kycId });
-    },
-    [reviewModal],
-  );
 
   const columns = useMemo<ColumnDef<KYCSubmission, unknown>[]>(
     () => [
@@ -99,17 +125,20 @@ export default function KYCPage() {
       {
         accessorKey: "submitted_at",
         header: "Submitted",
-        cell: ({ row }) => (
-          <Stack gap={0}>
-            <Text variant="caption" color="primary" as="p">
-              {row.original.submitted_at.split(" ")[1] ||
-                row.original.submitted_at}
-            </Text>
-            <Text variant="micro" color="muted" as="p">
-              {row.original.submitted_at.split(" ")[0] || ""}
-            </Text>
-          </Stack>
-        ),
+        cell: ({ row }) => {
+          const submitted = splitSubmittedAt(row.original.submitted_at);
+
+          return (
+            <Stack gap={0}>
+              <Text variant="caption" color="primary" as="p">
+                {submitted.time || submitted.date || "N/A"}
+              </Text>
+              <Text variant="micro" color="muted" as="p">
+                {submitted.time ? submitted.date : ""}
+              </Text>
+            </Stack>
+          );
+        },
       },
       {
         accessorKey: "tier",
@@ -118,10 +147,10 @@ export default function KYCPage() {
           const tier = getValue<string>();
           const color =
             tier === "Tier 3"
-              ? "text-[var(--color-danger)]"
+              ? "text-(--color-danger)"
               : tier === "Tier 2"
-                ? "text-[var(--color-brand)]"
-                : "text-[var(--color-success-mid)]";
+                ? "text-(--color-brand)"
+                : "text-(--color-success-mid)";
           return (
             <Text variant="caption" weight="medium" className={color} as="span">
               {tier}
@@ -164,14 +193,14 @@ export default function KYCPage() {
           // Matches image 2: "pending" in orange pill
           const style =
             v === "approved"
-              ? "bg-[var(--color-success-bg)] text-[var(--color-success-mid)]"
+              ? "bg-(--color-success-bg) text-(--color-success-mid)"
               : v === "rejected"
-                ? "bg-[var(--color-danger-subtle)] text-[var(--color-danger)]"
-                : "bg-[var(--color-warning-subtle)] text-[var(--color-warning-dark)]";
+                ? "bg-(--color-danger-subtle) text-(--color-danger)"
+                : "bg-(--color-warning-subtle) text-(--color-warning-dark)";
           return (
             <span
               className={cn(
-                "inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium",
+                "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
                 style,
               )}
             >
@@ -184,14 +213,19 @@ export default function KYCPage() {
         id: "action",
         header: "Action",
         cell: ({ row }) => (
-          <Button size="sm" onClick={() => handleReview(row.original.id)}>
+          <Button
+            size="sm"
+            onClick={() =>
+              reviewModal.open({ kycId: row.original.id, application: row.original })
+            }
+          >
             <Eye size={13} />
             Review
           </Button>
         ),
       },
     ],
-    [handleReview],
+    [reviewModal],
   );
 
   return (
@@ -201,7 +235,7 @@ export default function KYCPage() {
         <StatCard
           label="Pending Review"
           value={pending}
-          icon={<Clock size={16} className="text-[var(--color-warning)]" />}
+          icon={<Clock size={16} className="text-(--color-warning)" />}
           loading={isLoading}
         />
         <StatCard
@@ -210,7 +244,7 @@ export default function KYCPage() {
           icon={
             <CheckCircle
               size={16}
-              className="text-[var(--color-success-mid)]"
+              className="text-(--color-success-mid)"
             />
           }
           loading={isLoading}
@@ -218,14 +252,14 @@ export default function KYCPage() {
         <StatCard
           label="Rejected Today"
           value={rejected}
-          icon={<XCircle size={16} className="text-[var(--color-danger)]" />}
+          icon={<XCircle size={16} className="text-(--color-danger)" />}
           loading={isLoading}
         />
         <StatCard
           label="Avg Review Time"
           value="24m"
           icon={
-            <FileText size={16} className="text-[var(--color-text-muted)]" />
+            <FileText size={16} className="text-(--color-text-muted)" />
           }
           loading={isLoading}
         />
@@ -238,7 +272,7 @@ export default function KYCPage() {
       */}
       <Card noPadding>
         {/* Tab bar as card header — no border-b on the card header */}
-        <Box px={5} className="border-b border-[var(--color-border)]">
+        <Box px={5} className="border-b border-(--color-border)">
           <TabsRoot value={filter} onChange={(v) => setFilter(v as FilterTab)}>
             <TabsList className="border-b-0 gap-6">
               {(["all", "pending", "approved", "rejected"] as FilterTab[]).map(

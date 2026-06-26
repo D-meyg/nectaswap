@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { usePageTitle } from "@/layouts/AppLayout";
 import { useMemo } from "react";
 import { RefreshCw, Info } from "lucide-react";
@@ -9,15 +10,15 @@ import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/tables/DataTable";
-import { DUMMY_EXCHANGE_RATES, DUMMY_FEE_TIERS } from "@/lib/dummyData";
+import { useExchangeRates, useFeeConfig, useFeeRevenue } from "@/hooks/queries/useRates";
 import type { ColumnDef } from "@tanstack/react-table";
 
-type RateRow = (typeof DUMMY_EXCHANGE_RATES)[0];
-type FeeRow = (typeof DUMMY_FEE_TIERS)[0];
+type RateRow = Record<string, any>;
+type FeeRow = Record<string, any>;
 
 function LinkButton({ label }: { label: string }) {
   return (
-    <button className="text-[var(--color-brand)] text-[13px] font-medium hover:underline transition-colors">
+    <button className="text-(--color-brand) text-[0.8125rem] font-medium hover:underline transition-colors">
       {label}
     </button>
   );
@@ -28,6 +29,13 @@ export default function RatesPage() {
     "Rates & Fees",
     "Live rates with spread configuration and fee control",
   );
+
+  const { data: apiRates = [], isLoading: loadingRates } = useExchangeRates();
+  const { data: apiFees = [], isLoading: loadingFees } = useFeeConfig();
+  const { data: feeRevenue = {} } = useFeeRevenue();
+
+  const rates = apiRates as RateRow[];
+  const fees = apiFees as FeeRow[];
 
   const rateCols = useMemo<ColumnDef<RateRow, unknown>[]>(
     () => [
@@ -161,7 +169,7 @@ export default function RatesPage() {
         <Row
           justify="between"
           align="center"
-          className="px-5 py-4 border-b border-[var(--color-border)]"
+          className="px-5 py-4 border-b border-(--color-border)"
         >
           <Stack gap={0}>
             <Text variant="subtitle" color="primary" weight="semibold" as="p">
@@ -177,8 +185,9 @@ export default function RatesPage() {
           </Button>
         </Row>
         <DataTable
-          data={DUMMY_EXCHANGE_RATES}
+          data={rates}
           columns={rateCols}
+          loading={loadingRates}
           emptyTitle="No rates"
           emptyMessage="Exchange rates unavailable"
         />
@@ -186,7 +195,7 @@ export default function RatesPage() {
 
       {/* Fee Configuration */}
       <Card noPadding>
-        <Box px={5} py={4} className="border-b border-[var(--color-border)]">
+        <Box px={5} py={4} className="border-b border-(--color-border)">
           <Text variant="subtitle" color="primary" weight="semibold" as="p">
             Fee Configuration
           </Text>
@@ -195,8 +204,9 @@ export default function RatesPage() {
           </Text>
         </Box>
         <DataTable
-          data={DUMMY_FEE_TIERS}
+          data={fees}
           columns={feeCols}
+          loading={loadingFees}
           emptyTitle="No fee tiers"
           emptyMessage="No fee tiers configured"
         />
@@ -207,20 +217,20 @@ export default function RatesPage() {
         {[
           {
             label: "Total Fee Revenue (24h)",
-            value: "₦ 2.4M",
-            delta: "↑ +10.5% vs yesterday",
+            value: (feeRevenue as any).total_fee_revenue_24h || "₦ 0",
+            delta: "",
             pos: true,
           },
           {
             label: "Avg Fee per Transaction",
-            value: "₦ 8,420",
-            delta: "↓ -2.1% vs yesterday",
+            value: (feeRevenue as any).avg_fee_per_transaction || "₦ 0",
+            delta: "",
             pos: false,
           },
           {
             label: "Fee Revenue (MTD)",
-            value: "₦ 68.3M",
-            delta: "↑ +18.3% vs last month",
+            value: (feeRevenue as any).fee_revenue_mtd || "₦ 0",
+            delta: "",
             pos: true,
           },
         ].map((s, i) => (
@@ -232,26 +242,28 @@ export default function RatesPage() {
               <Text variant="heading" color="primary" weight="semibold" as="p">
                 {s.value}
               </Text>
-              <Text
-                variant="micro"
-                weight="medium"
-                className={[
-                  "mt-1 block",
-                  s.pos
-                    ? "text-[var(--color-success-mid)]"
-                    : "text-[var(--color-danger)]",
-                ].join(" ")}
-              >
-                {s.delta}
-              </Text>
+              {s.delta && (
+                <Text
+                  variant="micro"
+                  weight="medium"
+                  className={[
+                    "mt-1 block",
+                    s.pos
+                      ? "text-(--color-success-mid)"
+                      : "text-(--color-danger)",
+                  ].join(" ")}
+                >
+                  {s.delta}
+                </Text>
+              )}
             </Box>
           </Card>
         ))}
       </div>
 
       {/* Info banner */}
-      <Box className="flex items-start gap-3 rounded-[var(--radius-md)] border border-[var(--color-brand)]/20 bg-[rgba(78,43,204,0.04)] px-4 py-3">
-        <Info size={15} className="text-[var(--color-brand)] mt-0.5 shrink-0" />
+      <Box className="flex items-start gap-3 rounded-(--radius-md) border border-(--color-brand)/20 bg-[rgba(78,43,204,0.04)] px-4 py-3">
+        <Info size={15} className="text-(--color-brand) mt-0.5 shrink-0" />
         <Stack gap={0}>
           <Text variant="caption" color="brand" weight="semibold" as="p">
             Rate & Fee Updates

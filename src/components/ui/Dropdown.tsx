@@ -1,4 +1,4 @@
-import * as RadixDropdown from "@radix-ui/react-dropdown-menu";
+﻿import * as RadixDropdown from "@radix-ui/react-dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Check, ChevronRight } from "lucide-react";
 import { type ReactNode } from "react";
@@ -26,9 +26,9 @@ import { type ReactNode } from "react";
 
 // ── Shared content styles ─────────────────────────────────
 const contentStyles = cn(
-  "z-[var(--z-dropdown)] min-w-[160px] overflow-hidden",
-  "rounded-[var(--radius-md)]",
-  "bg-white border border-[var(--color-border)]",
+  "z-(--z-dropdown) min-w-40 overflow-hidden",
+  "rounded-(--radius-md)",
+  "bg-white border border-(--color-border)",
   "shadow-[0_4px_16px_rgba(0,0,0,0.10)]",
   "py-1",
   // Animations
@@ -40,7 +40,7 @@ const contentStyles = cn(
 
 const itemBaseStyles = cn(
   "relative flex items-center gap-2.5 select-none outline-none cursor-pointer",
-  "px-3 py-[7px] text-[13px] transition-colors",
+  "px-3 py-[0.4375rem] text-[0.8125rem] transition-colors",
   "data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed",
 );
 
@@ -97,8 +97,8 @@ function Item({
       className={cn(
         itemBaseStyles,
         danger
-          ? "text-[var(--color-danger)] focus:bg-[var(--color-danger-subtle)]"
-          : "text-[var(--color-text-primary)] focus:bg-[var(--color-bg-subtle)]",
+          ? "text-(--color-danger) focus:bg-(--color-danger-subtle)"
+          : "text-(--color-text-primary) focus:bg-(--color-bg-subtle)",
         className,
       )}
     >
@@ -107,8 +107,8 @@ function Item({
           className={cn(
             "shrink-0",
             danger
-              ? "text-[var(--color-danger)]"
-              : "text-[var(--color-text-muted)]",
+              ? "text-(--color-danger)"
+              : "text-(--color-text-muted)",
           )}
         >
           {icon}
@@ -140,11 +140,11 @@ function CheckboxItem({
       disabled={disabled}
       className={cn(
         itemBaseStyles,
-        "text-[var(--color-text-primary)] focus:bg-[var(--color-bg-subtle)] pl-8",
+        "text-(--color-text-primary) focus:bg-(--color-bg-subtle) pl-8",
       )}
     >
       <RadixDropdown.ItemIndicator className="absolute left-3">
-        <Check size={12} className="text-[var(--color-brand)]" />
+        <Check size={12} className="text-(--color-brand)" />
       </RadixDropdown.ItemIndicator>
       {children}
     </RadixDropdown.CheckboxItem>
@@ -163,15 +163,15 @@ function SubTrigger({ children, icon, className }: SubTriggerProps) {
     <RadixDropdown.SubTrigger
       className={cn(
         itemBaseStyles,
-        "text-[var(--color-text-primary)] focus:bg-[var(--color-bg-subtle)]",
+        "text-(--color-text-primary) focus:bg-(--color-bg-subtle)",
         className,
       )}
     >
       {icon && (
-        <span className="text-[var(--color-text-muted)] shrink-0">{icon}</span>
+        <span className="text-(--color-text-muted) shrink-0">{icon}</span>
       )}
       <span className="flex-1 truncate">{children}</span>
-      <ChevronRight size={12} className="text-[var(--color-text-muted)]" />
+      <ChevronRight size={12} className="text-(--color-text-muted)" />
     </RadixDropdown.SubTrigger>
   );
 }
@@ -199,7 +199,7 @@ function SubContent({
 function Label({ children }: { children: ReactNode }) {
   return (
     <RadixDropdown.Label className="px-3 py-1.5">
-      <span className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-[0.5px]">
+      <span className="text-[0.6875rem] font-medium text-(--color-text-muted) uppercase tracking-[0.5px]">
         {children}
       </span>
     </RadixDropdown.Label>
@@ -208,7 +208,7 @@ function Label({ children }: { children: ReactNode }) {
 
 function Separator() {
   return (
-    <RadixDropdown.Separator className="h-px bg-[var(--color-border)] my-1" />
+    <RadixDropdown.Separator className="h-px bg-(--color-border) my-1" />
   );
 }
 

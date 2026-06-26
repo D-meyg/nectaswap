@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 interface SeverityBadgeProps {
   severity: string;
@@ -18,7 +18,7 @@ export function SeverityBadge({ severity, className }: SeverityBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 font-geom text-[12px] font-medium capitalize leading-[18px]",
+        "inline-flex items-center rounded-full border px-2 py-0.5 font-geom text-xs font-medium capitalize leading-[1.125rem]",
         styles,
         className,
       )}
@@ -51,7 +51,7 @@ export function ComplianceStatusText({
   return (
     <span
       className={cn(
-        "font-geom text-[13px] font-medium capitalize leading-none",
+        "font-geom text-[0.8125rem] font-medium capitalize leading-none",
         color,
         className,
       )}

@@ -1,18 +1,42 @@
-import { Card }    from '@/components/ui/Card'
+﻿import { Card }    from '@/components/ui/Card'
 import { Text }    from '@/components/ui/Text'
-import { Badge }   from '@/components/ui/Badge'
 import { Skeleton }from '@/components/ui/Skeleton'
+import { Box }     from '@/components/ui/Box'
+import { Stack }   from '@/components/ui/Stack'
 import { formatNGN } from '@/lib/utils'
 import type { UserDetail } from '@/api/types'
+import type { ReactNode } from 'react'
 
 interface InfoFieldProps { label: string; value?: string | number | null }
 
 function InfoField({ label, value }: InfoFieldProps) {
   return (
-    <div>
-      <Text variant="micro" color="muted" uppercase className="mb-0.5">{label}</Text>
-      <Text variant="caption" color="primary">{value ?? 'N/A'}</Text>
-    </div>
+    <Stack gap={0}>
+      <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">{label}</Text>
+      <Text variant="caption" color="primary" className="text-xs leading-4">{value ?? 'N/A'}</Text>
+    </Stack>
+  )
+}
+
+function OverviewCard({
+  title,
+  children,
+  className,
+}: {
+  title?: string
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <Card className={className}>
+      {title && (
+        <Card.Header
+          title={title}
+          className="border-b-0 px-4 pb-1 pt-3 [&_h4]:text-xs [&_h4]:leading-4"
+        />
+      )}
+      <Card.Body className="px-4 pb-4 pt-1">{children}</Card.Body>
+    </Card>
   )
 }
 
@@ -24,110 +48,95 @@ interface OverviewTabProps {
 export function OverviewTab({ user, loading }: OverviewTabProps) {
   if (loading) {
     return (
-      <div className="space-y-4">
+      <Stack gap={4}>
         {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)}
-      </div>
+      </Stack>
     )
   }
 
-  const kycStatusVariant =
-    user.kyc_status === 'approved' ? 'success' :
-    user.kyc_status === 'rejected' ? 'danger'  : 'warning'
-
   return (
-    <div className="space-y-4">
-      {/* Profile Information */}
-      <Card>
-        <Card.Header title="Profile Information" />
-        <Card.Body padded>
-          <div className="grid grid-cols-2 gap-x-8 gap-y-4 pt-1">
-            <InfoField label="Email"   value={user.email} />
-            <InfoField label="Phone"   value={user.phone} />
-            <InfoField label="Joined"  value={user.joined} />
-            <InfoField label="Last IP" value={user.last_ip} />
-          </div>
-        </Card.Body>
-      </Card>
+    <Stack gap={4}>
+      <OverviewCard title="Profile Information">
+        <Box className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2">
+          <InfoField label="Email"   value={user.email} />
+          <InfoField label="Phone"   value={user.phone} />
+          <InfoField label="Joined"  value={user.joined} />
+          <InfoField label="Last IP" value={user.last_ip} />
+        </Box>
+      </OverviewCard>
 
-      {/* KYC & Risk */}
-      <Card>
-        <Card.Header title="KYC & Risk" />
-        <Card.Body padded>
-          <div className="grid grid-cols-3 gap-x-8 gap-y-4 pt-1">
-            <div>
-              <Text variant="micro" color="muted" uppercase className="mb-0.5">KYC Level</Text>
-              <Text variant="caption" color="primary">{user.kyc_level ?? 'N/A'}</Text>
-              {user.kyc_status && (
-                <div className="mt-1">
-                  <Badge variant={kycStatusVariant} label={user.kyc_status} />
-                </div>
-              )}
-            </div>
-            <InfoField label="Expiry Date"  value={user.kyc_expiry} />
-            <div>
-              <Text variant="micro" color="muted" uppercase className="mb-0.5">Risk Score</Text>
+      <OverviewCard title="KYC & Risk">
+        <Box className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-3">
+          <Stack gap={0}>
+            <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">KYC Level</Text>
+            <Text variant="caption" color="primary" className="text-xs leading-4">{user.kyc_level ?? 'N/A'}</Text>
+            {user.kyc_status && (
               <Text
-                variant="caption"
-                color={
-                  (user.risk_score ?? 0) > 70 ? 'danger' :
-                  (user.risk_score ?? 0) > 40 ? 'warning' : 'success'
-                }
+                variant="micro"
+                color={user.kyc_status === 'rejected' ? 'danger' : 'success'}
                 weight="semibold"
+                className="mt-0.5 text-[0.625rem] capitalize leading-4"
               >
-                {user.risk_score ?? 0}
+                {user.kyc_status}
               </Text>
-            </div>
-          </div>
-        </Card.Body>
-      </Card>
-
-      {/* Linked Bank Accounts */}
-      <Card>
-        <Card.Header title="Linked Bank Accounts" />
-        <Card.Body padded>
-          <Text variant="caption" color="muted" className="py-4 block text-center">
-            No bank accounts linked
-          </Text>
-        </Card.Body>
-      </Card>
-
-      {/* Crypto Wallet */}
-      <Card>
-        <Card.Header title="Crypto Wallet" />
-        <Card.Body padded>
-          <Text variant="caption" color={user.crypto_wallet ? 'primary' : 'muted'}>
-            {user.crypto_wallet ?? 'N/A'}
-          </Text>
-        </Card.Body>
-      </Card>
-
-      {/* Volume Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card>
-          <Card.Body padded>
-            <Text variant="micro" color="muted" uppercase>Total Volume (Crypto → Naira)</Text>
-            <Text variant="heading" color="primary" className="mt-1 block">
-              {user.total_volume ? formatNGN(user.total_volume) : 'N/A'}
-            </Text>
-            <Text variant="micro" color="muted">{user.conversions ?? 0} conversions</Text>
-          </Card.Body>
-        </Card>
-        <Card>
-          <Card.Body padded>
-            <Text variant="micro" color="muted" uppercase>Success Rate</Text>
+            )}
+          </Stack>
+          <InfoField label="Expiry Date"  value={user.kyc_expiry} />
+          <Stack gap={0}>
+            <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">Risk Score</Text>
             <Text
-              variant="heading"
-              color={user.success_rate ? 'success' : 'muted'}
-              className="mt-1 block"
+              variant="caption"
+              color={
+                (user.risk_score ?? 0) > 70 ? 'danger' :
+                (user.risk_score ?? 0) > 40 ? 'warning' : 'success'
+              }
+              weight="semibold"
+              className="text-xs leading-4"
             >
-              {user.success_rate ? `${user.success_rate}%` : 'N/A'}
+              {user.risk_score ?? 0}
             </Text>
-            <Text variant="micro" color="muted">
-              Avg. {user.success_rate ? `${user.success_rate}%` : 'N/A'}
-            </Text>
-          </Card.Body>
-        </Card>
-      </div>
-    </div>
+          </Stack>
+        </Box>
+      </OverviewCard>
+
+      <OverviewCard title="Linked Bank Accounts">
+        <Text variant="caption" color="primary" className="text-xs leading-4">
+          N/A
+        </Text>
+      </OverviewCard>
+
+      <OverviewCard title="Crypto Wallet">
+        <Text
+          variant="caption"
+          color={user.crypto_wallet ? 'primary' : 'muted'}
+          className="text-xs leading-4"
+        >
+          {user.crypto_wallet ?? 'N/A'}
+        </Text>
+      </OverviewCard>
+
+      <Box className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <OverviewCard>
+          <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">Total Volume (Crypto → Naira)</Text>
+          <Text variant="heading" color="primary" className="mt-1 block text-2xl leading-7">
+            {user.total_volume ? formatNGN(user.total_volume) : 'N/A'}
+          </Text>
+          <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">{user.conversions ?? 0} conversions</Text>
+        </OverviewCard>
+        <OverviewCard>
+          <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">Success Rate</Text>
+          <Text
+            variant="heading"
+            color={user.success_rate ? 'success' : 'muted'}
+            className="mt-1 block text-2xl leading-7"
+          >
+            {user.success_rate ? `${user.success_rate}%` : 'N/A'}
+          </Text>
+          <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+            Avg. {user.success_rate ? `${user.success_rate}%` : 'N/A'}
+          </Text>
+        </OverviewCard>
+      </Box>
+    </Stack>
   )
 }

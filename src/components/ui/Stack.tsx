@@ -1,10 +1,11 @@
+import type { HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { type ElementType, type ReactNode } from "react";
 
-type GapKey = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10;
+type GapKey = 0 | 0.5 | 1 | 2 | 3 | 4 | 5 | 6 | 8 | 10 | 12;
 
-const GAP: Record<GapKey, string> = {
+const gapMap: Record<GapKey, string> = {
   0: "gap-0",
+  0.5: "gap-0.5",
   1: "gap-1",
   2: "gap-2",
   3: "gap-3",
@@ -13,40 +14,35 @@ const GAP: Record<GapKey, string> = {
   6: "gap-6",
   8: "gap-8",
   10: "gap-10",
+  12: "gap-12",
 };
 
-interface StackProps {
-  as?: ElementType;
+interface StackProps extends HTMLAttributes<HTMLDivElement> {
+  children: ReactNode;
   gap?: GapKey;
   align?: "start" | "center" | "end" | "stretch";
-  className?: string;
-  children: ReactNode;
 }
 
-export function Stack({
-  as: Tag = "div",
-  gap = 4,
-  align,
-  className,
-  children,
-}: StackProps) {
-  const alignMap = {
-    start: "items-start",
-    center: "items-center",
-    end: "items-end",
-    stretch: "items-stretch",
-  };
+const alignMap = {
+  start: "items-start",
+  center: "items-center",
+  end: "items-end",
+  stretch: "items-stretch",
+};
 
+export function Stack({
+  children,
+  gap = 4,
+  align = "stretch",
+  className,
+  ...props
+}: StackProps) {
   return (
-    <Tag
-      className={cn(
-        "flex flex-col",
-        GAP[gap],
-        align && alignMap[align],
-        className,
-      )}
+    <div
+      className={cn("flex flex-col", gapMap[gap], alignMap[align], className)}
+      {...props}
     >
       {children}
-    </Tag>
+    </div>
   );
 }

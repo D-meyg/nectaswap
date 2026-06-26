@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 import { type ElementType, type ReactNode } from "react";
 
 export type TextVariant =
@@ -38,31 +38,31 @@ interface TextProps {
 
 const variantStyles: Record<TextVariant, string> = {
   display:
-    "font-geom text-[32px] leading-[41.6px] tracking-[-0.64px] font-semibold",
+    "font-geom text-[2rem] leading-[2.6rem] tracking-[-0.64px] font-semibold",
   heading:
-    "font-geom text-[24px] leading-[33.6px] tracking-[-0.24px] font-semibold",
+    "font-geom text-2xl leading-[2.1rem] tracking-[-0.24px] font-semibold",
   title:
-    "font-geom text-[18px] leading-[25.2px] tracking-[-0.18px] font-semibold",
+    "font-geom text-lg leading-[1.575rem] tracking-[-0.18px] font-semibold",
   subtitle:
-    "font-geom text-[15px] leading-[21px] tracking-[-0.15px] font-medium",
-  body: "font-geom text-[14px] leading-[20px] tracking-[-0.14px] font-normal",
+    "font-geom text-[0.9375rem] leading-[1.3125rem] tracking-[-0.15px] font-medium",
+  body: "font-geom text-sm leading-5 tracking-[-0.14px] font-normal",
   caption:
-    "font-geom text-[13px] leading-[19.5px] tracking-[0.13px] font-normal",
+    "font-geom text-[0.8125rem] leading-[1.21875rem] tracking-[0.13px] font-normal",
   label:
-    "font-geom text-[12px] leading-[17.6px] tracking-[0.275px] font-medium",
+    "font-geom text-xs leading-[1.1rem] tracking-[0.275px] font-medium",
   micro:
-    "font-geom text-[11px] leading-[17.6px] tracking-[0.275px] font-normal",
+    "font-geom text-[0.6875rem] leading-[1.1rem] tracking-[0.275px] font-normal",
 };
 
 const colorStyles: Record<TextColor, string> = {
-  primary: "text-[var(--color-text-primary)]",
-  secondary: "text-[var(--color-text-secondary)]",
-  tertiary: "text-[var(--color-text-tertiary)]",
-  muted: "text-[var(--color-text-muted)]",
-  success: "text-[var(--color-success-dark)]",
-  warning: "text-[var(--color-warning-dark)]",
-  danger: "text-[var(--color-danger-dark)]",
-  brand: "text-[var(--color-brand)]",
+  primary: "text-(--color-text-primary)",
+  secondary: "text-(--color-text-secondary)",
+  tertiary: "text-(--color-text-tertiary)",
+  muted: "text-(--color-text-muted)",
+  success: "text-(--color-success-dark)",
+  warning: "text-(--color-warning-dark)",
+  danger: "text-(--color-danger-dark)",
+  brand: "text-(--color-brand)",
   white: "text-white",
   inherit: "text-inherit",
 };

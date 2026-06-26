@@ -1,4 +1,4 @@
-import { usePageTitle } from "@/layouts/AppLayout";
+﻿import { usePageTitle } from "@/layouts/AppLayout";
 import { useMemo } from "react";
 import { RefreshCw, Copy, ExternalLink } from "lucide-react";
 
@@ -12,13 +12,29 @@ import { Button } from "@/components/ui/Button";
 import { CryptoBadge } from "@/components/ui/CryptoBadge";
 import { DataTable } from "@/components/tables/DataTable";
 import { useClipboard } from "@/hooks/ui/useClipboard";
-import {
-  DUMMY_WALLETS_V2,
-  DUMMY_REBALANCE_HISTORY,
-  type WalletRow,
-  type RebalanceEntry,
-} from "@/lib/dummyData";
+import { useDashboardLiquidity } from "@/hooks/queries/useDashboard";
 import type { ColumnDef } from "@tanstack/react-table";
+
+type WalletRow = {
+  id: string;
+  type: string;
+  network: string;
+  asset: string;
+  address: string;
+  balance: string;
+  unit: string;
+  usd_value: string;
+  threshold: number;
+  status: string;
+};
+type RebalanceEntry = {
+  date: string;
+  from: string;
+  to: string;
+  amount: string;
+  reason: string;
+  initiated_by: string;
+};
 
 function ThresholdBar({
   value,
@@ -29,13 +45,13 @@ function ThresholdBar({
 }) {
   const barColor =
     status === "healthy"
-      ? "bg-[var(--color-success-mid)]"
+      ? "bg-(--color-success-mid)"
       : status === "secure"
-        ? "bg-[var(--color-brand)]"
-        : "bg-[var(--color-warning)]";
+        ? "bg-(--color-brand)"
+        : "bg-(--color-warning)";
   return (
     <Row gap={2} align="center">
-      <div className="w-20 h-1.5 rounded-full bg-[var(--color-border)] overflow-hidden">
+      <div className="w-20 h-1.5 rounded-full bg-(--color-border) overflow-hidden">
         <div
           className={["h-full rounded-full", barColor].join(" ")}
           style={{ width: `${value}%` }}
@@ -55,17 +71,17 @@ function WalletAddress({ address }: { address: string }) {
       <Text
         variant="micro"
         color="secondary"
-        className="font-mono truncate max-w-[120px]"
+        className="font-mono truncate max-w-[7.5rem]"
       >
         {address}
       </Text>
       <button
         onClick={() => copy(address)}
-        className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+        className="text-(--color-text-muted) hover:text-(--color-text-primary)"
       >
         <Copy size={11} />
       </button>
-      <button className="text-[var(--color-text-muted)] hover:text-[var(--color-brand)]">
+      <button className="text-(--color-text-muted) hover:text-(--color-brand)">
         <ExternalLink size={11} />
       </button>
     </Row>
@@ -75,6 +91,34 @@ function WalletAddress({ address }: { address: string }) {
 export default function WalletsPage() {
   usePageTitle("Wallets & Liquidity", "Asset custody and operational safety");
 
+  const { data: apiLiquidity = [] } = useDashboardLiquidity();
+
+  const wallets = useMemo<WalletRow[]>(
+    () =>
+      Array.isArray(apiLiquidity)
+        ? apiLiquidity.map((value: unknown, index: number) => {
+            const item =
+              value && typeof value === "object"
+                ? (value as Record<string, unknown>)
+                : {};
+
+            return {
+              id: String(item.id ?? item.wallet_id ?? index),
+              type: String(item.type ?? item.wallet_type ?? "Hot Wallet"),
+              network: String(item.network ?? item.chain ?? "—"),
+              asset: String(item.asset ?? item.symbol ?? item.currency ?? "—"),
+              address: String(item.address ?? item.wallet_address ?? "—"),
+              balance: String(item.balance ?? item.amount ?? "0"),
+              unit: String(item.unit ?? item.asset ?? item.symbol ?? ""),
+              usd_value: String(item.usd_value ?? item.value_usd ?? item.value ?? "—"),
+              threshold: Number(item.threshold ?? item.threshold_percent ?? 0),
+              status: String(item.status ?? "healthy"),
+            };
+          })
+        : [],
+    [apiLiquidity],
+  );
+
   const walletCols = useMemo<ColumnDef<WalletRow, unknown>[]>(
     () => [
       {
@@ -82,7 +126,7 @@ export default function WalletsPage() {
         header: "Wallet Type",
         cell: ({ row }) => (
           <Row gap={2} align="center">
-            <span className="text-[16px]">
+            <span className="text-base">
               {row.original.type === "Hot Wallet"
                 ? "🔥"
                 : row.original.type === "Cold Wallet"
@@ -150,12 +194,12 @@ export default function WalletsPage() {
           const v = getValue<WalletRow["status"]>();
           const color =
             v === "healthy"
-              ? "text-[var(--color-success-mid)]"
+              ? "text-(--color-success-mid)"
               : v === "secure"
-                ? "text-[var(--color-brand)]"
-                : "text-[var(--color-warning)]";
+                ? "text-(--color-brand)"
+                : "text-(--color-warning)";
           return (
-            <span className={["text-[13px] font-medium", color].join(" ")}>
+            <span className={["text-[0.8125rem] font-medium", color].join(" ")}>
               {v}
             </span>
           );
@@ -165,7 +209,7 @@ export default function WalletsPage() {
         id: "actions",
         header: "Actions",
         cell: () => (
-          <button className="text-[var(--color-brand)] text-[13px] font-medium hover:underline transition-colors">
+          <button className="text-(--color-brand) text-[0.8125rem] font-medium hover:underline transition-colors">
             Manage
           </button>
         ),
@@ -237,17 +281,17 @@ export default function WalletsPage() {
   return (
     <Box p={6} className="space-y-5">
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Assets (USD)" value="$62.19M" />
-        <StatCard label="Hot Wallets" value={3} />
-        <StatCard label="Cold Storage" value="$37.6M" />
-        <StatCard label="Low Balance Alerts" value={1} status="danger" />
+        <StatCard label="Total Assets (USD)" value={wallets.length ? wallets[0]?.usd_value ?? "$0" : "$0"} />
+        <StatCard label="Hot Wallets" value={wallets.filter((wallet) => wallet.type === "Hot Wallet").length} />
+        <StatCard label="Cold Storage" value={wallets.find((wallet) => wallet.type === "Cold Wallet")?.usd_value ?? "$0"} />
+        <StatCard label="Low Balance Alerts" value={wallets.filter((wallet) => wallet.status === "low").length} status="danger" />
       </div>
 
       <Card noPadding>
         <Row
           justify="between"
           align="center"
-          className="px-5 py-4 border-b border-[var(--color-border)]"
+          className="px-5 py-4 border-b border-(--color-border)"
         >
           <Stack gap={0}>
             <Text variant="subtitle" color="primary" weight="semibold" as="p">
@@ -263,7 +307,7 @@ export default function WalletsPage() {
           </Button>
         </Row>
         <DataTable
-          data={DUMMY_WALLETS_V2}
+          data={wallets}
           columns={walletCols}
           emptyTitle="No wallets"
           emptyMessage="No wallets configured"
@@ -271,7 +315,7 @@ export default function WalletsPage() {
       </Card>
 
       <Card noPadding>
-        <Box px={5} py={4} className="border-b border-[var(--color-border)]">
+        <Box px={5} py={4} className="border-b border-(--color-border)">
           <Text variant="subtitle" color="primary" weight="semibold" as="p">
             Rebalancing History
           </Text>
@@ -280,10 +324,10 @@ export default function WalletsPage() {
           </Text>
         </Box>
         <DataTable
-          data={DUMMY_REBALANCE_HISTORY}
+          data={[]}
           columns={rebalanceCols}
           emptyTitle="No history"
-          emptyMessage="No rebalancing history"
+          emptyMessage="No rebalancing history available"
         />
       </Card>
     </Box>

@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 type SpinnerSize = "xs" | "sm" | "md" | "lg";
 
@@ -22,7 +22,11 @@ const sizeMap: Record<SpinnerSize, string> = {
  * Usage:
  *   <Spinner />                    — medium, inherits color
  *   <Spinner size="sm" />          — inside buttons
+<<<<<<< HEAD
  *   <Spinner size="lg" className="text-[var(--color-brand)]" />
+=======
+ *   <Spinner size="lg" className="text-(--color-brand)" />
+>>>>>>> refactoring/dummy-data
  */
 export function Spinner({
   size = "md",

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+﻿import { cn } from '@/lib/utils'
 import { type LucideIcon, Inbox } from 'lucide-react'
 
 interface EmptyStateProps {
@@ -18,13 +18,13 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3 py-16 text-center', className)}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-bg-subtle)]">
-        <Icon className="h-5 w-5 text-[var(--color-text-muted)]" />
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-(--color-bg-subtle)">
+        <Icon className="h-5 w-5 text-(--color-text-muted)" />
       </div>
       <div>
-        <p className="text-[14px] font-medium text-[var(--color-text-primary)]">{title}</p>
+        <p className="text-sm font-medium text-(--color-text-primary)">{title}</p>
         {description && (
-          <p className="mt-0.5 text-[12px] text-[var(--color-text-tertiary)]">{description}</p>
+          <p className="mt-0.5 text-xs text-(--color-text-tertiary)">{description}</p>
         )}
       </div>
       {action && <div className="mt-1">{action}</div>}

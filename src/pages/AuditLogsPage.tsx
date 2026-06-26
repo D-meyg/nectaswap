@@ -1,4 +1,4 @@
-import { usePageTitle } from "@/layouts/AppLayout";
+﻿import { usePageTitle } from "@/layouts/AppLayout";
 import { useMemo, useState } from "react";
 import { Download, CheckCircle, X, AlertTriangle, Eye } from "lucide-react";
 
@@ -6,13 +6,16 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
+import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import { Avatar } from "@/components/ui/Avatar";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { FilterButton } from "@/components/ui/FilterButton";
 import { useDebounce } from "@/hooks/ui/useDebounce";
+import { useAdminActivityLogs } from "@/hooks/queries/useAdmins";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface AuditLog {
@@ -23,159 +26,66 @@ interface AuditLog {
   category: string;
   category_color: string;
   result: "Success" | "Failed" | "Warning";
+  ip_address: string;
+  log_id: string;
+  details: string;
 }
 
-const AUDIT_DATA: AuditLog[] = [
-  {
-    timestamp: "2024-01-29 14:23:15",
-    admin: "Sarah Chen",
-    action: "Approved KYC",
-    target: "User #7834 (John Doe)",
-    category: "Compliance",
-    category_color: "text-[var(--color-brand)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 14:20:42",
-    admin: "James Wilson",
-    action: "Manual Credit",
-    target: "₦50,000 to User #4521",
-    category: "Financial",
-    category_color: "text-[var(--color-success-mid)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 14:18:33",
-    admin: "Maria Garcia",
-    action: "Froze Account",
-    target: "User #3029 (Suspicious Activity)",
-    category: "Security",
-    category_color: "text-[var(--color-warning-dark)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 14:15:28",
-    admin: "System",
-    action: "Rate Update",
-    target: "BTC/NGN Rate: ₦42,100",
-    category: "Financial",
-    category_color: "text-[var(--color-success-mid)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 14:12:19",
-    admin: "David Park",
-    action: "Resolved Dispute",
-    target: "Ticket #8821",
-    category: "User Management",
-    category_color: "text-[var(--color-text-secondary)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 14:08:45",
-    admin: "Sarah Chen",
-    action: "Login Attempt",
-    target: "Admin Panel",
-    category: "Security",
-    category_color: "text-[var(--color-warning-dark)]",
-    result: "Failed",
-  },
-  {
-    timestamp: "2024-01-29 14:05:12",
-    admin: "James Wilson",
-    action: "Updated User Limits",
-    target: "User #2847 (Daily Limit)",
-    category: "User Management",
-    category_color: "text-[var(--color-text-secondary)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 14:02:33",
-    admin: "System",
-    action: "Database Backup",
-    target: "Full System Backup",
-    category: "System",
-    category_color: "text-[var(--color-brand)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 13:58:22",
-    admin: "Maria Garcia",
-    action: "Rejected KYC",
-    target: "User #5623 (Invalid Documents)",
-    category: "Compliance",
-    category_color: "text-[var(--color-brand)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 13:55:11",
-    admin: "David Park",
-    action: "Issued Virtual Card",
-    target: "User #9012 (Card #VC-2847)",
-    category: "Financial",
-    category_color: "text-[var(--color-success-mid)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 13:50:45",
-    admin: "James Wilson",
-    action: "Wallet Rebalance",
-    target: "BTC Hot Wallet",
-    category: "Financial",
-    category_color: "text-[var(--color-success-mid)]",
-    result: "Warning",
-  },
-  {
-    timestamp: "2024-01-29 13:47:33",
-    admin: "Sarah Chen",
-    action: "Created Admin User",
-    target: "New Admin: Lisa Anderson",
-    category: "Security",
-    category_color: "text-[var(--color-warning-dark)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 13:43:28",
-    admin: "System",
-    action: "API Rate Limit",
-    target: "IP: 198.51.100.25",
-    category: "Security",
-    category_color: "text-[var(--color-warning-dark)]",
-    result: "Warning",
-  },
-  {
-    timestamp: "2024-01-29 13:40:15",
-    admin: "Maria Garcia",
-    action: "Updated Compliance Rule",
-    target: "AML Velocity Check",
-    category: "Compliance",
-    category_color: "text-[var(--color-brand)]",
-    result: "Success",
-  },
-  {
-    timestamp: "2024-01-29 13:35:42",
-    admin: "David Park",
-    action: "Refunded Transaction",
-    target: "Transaction #0x8h9i...0jlk",
-    category: "Transaction",
-    category_color: "text-[var(--color-text-secondary)]",
-    result: "Success",
-  },
-];
+function text(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function normalizeResult(value: unknown): AuditLog["result"] {
+  const result = text(value, "Success").toLowerCase();
+  if (result === "failed" || result === "failure") return "Failed";
+  if (result === "warning" || result === "warn") return "Warning";
+  return "Success";
+}
+
+function categoryColor(category: string) {
+  const normalized = category.toLowerCase();
+  if (normalized.includes("financial")) return "text-(--color-success-mid)";
+  if (normalized.includes("security")) return "text-(--color-warning-dark)";
+  if (normalized.includes("compliance")) return "text-(--color-brand)";
+  return "text-(--color-text-secondary)";
+}
+
+function normalizeAudit(value: unknown): AuditLog {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const admin =
+    item.admin && typeof item.admin === "object"
+      ? (item.admin as Record<string, unknown>)
+      : {};
+  const category = text(item.category ?? item.module, "System");
+
+  return {
+    timestamp: text(item.timestamp ?? item.created_at ?? item.date, "N/A"),
+    admin: text(item.admin_name ?? item.admin ?? admin.name, "System"),
+    action: text(item.action ?? item.event, "Activity"),
+    target: text(item.target ?? item.description, "N/A"),
+    category,
+    category_color: text(item.category_color, categoryColor(category)),
+    result: normalizeResult(item.result ?? item.status),
+    ip_address: text(item.ip_address ?? item.ip, "N/A"),
+    log_id: text(item.log_id ?? item.id, "#000001"),
+    details: text(item.details ?? item.description, "No details provided."),
+  };
+}
 
 function ResultBadge({ result }: { result: AuditLog["result"] }) {
   const styles = {
     Success: {
       icon: <CheckCircle size={12} />,
-      cls: "text-[var(--color-success-mid)]",
+      cls: "text-(--color-success-mid)",
     },
-    Failed: { icon: <X size={12} />, cls: "text-[var(--color-danger)]" },
+    Failed: { icon: <X size={12} />, cls: "text-(--color-danger)" },
     Warning: {
       icon: <AlertTriangle size={12} />,
-      cls: "text-[var(--color-warning-dark)]",
+      cls: "text-(--color-warning-dark)",
     },
   };
-  const s = styles[result];
+  const s = styles[result] ?? styles.Success;
   return (
     <Row gap={1} align="center" className={s.cls}>
       {s.icon}
@@ -186,6 +96,74 @@ function ResultBadge({ result }: { result: AuditLog["result"] }) {
   );
 }
 
+function AuditLogDetailsModal({
+  log,
+  onClose,
+}: {
+  log: AuditLog | null;
+  onClose: () => void;
+}) {
+  if (!log) return null;
+
+  const details = [
+    ["Timestamp", log.timestamp],
+    ["Admin User", log.admin],
+    ["Action", log.action],
+    ["Target", log.target],
+    ["Category", log.category],
+    ["Result", log.result],
+    ["IP Address", log.ip_address],
+    ["Log ID", log.log_id],
+  ];
+
+  return (
+    <Modal open={Boolean(log)} onClose={onClose} size="lg" className="max-w-[38rem]">
+      <Modal.Header
+        title="Audit Log Details"
+        onClose={onClose}
+        className="border-b-0 px-5 pb-2 pt-5 [&_h4]:text-[1rem] [&_h4]:leading-5"
+      />
+      <Modal.Body className="px-5 pb-3 pt-0">
+        <div className="grid grid-cols-2 overflow-hidden rounded-(--radius-sm) border border-(--color-border)">
+          {details.map(([label, value]) => (
+            <div key={label} className="border-b border-r border-(--color-border) px-3 py-2 even:border-r-0 last:border-b-0 [&:nth-last-child(2)]:border-b-0">
+              <Text variant="micro" color="muted" className="block text-[0.625rem] leading-3">
+                {label}
+              </Text>
+              {label === "Result" ? (
+                <ResultBadge result={value as AuditLog["result"]} />
+              ) : (
+                <Text variant="caption" color="primary" className="mt-0.5 block text-[0.75rem] leading-4">
+                  {value}
+                </Text>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <Stack gap={1} className="mt-3">
+          <Text variant="micro" color="muted" className="text-[0.625rem] leading-3">
+            Details
+          </Text>
+          <Box className="rounded-(--radius-sm) bg-(--color-bg-subtle) px-3 py-3">
+            <Text variant="caption" color="primary" className="text-[0.75rem] leading-4">
+              {log.details}
+            </Text>
+          </Box>
+        </Stack>
+      </Modal.Body>
+      <Modal.Footer className="grid grid-cols-2 gap-3 border-t-0 bg-white px-5 pb-5 pt-2">
+        <Button variant="secondary" size="sm" className="h-9 justify-center text-[0.75rem]" onClick={onClose}>
+          Close
+        </Button>
+        <Button size="sm" className="h-9 justify-center text-[0.75rem]">
+          Export This Log
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
 export default function AuditLogsPage() {
   usePageTitle(
     "Audit Logs",
@@ -193,23 +171,29 @@ export default function AuditLogsPage() {
   );
 
   const [search, setSearch] = useState("");
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const debounced = useDebounce(search, 300);
+  const { data: apiLogs = [], isLoading } = useAdminActivityLogs();
+  const logs = useMemo(
+    () => (Array.isArray(apiLogs) ? apiLogs.map(normalizeAudit) : []),
+    [apiLogs],
+  );
 
   const filtered = useMemo(
     () =>
-      AUDIT_DATA.filter(
+      logs.filter(
         (l) =>
           !debounced ||
           l.admin.toLowerCase().includes(debounced.toLowerCase()) ||
           l.action.toLowerCase().includes(debounced.toLowerCase()) ||
           l.target.toLowerCase().includes(debounced.toLowerCase()),
       ),
-    [debounced],
+    [logs, debounced],
   );
 
-  const success = AUDIT_DATA.filter((l) => l.result === "Success").length;
-  const failed = AUDIT_DATA.filter((l) => l.result === "Failed").length;
-  const warnings = AUDIT_DATA.filter((l) => l.result === "Warning").length;
+  const success = logs.filter((l) => l.result === "Success").length;
+  const failed = logs.filter((l) => l.result === "Failed").length;
+  const warnings = logs.filter((l) => l.result === "Warning").length;
 
   const columns = useMemo<ColumnDef<AuditLog, unknown>[]>(
     () => [
@@ -227,7 +211,7 @@ export default function AuditLogsPage() {
         header: "Admin",
         cell: ({ getValue }) => (
           <Row gap={2} align="center">
-            <Avatar name={getValue<string>()} size="sm" />
+            <Avatar name={getValue<string>()} size="xs" />
             <Text variant="caption" color="primary" weight="medium">
               {getValue<string>()}
             </Text>
@@ -250,7 +234,7 @@ export default function AuditLogsPage() {
           <Text
             variant="caption"
             color="secondary"
-            className="max-w-[200px] truncate block"
+            className="max-w-[12.5rem] truncate block"
           >
             {getValue<string>()}
           </Text>
@@ -279,13 +263,14 @@ export default function AuditLogsPage() {
       {
         id: "actions",
         header: "Actions",
-        cell: () => (
+        cell: ({ row }) => (
           <Button
             variant="ghost"
             size="sm"
             className="h-7 w-7 p-0 flex items-center justify-center"
+            onClick={() => setSelectedLog(row.original)}
           >
-            <Eye size={14} className="text-[var(--color-text-muted)]" />
+            <Eye size={14} className="text-(--color-text-muted)" />
           </Button>
         ),
       },
@@ -302,7 +287,7 @@ export default function AuditLogsPage() {
             value={search}
             onChange={setSearch}
             placeholder="Search by admin, action, or target..."
-            className="max-w-[380px] flex-1"
+            className="max-w-[23.75rem] flex-1"
           />
           <Row gap={2}>
             <FilterButton label="" />
@@ -318,7 +303,7 @@ export default function AuditLogsPage() {
 
       {/* 4 stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Logs" value={AUDIT_DATA.length} />
+        <StatCard label="Total Logs" value={logs.length} />
         <StatCard
           label="Success"
           value={success}
@@ -326,7 +311,7 @@ export default function AuditLogsPage() {
           icon={
             <CheckCircle
               size={16}
-              className="text-[var(--color-success-mid)]"
+              className="text-(--color-success-mid)"
             />
           }
         />
@@ -334,14 +319,14 @@ export default function AuditLogsPage() {
           label="Failed"
           value={failed}
           status="danger"
-          icon={<X size={16} className="text-[var(--color-danger)]" />}
+          icon={<X size={16} className="text-(--color-danger)" />}
         />
         <StatCard
           label="Warnings"
           value={warnings}
           status="warning"
           icon={
-            <AlertTriangle size={16} className="text-[var(--color-warning)]" />
+            <AlertTriangle size={16} className="text-(--color-warning)" />
           }
         />
       </div>
@@ -351,11 +336,13 @@ export default function AuditLogsPage() {
         <DataTable
           data={filtered}
           columns={columns}
+          loading={isLoading}
           emptyTitle="No audit logs"
           emptyMessage="No logs found matching your search"
           stickyHeader
         />
       </Card>
+      <AuditLogDetailsModal log={selectedLog} onClose={() => setSelectedLog(null)} />
     </Box>
   );
 }

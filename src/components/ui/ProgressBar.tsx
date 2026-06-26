@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 import { Text } from "./Text";
 
 interface ProgressBarProps {
@@ -20,10 +20,10 @@ export function ProgressBar({
 
   const color =
     pct >= 90
-      ? "bg-[var(--color-danger)]"
+      ? "bg-(--color-danger)"
       : pct >= 70
-        ? "bg-[var(--color-warning)]"
-        : "bg-[var(--color-brand)]";
+        ? "bg-(--color-warning)"
+        : "bg-(--color-brand)";
 
   return (
     <div className={cn("w-full flex flex-col gap-1.5", className)}>
@@ -43,7 +43,7 @@ export function ProgressBar({
         </div>
       )}
 
-      <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-border)]">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-(--color-border)">
         <div
           className={cn(
             "h-full rounded-full transition-all duration-500",

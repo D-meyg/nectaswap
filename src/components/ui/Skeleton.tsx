@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+﻿import { cn } from '@/lib/utils'
 
 interface SkeletonProps {
   className?: string
@@ -7,7 +7,7 @@ interface SkeletonProps {
 export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
-      className={cn('animate-pulse rounded-[var(--radius-sm)] bg-[var(--color-border)]', className)}
+      className={cn('animate-pulse rounded-(--radius-sm) bg-(--color-border)', className)}
     />
   )
 }
@@ -16,7 +16,7 @@ export function TableSkeleton({ rows = 8, cols = 5 }: { rows?: number; cols?: nu
   return (
     <div className="w-full">
       {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 border-b border-[var(--color-border)] px-4 py-3">
+        <div key={i} className="flex items-center gap-4 border-b border-(--color-border) px-4 py-3">
           {Array.from({ length: cols }).map((_, j) => (
             <Skeleton key={j} className={cn('h-4', j === 0 ? 'w-32' : 'flex-1')} />
           ))}

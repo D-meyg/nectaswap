@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+﻿import { useMemo } from "react";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Text } from "@/components/ui/Text";
@@ -31,7 +31,7 @@ export function RecentConversions({
         accessorKey: "crypto",
         header: "Crypto",
         cell: ({ getValue }) => (
-          <span className="inline-flex items-center rounded-[var(--radius-sm)] bg-[var(--color-bg-subtle)] border border-[var(--color-border)] px-2 py-0.5">
+          <span className="inline-flex items-center rounded-(--radius-sm) bg-(--color-bg-subtle) border border-(--color-border) px-2 py-0.5">
             <Text variant="label" color="secondary" weight="medium">
               {getValue<string>()}
             </Text>

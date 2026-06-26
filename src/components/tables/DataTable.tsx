@@ -1,4 +1,4 @@
-import {
+﻿import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
@@ -46,15 +46,15 @@ const SortIcon = memo(function SortIcon({
   state: "asc" | "desc" | false;
 }) {
   if (state === "asc") {
-    return <ChevronUp size={14} className="text-[var(--color-brand)]" />;
+    return <ChevronUp size={14} className="text-(--color-brand)" />;
   }
 
   if (state === "desc") {
-    return <ChevronDown size={14} className="text-[var(--color-brand)]" />;
+    return <ChevronDown size={14} className="text-(--color-brand)" />;
   }
 
   return (
-    <ChevronsUpDown size={14} className="text-[var(--color-text-muted)]" />
+    <ChevronsUpDown size={14} className="text-(--color-text-muted)" />
   );
 });
 
@@ -62,10 +62,10 @@ function TableSkeleton({ columns }: { columns: number }) {
   return (
     <>
       {Array.from({ length: 5 }).map((_, rowIndex) => (
-        <tr key={rowIndex} className="border-b border-[var(--color-border)]">
+        <tr key={rowIndex} className="border-b border-(--color-border)">
           {Array.from({ length: columns }).map((__, cellIndex) => (
-            <td key={cellIndex} className="px-5 py-4">
-              <div className="h-4 w-full max-w-[140px] animate-pulse rounded bg-[var(--color-border)]" />
+            <td key={cellIndex} className="px-4 py-3">
+              <div className="h-3 w-full max-w-[8.75rem] animate-pulse rounded bg-(--color-border)" />
             </td>
           ))}
         </tr>
@@ -94,10 +94,11 @@ export function DataTable<TData>({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
+  const tableData = useMemo(() => (Array.isArray(data) ? data : []), [data]);
   const memoColumns = useMemo(() => columns, [columns]);
 
   const table = useReactTable({
-    data,
+    data: tableData,
     columns: memoColumns,
     state: {
       sorting,
@@ -114,7 +115,7 @@ export function DataTable<TData>({
 
       const selectedRows = Object.keys(next)
         .filter((key) => next[key])
-        .map((key) => data[Number(key)])
+        .map((key) => tableData[Number(key)])
         .filter(Boolean);
 
       onSelectionChange(selectedRows);
@@ -140,7 +141,7 @@ export function DataTable<TData>({
   return (
     <div className={cn("flex flex-col w-full", className)}>
       {toolbar && (
-        <div className="border-b border-[var(--color-border)] bg-white px-5 py-4">
+        <div className="border-b border-(--color-border) bg-white px-4 py-3">
           {toolbar}
         </div>
       )}
@@ -149,27 +150,27 @@ export function DataTable<TData>({
         <table className="w-full border-collapse text-left">
           <thead
             className={cn(
-              "bg-[var(--color-bg-subtle)]",
+              "bg-(--color-bg-subtle)",
               stickyHeader && "sticky top-0 z-10",
             )}
           >
             {table.getHeaderGroups().map((headerGroup) => (
               <tr
                 key={headerGroup.id}
-                className="h-[44px] border-b border-[var(--color-border)]"
+                className="h-9 border-b border-(--color-border)"
               >
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     onClick={header.column.getToggleSortingHandler()}
                     className={cn(
-                      "whitespace-nowrap px-5 py-3 text-left align-middle",
+                      "whitespace-nowrap px-4 py-2 text-left align-middle",
                       header.column.getCanSort() &&
                         "cursor-pointer select-none hover:bg-[rgba(0,0,0,0.02)] transition-colors",
                     )}
                   >
                     <span className="inline-flex items-center gap-2">
-                      <span className="font-geom text-[11px] font-semibold uppercase leading-none tracking-[0.05em] text-[var(--color-text-tertiary)]">
+                      <span className="font-geom text-[0.625rem] font-semibold uppercase leading-none tracking-[0.04em] text-(--color-text-tertiary)">
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
@@ -191,20 +192,20 @@ export function DataTable<TData>({
               <TableSkeleton columns={columns.length} />
             ) : error ? (
               <tr>
-                <td colSpan={columns.length} className="px-5 py-12 text-center">
-                  <Text variant="caption" color="danger">
+                <td colSpan={columns.length} className="px-4 py-10 text-center">
+                  <Text variant="caption" color="danger" className="text-xs">
                     {error}
                   </Text>
                 </td>
               </tr>
             ) : table.getRowModel().rows.length === 0 ? (
               <tr>
-                <td colSpan={columns.length} className="px-5 py-12 text-center">
-                  <Text variant="subtitle" color="primary" weight="semibold">
+                <td colSpan={columns.length} className="px-4 py-10 text-center">
+                  <Text variant="subtitle" color="primary" weight="semibold" className="text-[0.8125rem]">
                     {emptyTitle}
                   </Text>
 
-                  <Text variant="caption" color="tertiary" className="mt-1">
+                  <Text variant="caption" color="tertiary" className="mt-1 text-[0.6875rem]">
                     {emptyMessage}
                   </Text>
                 </td>
@@ -214,15 +215,15 @@ export function DataTable<TData>({
                 <tr
                   key={row.id}
                   className={cn(
-                    "h-[64px] border-b border-[var(--color-border)] last:border-b-0",
-                    "transition-colors hover:bg-[var(--color-bg-subtle)]",
+                    "h-11 border-b border-(--color-border) last:border-b-0",
+                    "transition-colors hover:bg-(--color-bg-subtle)",
                     row.getIsSelected() && "bg-[rgba(78,43,204,0.04)]",
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      className="whitespace-nowrap px-5 py-3 align-middle"
+                      className="whitespace-nowrap px-4 py-2 align-middle text-xs"
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -238,8 +239,8 @@ export function DataTable<TData>({
       </div>
 
       {onPageChange && (
-        <div className="flex items-center justify-between gap-4 border-t border-[var(--color-border)] bg-white px-5 py-4">
-          <Text variant="caption" color="tertiary">
+        <div className="flex items-center justify-between gap-4 border-t border-(--color-border) bg-white px-4 py-3">
+          <Text variant="caption" color="tertiary" className="text-[0.6875rem]">
             {total
               ? `Showing ${(page - 1) * pageSize + 1}–${Math.min(
                   page * pageSize,
@@ -254,13 +255,13 @@ export function DataTable<TData>({
               size="sm"
               onClick={handlePrev}
               disabled={page <= 1}
-              className="h-[32px] px-3"
+              className="h-8 px-3"
             >
               <ChevronLeft size={14} />
               Previous
             </Button>
 
-            <span className="flex h-[32px] min-w-[32px] items-center justify-center rounded-[var(--radius-sm)] bg-[var(--color-brand)] px-2 font-geom text-[13px] font-semibold text-white shadow-sm">
+            <span className="flex h-8 min-w-8 items-center justify-center rounded-(--radius-sm) bg-(--color-brand) px-2 font-geom text-[0.8125rem] font-semibold text-white shadow-sm">
               {page}
             </span>
 
@@ -269,7 +270,7 @@ export function DataTable<TData>({
               size="sm"
               onClick={handleNext}
               disabled={page >= totalPages}
-              className="h-[32px] px-3"
+              className="h-8 px-3"
             >
               Next
               <ChevronRight size={14} />

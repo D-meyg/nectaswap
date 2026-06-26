@@ -1,55 +1,69 @@
-import { useQuery } from '@tanstack/react-query'
-import { userService }    from '@/services/userService'
-import { cardService }    from '@/services/cardService'
-import { activityService }from '@/services/activityService'
-import { noteService }    from '@/services/noteService'
-import { kycService }     from '@/services/kycService'
-import { QUERY_KEYS }     from '@/lib/constants'
+import { useQuery } from "@tanstack/react-query";
+import { userService } from "@/services/userService";
+import type { UserDetail, ActivityEvent, Note, KYCHistoryEvent, Card } from "@/api/types";
 
-export function useUserDetail(id: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.USER(id),
-    queryFn:  () => userService.get(id),
-    enabled:  !!id,
-  })
+export function useUserDetail(userId: string) {
+  return useQuery<UserDetail>({
+    queryKey: ["users", userId, "detail"],
+    queryFn: async () => {
+      const res = await userService.getUserDetail(userId);
+      return res.data;
+    },
+    enabled: !!userId,
+  });
 }
 
 export function useUserCards(userId: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.USER_CARDS(userId),
-    queryFn:  () => cardService.list(userId),
-    enabled:  !!userId,
-  })
-}
-
-export function useUserActivity(userId: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.USER_ACTIVITY(userId),
-    queryFn:  () => activityService.list(userId),
-    enabled:  !!userId,
-  })
-}
-
-export function useUserNotes(userId: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.USER_NOTES(userId),
-    queryFn:  () => noteService.list(userId),
-    enabled:  !!userId,
-  })
+  return useQuery<Card[]>({
+    queryKey: ["users", userId, "cards"],
+    queryFn: async () => {
+      const res = await userService.getUserCards(userId);
+      return res.data;
+    },
+    enabled: !!userId,
+  });
 }
 
 export function useKYCHistory(userId: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.KYC_HISTORY(userId),
-    queryFn:  () => kycService.history(userId),
-    enabled:  !!userId,
-  })
+  return useQuery<KYCHistoryEvent[]>({
+    queryKey: ["users", userId, "kyc"],
+    queryFn: async () => {
+      const res = await userService.getUserKYC(userId);
+      return res.data;
+    },
+    enabled: !!userId,
+  });
 }
 
-export function useKYCDetail(kycId: string) {
-  return useQuery({
-    queryKey: QUERY_KEYS.KYC_DETAIL(kycId),
-    queryFn:  () => kycService.get(kycId),
-    enabled:  !!kycId,
-  })
+export function useUserActivity(userId: string) {
+  return useQuery<ActivityEvent[]>({
+    queryKey: ["users", userId, "activity"],
+    queryFn: async () => {
+      const res = await userService.getUserActivity(userId);
+      return res.data;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useUserNotes(userId: string) {
+  return useQuery<Note[]>({
+    queryKey: ["users", userId, "notes"],
+    queryFn: async () => {
+      const res = await userService.getUserNotes(userId);
+      return res.data;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useUserAuditLog(userId: string) {
+  return useQuery<unknown[]>({
+    queryKey: ["users", userId, "audit-log"],
+    queryFn: async () => {
+      const res = await userService.getUserAuditLog(userId);
+      return res.data;
+    },
+    enabled: !!userId,
+  });
 }

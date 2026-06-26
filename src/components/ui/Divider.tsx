@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 interface DividerProps {
   vertical?: boolean;
@@ -7,7 +7,7 @@ interface DividerProps {
 }
 
 /**
- * Divider — replaces <div className="h-px bg-[var(--color-border)]">
+ * Divider — replaces <div className="h-px bg-(--color-border)">
  * scattered across TopBar, dropdowns, card sections, modals.
  *
  * Usage:
@@ -19,7 +19,7 @@ export function Divider({ vertical, className, label }: DividerProps) {
   if (vertical) {
     return (
       <div
-        className={cn("w-px self-stretch bg-[var(--color-border)]", className)}
+        className={cn("w-px self-stretch bg-(--color-border)", className)}
         role="separator"
         aria-orientation="vertical"
       />
@@ -32,18 +32,18 @@ export function Divider({ vertical, className, label }: DividerProps) {
         className={cn("flex items-center gap-3", className)}
         role="separator"
       >
-        <div className="flex-1 h-px bg-[var(--color-border)]" />
-        <span className="text-[11px] text-[var(--color-text-muted)] font-medium uppercase tracking-[0.5px]">
+        <div className="flex-1 h-px bg-(--color-border)" />
+        <span className="text-[0.6875rem] text-(--color-text-muted) font-medium uppercase tracking-[0.5px]">
           {label}
         </span>
-        <div className="flex-1 h-px bg-[var(--color-border)]" />
+        <div className="flex-1 h-px bg-(--color-border)" />
       </div>
     );
   }
 
   return (
     <div
-      className={cn("h-px w-full bg-[var(--color-border)]", className)}
+      className={cn("h-px w-full bg-(--color-border)", className)}
       role="separator"
       aria-orientation="horizontal"
     />

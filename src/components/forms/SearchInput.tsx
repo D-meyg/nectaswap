@@ -1,4 +1,4 @@
-import { forwardRef } from "react";
+﻿import { forwardRef } from "react";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +22,7 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
     return (
       <div
         className={cn(
-          "flex h-[40px] items-center gap-2.5 rounded-(--radius-md) border border-(--color-border) bg-white px-3.5",
+          "flex h-10 items-center gap-2.5 rounded-(--radius-md) border border-(--color-border) bg-white px-3.5",
           "transition-all duration-200 focus-within:border-(--color-brand) focus-within:ring-4 focus-within:ring-(--color-brand)/10",
           className,
         )}

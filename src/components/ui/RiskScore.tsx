@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 interface RiskScoreProps {
   score: number;
@@ -31,15 +31,15 @@ export function RiskScore({ score, className }: RiskScoreProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-geom text-[11px] font-semibold tracking-wide uppercase leading-none",
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-geom text-[0.6875rem] font-semibold tracking-wide uppercase leading-none",
         level.bg,
         level.color,
         level.border,
         className,
       )}
     >
-      <span className="text-[12px] tabular-nums font-bold">{score}</span>
-      <span className="w-[1px] h-3 bg-current opacity-30" />
+      <span className="text-xs tabular-nums font-bold">{score}</span>
+      <span className="w-px h-3 bg-current opacity-30" />
       {level.text}
     </span>
   );

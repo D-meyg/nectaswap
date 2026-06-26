@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 import { createContext, type ReactNode, useContext } from "react";
 import { Text } from "./Text";
 
@@ -41,7 +41,7 @@ export function TabsList({ children, className }: TabsListProps) {
   return (
     <div
       className={cn(
-        "flex min-h-[48px] items-center gap-6 overflow-x-auto border-b border-(--color-border) scrollbar-hide",
+        "flex min-h-[2.375rem] items-center gap-5 overflow-x-auto border-b border-(--color-border) scrollbar-hide",
         className,
       )}
     >
@@ -67,7 +67,7 @@ export function Tab({ value, children, icon, count, className }: TabProps) {
       type="button"
       onClick={() => onChange(value)}
       className={cn(
-        "inline-flex h-[48px] shrink-0 items-center gap-2 border-b-2 px-1 pb-[2px] font-geom text-[13.5px] transition-colors focus:outline-none",
+        "inline-flex h-[2.375rem] shrink-0 items-center gap-1.5 border-b-2 px-1 pb-px font-geom text-xs transition-colors focus:outline-none",
         isActive
           ? "border-(--color-brand) text-(--color-brand)"
           : "border-transparent text-(--color-text-secondary) hover:border-(--color-border-02) hover:text-(--color-text-primary)",
@@ -86,7 +86,7 @@ export function Tab({ value, children, icon, count, className }: TabProps) {
         variant="caption"
         color="inherit"
         weight={isActive ? "semibold" : "medium"}
-        className="text-[13.5px]"
+        className="text-xs leading-4"
       >
         {children}
       </Text>
@@ -94,7 +94,7 @@ export function Tab({ value, children, icon, count, className }: TabProps) {
       {count !== undefined && (
         <span
           className={cn(
-            "ml-1 rounded-full px-1.5 py-[1px] font-geom text-[11px] font-semibold leading-none",
+            "ml-1 rounded-full px-1.5 py-px font-geom text-[0.6875rem] font-semibold leading-none",
             isActive
               ? "bg-(--color-brand)/10 text-(--color-brand)"
               : "bg-(--color-bg-subtle) text-(--color-text-secondary)",
@@ -173,7 +173,7 @@ export function TabsWithSidebar({
       <div className={cn("flex flex-col", className)}>
         {tabListChildren}
 
-        <div className="flex items-start gap-6 mt-6">
+        <div className="flex items-start gap-4 mt-4">
           <div className="min-w-0 flex-1">{panelChildren}</div>
 
           <aside className="shrink-0" style={{ width: sidebarWidth }}>

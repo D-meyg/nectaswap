@@ -1,4 +1,4 @@
-import { memo } from "react";
+﻿import { memo } from "react";
 import { Bell, Search, ChevronDown, LogOut, User } from "lucide-react";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
@@ -15,8 +15,8 @@ export const TopBar = memo(function TopBar() {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const { title, subtitle } = useCurrentPageTitle();
-
-  console.log(title, subtitle)
+  const displayName = user?.name?.trim() || "Admin";
+  const firstName = displayName.split(" ")[0] || "Admin";
 
   return (
     <Row
@@ -24,39 +24,39 @@ export const TopBar = memo(function TopBar() {
       justify="between"
       align="center"
       gap={4}
-      className="h-[72px] shrink-0 px-6 bg-white border-b border-[var(--color-border)]"
+      className="h-16 shrink-0 px-6 bg-white border-b border-(--color-border)"
     >
       {/* Left: dynamic page title + subtitle */}
       <Stack gap={0}>
-        <Text as="h1" variant="heading" color="primary" weight="semibold">
+        <Text as="h1" variant="heading" color="primary" weight="semibold" className="text-2xl leading-7">
           {title}
         </Text>
-        <Text as="p" variant="caption" color="tertiary">
+        <Text as="p" variant="caption" color="tertiary" className="text-[0.6875rem] leading-4">
           {subtitle}
         </Text>
       </Stack>
 
       {/* Right: search + bell + user */}
-      <Row gap={4} align="center">
+      <Row gap={3} align="center">
         {/* Search */}
         <Row
           gap={2}
           align="center"
           className={[
-            "w-[280px] h-[36px] px-3",
-            "rounded-[var(--radius-sm)] border border-[var(--color-border)]",
-            "bg-[var(--color-bg-subtle)]",
-            "transition-colors focus-within:border-[var(--color-brand)] focus-within:bg-white",
+            "w-[18.75rem] h-8 px-3",
+            "rounded-(--radius-sm) border border-(--color-border)",
+            "bg-(--color-bg-subtle)",
+            "transition-colors focus-within:border-(--color-brand) focus-within:bg-white",
           ].join(" ")}
         >
           <Search
             size={14}
-            className="text-[var(--color-text-muted)] shrink-0"
+            className="text-(--color-text-muted) shrink-0"
           />
           <input
             type="text"
             placeholder="Search users, transactions, cards..."
-            className="flex-1 min-w-0 bg-transparent outline-none text-[13px] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)]"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[0.6875rem] text-(--color-text-primary) placeholder:text-(--color-text-muted)"
           />
         </Row>
 
@@ -70,7 +70,7 @@ export const TopBar = memo(function TopBar() {
           >
             <Bell size={16} />
           </Button>
-          <span className="absolute top-[7px] right-[7px] h-[7px] w-[7px] rounded-full bg-[var(--color-danger)] ring-[1.5px] ring-white pointer-events-none" />
+          <span className="absolute top-[0.4375rem] right-[0.4375rem] h-[0.4375rem] w-[0.4375rem] rounded-full bg-(--color-danger) ring-[1.5px] ring-white pointer-events-none" />
         </Box>
 
         {/* User dropdown */}
@@ -80,15 +80,15 @@ export const TopBar = memo(function TopBar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="flex items-center gap-2 pl-1.5 pr-2 py-1 h-auto"
+                className="flex h-8 items-center gap-2 pl-1.5 pr-2 py-1"
               >
-                <Avatar name={user.name} size="sm" />
-                <Text variant="caption" color="primary" weight="medium">
-                  {user.name.split(" ")[0]}
+                <Avatar name={displayName} size="sm" />
+                <Text variant="caption" color="primary" weight="medium" className="text-[0.6875rem]">
+                  {firstName}
                 </Text>
                 <ChevronDown
                   size={12}
-                  className="text-[var(--color-text-muted)]"
+                  className="text-(--color-text-muted)"
                 />
               </Button>
             </Dropdown.Trigger>
@@ -96,7 +96,7 @@ export const TopBar = memo(function TopBar() {
               <Box
                 px={3}
                 py={2}
-                className="border-b border-[var(--color-border)]"
+                className="border-b border-(--color-border)"
               >
                 <Stack gap={0}>
                   <Text
@@ -106,7 +106,7 @@ export const TopBar = memo(function TopBar() {
                     truncate
                     as="p"
                   >
-                    {user.name}
+                    {displayName}
                   </Text>
                   <Text variant="micro" color="muted" truncate as="p">
                     {user.email}

@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { usePageTitle } from "@/layouts/AppLayout";
 import { useState, useMemo } from "react";
 import { Flag, AlertTriangle, Shield, CheckCircle2, Eye } from "lucide-react";
@@ -16,28 +17,29 @@ import {
 } from "@/components/ui/SeverityBadge";
 import { TabsRoot, TabsList, Tab } from "@/components/ui/Tabs";
 import { DataTable } from "@/components/tables/DataTable";
-import {
-  DUMMY_FLAGGED_USERS,
-  DUMMY_FLAGGED_TRANSACTIONS,
-  DUMMY_RISK_RULES,
-} from "@/lib/dummyData";
 import type { ColumnDef } from "@tanstack/react-table";
+import {
+  useComplianceStats,
+  useFlaggedUsers,
+  useFlaggedTransactions,
+  useRiskRules,
+} from "@/hooks/queries/useCompliance";
 
 type TabValue = "flagged-users" | "flagged-transactions" | "risk-rules";
 
-type FlaggedUser = (typeof DUMMY_FLAGGED_USERS)[0];
-type FlaggedTx = (typeof DUMMY_FLAGGED_TRANSACTIONS)[0];
-type RiskRule = (typeof DUMMY_RISK_RULES)[0];
+type FlaggedUser = Record<string, any>;
+type FlaggedTx = Record<string, any>;
+type RiskRule = Record<string, any>;
 
 // ── Link-style action button ──────────────────────────────
 function LinkButton({ label, danger }: { label: string; danger?: boolean }) {
   return (
     <button
       className={[
-        "text-[13px] font-medium transition-colors",
+        "text-[0.8125rem] font-medium transition-colors",
         danger
-          ? "text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
-          : "text-[var(--color-brand)] hover:underline",
+          ? "text-(--color-text-muted) hover:text-(--color-danger)"
+          : "text-(--color-brand) hover:underline",
       ].join(" ")}
     >
       {label}
@@ -48,6 +50,14 @@ function LinkButton({ label, danger }: { label: string; danger?: boolean }) {
 export default function CompliancePage() {
   usePageTitle("Compliance & Risk", "Fraud prevention and risk monitoring");
   const [activeTab, setActiveTab] = useState<TabValue>("flagged-users");
+  const { data: stats = {} } = useComplianceStats();
+  const { data: apiFlaggedUsers = [], isLoading: loadingUsers } = useFlaggedUsers();
+  const { data: apiFlaggedTransactions = [], isLoading: loadingTransactions } = useFlaggedTransactions();
+  const { data: apiRiskRules = [], isLoading: loadingRules } = useRiskRules();
+
+  const flaggedUsers = apiFlaggedUsers as FlaggedUser[];
+  const flaggedTransactions = apiFlaggedTransactions as FlaggedTx[];
+  const riskRules = apiRiskRules as RiskRule[];
 
   // ── Flagged Users columns ───────────────────────────────
   const flaggedUserCols = useMemo<ColumnDef<FlaggedUser, unknown>[]>(
@@ -251,29 +261,29 @@ export default function CompliancePage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="Total Flags (24h)"
-          value={7}
-          icon={<Flag size={16} className="text-[var(--color-warning)]" />}
+          value={(stats as any).total_flags_24h ?? flaggedUsers.length + flaggedTransactions.length}
+          icon={<Flag size={16} className="text-(--color-warning)" />}
         />
         <StatCard
           label="High Severity"
-          value={3}
+          value={(stats as any).high_severity ?? flaggedUsers.filter((u) => u.severity === "high").length}
           icon={
-            <AlertTriangle size={16} className="text-[var(--color-danger)]" />
+            <AlertTriangle size={16} className="text-(--color-danger)" />
           }
           status="danger"
         />
         <StatCard
           label="Under Review"
-          value={2}
-          icon={<Shield size={16} className="text-[var(--color-warning)]" />}
+          value={(stats as any).under_review ?? flaggedUsers.filter((u) => u.status === "under_review").length}
+          icon={<Shield size={16} className="text-(--color-warning)" />}
         />
         <StatCard
           label="Resolved (24h)"
-          value={2}
+          value={(stats as any).resolved_24h ?? flaggedUsers.filter((u) => u.status === "resolved").length}
           icon={
             <CheckCircle2
               size={16}
-              className="text-[var(--color-success-mid)]"
+              className="text-(--color-success-mid)"
             />
           }
           status="success"
@@ -281,7 +291,7 @@ export default function CompliancePage() {
       </div>
 
       <Card noPadding>
-        <Box px={5} className="border-b border-[var(--color-border)]">
+        <Box px={5} className="border-b border-(--color-border)">
           <TabsRoot
             value={activeTab}
             onChange={(v) => setActiveTab(v as TabValue)}
@@ -296,24 +306,27 @@ export default function CompliancePage() {
 
         {activeTab === "flagged-users" && (
           <DataTable
-            data={DUMMY_FLAGGED_USERS}
+            data={flaggedUsers}
             columns={flaggedUserCols}
+            loading={loadingUsers}
             emptyTitle="No flagged users"
             emptyMessage="No users have been flagged"
           />
         )}
         {activeTab === "flagged-transactions" && (
           <DataTable
-            data={DUMMY_FLAGGED_TRANSACTIONS}
+            data={flaggedTransactions}
             columns={flaggedTxCols}
+            loading={loadingTransactions}
             emptyTitle="No flagged transactions"
             emptyMessage="No transactions have been flagged"
           />
         )}
         {activeTab === "risk-rules" && (
           <DataTable
-            data={DUMMY_RISK_RULES}
+            data={riskRules}
             columns={riskRuleCols}
+            loading={loadingRules}
             emptyTitle="No rules"
             emptyMessage="No risk rules configured"
           />

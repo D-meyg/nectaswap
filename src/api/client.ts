@@ -1,13 +1,10 @@
-import axios from 'axios'
-import { API_BASE_URL } from '@/lib/constants'
-import { applyInterceptors } from './interceptors'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from "axios";
 
-const client = axios.create({
-  baseURL: API_BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 15000,
-})
-
-applyInterceptors(client)
-
-export default client
+export const client = axios.create({
+  baseURL: (import.meta as any).env?.VITE_API_URL || "",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  timeout: 30000,
+});

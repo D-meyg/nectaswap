@@ -1,4 +1,4 @@
-import { memo } from "react";
+﻿import { memo } from "react";
 import { AlertTriangle, Info, Zap } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
@@ -10,15 +10,15 @@ import type { LiveAlert } from "@/api/types";
 const alertConfig = {
   danger: {
     icon: AlertTriangle,
-    color: "text-[var(--color-danger)]",
-    bg: "bg-[var(--color-danger-subtle)]",
+    color: "text-(--color-danger)",
+    bg: "bg-(--color-danger-subtle)",
   },
   warning: {
     icon: Zap,
-    color: "text-[var(--color-warning)]",
-    bg: "bg-[var(--color-warning-subtle)]",
+    color: "text-(--color-warning)",
+    bg: "bg-(--color-warning-subtle)",
   },
-  info: { icon: Info, color: "text-[var(--color-info)]", bg: "bg-[#EFF6FF]" },
+  info: { icon: Info, color: "text-(--color-info)", bg: "bg-[#EFF6FF]" },
 };
 
 // memo: alert rows only re-render when alert data changes
@@ -38,7 +38,7 @@ const AlertRow = memo(function AlertRow({
     <div
       className={cn(
         "flex gap-3 px-4 py-3",
-        !isLast && "border-b border-[var(--color-border)]",
+        !isLast && "border-b border-(--color-border)",
       )}
     >
       <div

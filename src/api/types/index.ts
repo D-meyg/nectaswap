@@ -13,11 +13,25 @@ export interface ApiError {
 }
 
 // ── Auth ─────────────────────────────────────────────────
+export interface LoginPayload {
+  email: string;
+  password: string;
+  device_name: string;
+  ip_address: string;
+  location: string;
+  user_agent: string;
+}
+
+export interface AcceptInvitePayload {
+  token: string;
+  password: string;
+}
+
 export interface AdminUser {
   id: string;
   name: string;
   email: string;
-  role: "super_admin" | "admin" | "compliance" | "support";
+  role: "super_admin" | "admin" | "compliance" | "support" | string;
   avatar?: string;
 }
 
@@ -51,7 +65,7 @@ export interface User {
   name: string;
   email: string;
   kyc_tier: string;
-  status: "active" | "frozen" | "suspended";
+  status: "active" | "frozen" | "suspended" | string;
   created_at: string;
 }
 
@@ -64,8 +78,8 @@ export interface UserDetail extends User {
   kyc_expiry?: string;
   risk_score?: number;
   kyc_status?: string;
-  velocity_check?: "Pass" | "Fail";
-  aml_screening?: "Clear" | "Flagged";
+  velocity_check?: "Pass" | "Fail" | string;
+  aml_screening?: "Clear" | "Flagged" | string;
   crypto_wallet?: string;
   total_volume?: number;
   success_rate?: number;
@@ -168,7 +182,8 @@ export type ActivityEventType =
   | "logout"
   | "kyc"
   | "card"
-  | "settings";
+  | "settings"
+  | string;
 
 export interface ActivityEvent {
   id: string;

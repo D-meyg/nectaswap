@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+﻿import { cn } from '@/lib/utils'
 import { type ReactNode, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { Text } from './Text'
@@ -48,7 +48,7 @@ function ModalRoot({ open, onClose, size = 'md', className, children, closeable 
     >
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-(--color-modal-overlay)"
         onClick={closeable ? onClose : undefined}
       />
       {/* Dialog */}
@@ -56,7 +56,7 @@ function ModalRoot({ open, onClose, size = 'md', className, children, closeable 
         role="dialog"
         aria-modal="true"
         className={cn(
-          'card relative w-full flex flex-col max-h-[90vh]',
+          'relative w-full flex flex-col max-h-[90vh] overflow-hidden rounded-[6px] border border-(--color-border) bg-(--color-modal-surface) shadow-[0_20px_45px_rgba(15,23,42,0.16)]',
           sizeMap[size],
           className
         )}
@@ -79,7 +79,7 @@ function ModalHeader({ title, subtitle, onClose, className }: ModalHeaderProps) 
   return (
     <div className={cn(
       'flex items-start justify-between gap-4 px-5 py-4',
-      'border-b border-[var(--color-border)] shrink-0',
+      'border-b border-(--color-border) shrink-0',
       className
     )}>
       <div>
@@ -89,7 +89,7 @@ function ModalHeader({ title, subtitle, onClose, className }: ModalHeaderProps) 
       {onClose && (
         <button
           onClick={onClose}
-          className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors"
+          className="flex h-7 w-7 items-center justify-center rounded-(--radius-sm) text-(--color-text-tertiary) hover:bg-(--color-bg-subtle) hover:text-(--color-text-primary) transition-colors"
           aria-label="Close modal"
         >
           <X size={16} />
@@ -124,7 +124,7 @@ function ModalFooter({ className, children }: ModalFooterProps) {
   return (
     <div className={cn(
       'flex items-center justify-end gap-2 px-5 py-4',
-      'border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)] shrink-0',
+      'border-t border-(--color-border) bg-(--color-bg-subtle) shrink-0',
       className
     )}>
       {children}

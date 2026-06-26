@@ -1,4 +1,4 @@
-import { forwardRef, type InputHTMLAttributes } from "react";
+﻿import { forwardRef, type InputHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { Text } from "@/components/ui/Text";
 
@@ -21,7 +21,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
       <div className="relative">
         {leftIcon && (
-          <span className="absolute left-3 top-1/2 flex -translate-y-1/2 text-[var(--color-text-tertiary)]">
+          <span className="absolute left-3 top-1/2 flex -translate-y-1/2 text-(--color-text-tertiary)">
             {leftIcon}
           </span>
         )}
@@ -29,12 +29,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           className={cn(
-            "h-[36px] w-full rounded-[var(--radius-md)] border border-[var(--color-border)] bg-white px-3 font-geom text-[13px] text-[var(--color-text-primary)]",
-            "placeholder:text-[var(--color-text-muted)]",
-            "transition-colors focus:border-[var(--color-brand)] focus:outline-none focus:ring-2 focus:ring-[var(--color-brand)]/10",
-            "disabled:cursor-not-allowed disabled:bg-[var(--color-bg-subtle)] disabled:opacity-60",
+            "h-9 w-full rounded-(--radius-md) border border-(--color-border) bg-white px-3 font-geom text-[0.8125rem] text-(--color-text-primary)",
+            "placeholder:text-(--color-text-muted)",
+            "transition-colors focus:border-(--color-brand) focus:outline-none focus:ring-2 focus:ring-(--color-brand)/10",
+            "disabled:cursor-not-allowed disabled:bg-(--color-bg-subtle) disabled:opacity-60",
             error &&
-              "border-[var(--color-danger)] focus:border-[var(--color-danger)]",
+              "border-(--color-danger) focus:border-(--color-danger)",
             leftIcon && "pl-9",
             rightIcon && "pr-9",
             className,
@@ -43,7 +43,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         />
 
         {rightIcon && (
-          <span className="absolute right-3 top-1/2 flex -translate-y-1/2 text-[var(--color-text-tertiary)]">
+          <span className="absolute right-3 top-1/2 flex -translate-y-1/2 text-(--color-text-tertiary)">
             {rightIcon}
           </span>
         )}

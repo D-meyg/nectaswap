@@ -1,28 +1,66 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type { PaginatedResponse, Transaction } from '@/api/types'
-import { PAGE_SIZE } from '@/lib/constants'
-
-interface ListParams {
-  page?:   number
-  search?: string
-  status?: string
-  crypto?: string
-}
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 
 export const transactionService = {
-  list: (params: ListParams = {}) =>
-    client
-      .get<PaginatedResponse<Transaction>>(ENDPOINTS.TRANSACTIONS.LIST, {
-        params: { page_size: PAGE_SIZE, ...params },
-      })
-      .then(r => r.data),
+  getTransactions: async (params?: Record<string, unknown>) => {
+    const { data } = await client.get(ENDPOINTS.TRANSACTIONS.LIST, { params });
+    return data;
+  },
 
-  get: (id: string) =>
-    client.get<Transaction>(ENDPOINTS.TRANSACTIONS.DETAIL(id)).then(r => r.data),
+  getTransactionDetail: async (id: string) => {
+    const { data } = await client.get(ENDPOINTS.TRANSACTIONS.DETAIL(id));
+    return data;
+  },
 
-  export: (params: ListParams = {}) =>
-    client
-      .get(ENDPOINTS.TRANSACTIONS.EXPORT, { params, responseType: 'blob' })
-      .then(r => r.data),
-}
+  updateStatus: async (payload: { id: string; status: string }) => {
+    const { data } = await client.patch(ENDPOINTS.TRANSACTIONS.STATUS, payload);
+    return data;
+  },
+
+  getPendingApprovals: async () => {
+    const { data } = await client.get(ENDPOINTS.TRANSACTIONS.PENDING_APPROVALS);
+    return data;
+  },
+
+  approveFlag: async (flagId: string, notes?: string) => {
+    const { data } = await client.patch(
+      ENDPOINTS.TRANSACTIONS.APPROVE_FLAG(flagId),
+      null,
+      { params: { notes } },
+    );
+    return data;
+  },
+
+  rejectFlag: async (flagId: string, notes?: string) => {
+    const { data } = await client.patch(
+      ENDPOINTS.TRANSACTIONS.REJECT_FLAG(flagId),
+      null,
+      { params: { notes } },
+    );
+    return data;
+  },
+
+  getFailedList: async () => {
+    const { data } = await client.get(ENDPOINTS.TRANSACTIONS.FAILED_LIST);
+    return data;
+  },
+
+  retryFailed: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.TRANSACTIONS.FAILED_RETRY(id));
+    return data;
+  },
+
+  resolveFailed: async (id: string) => {
+    const { data } = await client.patch(
+      ENDPOINTS.TRANSACTIONS.FAILED_RESOLVE(id),
+    );
+    return data;
+  },
+
+  refundFailed: async (id: string) => {
+    const { data } = await client.post(
+      ENDPOINTS.TRANSACTIONS.FAILED_REFUND(id),
+    );
+    return data;
+  },
+};

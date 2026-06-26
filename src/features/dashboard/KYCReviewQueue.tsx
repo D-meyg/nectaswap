@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
@@ -10,6 +10,7 @@ import { KYC_REVIEW_MODAL_ID } from "@/components/modals/KYCReviewModal";
 
 export function KYCReviewQueue({ items }: { items: any[] }) {
   const reviewModal = useModal(KYC_REVIEW_MODAL_ID);
+  const safeItems = Array.isArray(items) ? items : [];
 
   return (
     <Card noPadding>
@@ -24,7 +25,7 @@ export function KYCReviewQueue({ items }: { items: any[] }) {
       </Box>
 
       <Stack gap={3} className="p-5">
-        {items.map((item, index) => (
+        {safeItems.map((item, index) => (
           <Row
             key={item.id || index}
             justify="between"
@@ -51,15 +52,15 @@ export function KYCReviewQueue({ items }: { items: any[] }) {
             <Button
               size="sm"
               onClick={() => reviewModal.open({ kycId: item.id })}
-              className="h-[28px] shrink-0 rounded-sm px-3 text-[11px]"
+              className="h-7 shrink-0 rounded-sm px-3 text-[0.6875rem]"
             >
               Review
             </Button>
           </Row>
         ))}
 
-        {!items.length && (
-          <Box className="rounded-md border border-border bg-bg-card px-4 py-8 text-center">
+        {!safeItems.length && (
+          <Box className="rounded-md bg-bg-card px-4 py-8 text-center">
             <Text variant="caption" color="secondary">
               No KYC reviews in queue.
             </Text>

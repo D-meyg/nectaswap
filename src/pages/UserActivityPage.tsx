@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+﻿import { useState, useMemo } from "react";
 import { Activity, LogIn, ShieldAlert, Sparkles, Download } from "lucide-react";
 
 import { usePageTitle } from "@/layouts/AppLayout";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { FilterButton } from "@/components/ui/FilterButton";
+import { useDashboardRecentActivity } from "@/hooks/queries/useDashboard";
 
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -41,114 +42,19 @@ interface ActivityLog {
   status: LogStatus;
 }
 
-// ── Dummy data matching image 1 ───────────────────────────
-const BEHAVIOR_PATTERNS: BehaviorPattern[] = [
-  {
-    id: "b1",
-    severity: "high",
-    title: "Multiple Failed Login Attempts",
-    instances: 5,
-    description: "3+ failed logins within 10 minutes",
-    affected: ["User #5621", "User #2389"],
-  },
-  {
-    id: "b2",
-    severity: "medium",
-    title: "Unusual Transaction Volume",
-    instances: 3,
-    description: "Transaction volume 3x above average",
-    affected: ["User #4521", "User #7234"],
-  },
-  {
-    id: "b3",
-    severity: "low",
-    title: "New Device Login",
-    instances: 12,
-    description: "Login from previously unseen device",
-    affected: ["User #8923", "User #3892"],
-  },
-  {
-    id: "b4",
-    severity: "high",
-    title: "Location Anomaly",
-    instances: 2,
-    description: "Login from different countries within 1 hour",
-    affected: ["User #6712"],
-  },
-  {
-    id: "b5",
-    severity: "medium",
-    title: "High-Value Transactions",
-    instances: 8,
-    description: "Transactions >₦500,000",
-    affected: ["User #4521", "User #3892"],
-  },
-];
-
-const ACTIVITY_LOGS: ActivityLog[] = [
-  {
-    id: "l1",
-    timestamp: "2024-01-29 14:25:12",
-    user_name: "Adewale Johnson",
-    user_id: "4521",
-    action: "Login",
-    action_icon: "→",
-    device: "iPhone 13 Pro",
-    location: "Lagos, Nigeria",
-    ip: "197.210.70.34",
-    status: "success",
-  },
-  {
-    id: "l2",
-    timestamp: "2024-01-29 14:20:45",
-    user_name: "Chiamaka Nnamdi",
-    user_id: "3892",
-    action: "Transaction",
-    action_icon: "⇄",
-    device: "Samsung Galaxy S21",
-    location: "Abuja, Nigeria",
-    ip: "197.210.84.21",
-    status: "success",
-  },
-  {
-    id: "l3",
-    timestamp: "2024-01-29 14:15:33",
-    user_name: "Yusuf Ibrahim",
-    user_id: "5621",
-    action: "Failed Login",
-    action_icon: "→",
-    device: "Windows PC",
-    location: "Kano, Nigeria",
-    ip: "197.210.55.18",
-    status: "failed",
-  },
-  {
-    id: "l4",
-    timestamp: "2024-01-29 14:10:22",
-    user_name: "Funke Olawale",
-    user_id: "7234",
-    action: "Card Used",
-    action_icon: "▣",
-    device: "Virtual Card",
-    location: "Lagos, Nigeria",
-    ip: "197.210.91.47",
-    status: "success",
-  },
-];
-
 // ── Severity badge ────────────────────────────────────────
 const severityStyle: Record<SeverityLevel, string> = {
-  high: "bg-[var(--color-danger-subtle)] text-[var(--color-danger)] border border-[var(--color-danger-muted)]",
+  high: "bg-(--color-danger-subtle) text-(--color-danger) border border-(--color-danger-muted)",
   medium:
-    "bg-[var(--color-warning-subtle)] text-[var(--color-warning-dark)] border border-[var(--color-warning-border)]",
-  low: "bg-[var(--color-success-bg)] text-[var(--color-success-mid)] border border-[var(--color-success-muted)]",
+    "bg-(--color-warning-subtle) text-(--color-warning-dark) border border-(--color-warning-border)",
+  low: "bg-(--color-success-bg) text-(--color-success-mid) border border-(--color-success-muted)",
 };
 
 // ── Status text ───────────────────────────────────────────
 const statusStyle: Record<LogStatus, string> = {
-  success: "text-[var(--color-success-mid)] font-medium text-[12px]",
-  failed: "text-[var(--color-danger)] font-medium text-[12px]",
-  pending: "text-[var(--color-warning)] font-medium text-[12px]",
+  success: "text-(--color-success-mid) font-medium text-xs",
+  failed: "text-(--color-danger) font-medium text-xs",
+  pending: "text-(--color-warning) font-medium text-xs",
 };
 
 export default function UserActivityPage() {
@@ -158,17 +64,67 @@ export default function UserActivityPage() {
   );
 
   const [search, setSearch] = useState("");
+  const { data: apiLogs = [], isLoading } = useDashboardRecentActivity(100);
+
+
+  console.log("Activity", apiLogs)
+
+  const logs = useMemo<ActivityLog[]>(
+    () =>
+      Array.isArray(apiLogs)
+        ? apiLogs.map((value: unknown, index: number) => {
+            const item =
+              value && typeof value === "object"
+                ? (value as Record<string, unknown>)
+                : {};
+            const user =
+              item.user && typeof item.user === "object"
+                ? (item.user as Record<string, unknown>)
+                : {};
+
+            return {
+              id: String(item.id ?? item.log_id ?? index),
+              timestamp: String(item.timestamp ?? item.created_at ?? item.date ?? "—"),
+              user_name: String(item.user_name ?? item.name ?? user.name ?? user.email ?? "Unknown user"),
+              user_id: String(item.user_id ?? user.id ?? "—"),
+              action: String(item.action ?? item.event ?? item.type ?? "Activity"),
+              action_icon: String(item.action_icon ?? "→"),
+              device: String(item.device ?? item.device_name ?? "Unknown device"),
+              location: String(item.location ?? item.country ?? "Unknown location"),
+              ip: String(item.ip ?? item.ip_address ?? "—"),
+              status: String(item.status ?? "success") as LogStatus,
+            };
+          })
+        : [],
+    [apiLogs],
+  );
+
+  const behaviorPatterns = useMemo<BehaviorPattern[]>(
+    () =>
+      logs
+        .filter((log) => log.status === "failed")
+        .slice(0, 5)
+        .map((log) => ({
+          id: log.id,
+          severity: "high",
+          title: log.action,
+          instances: 1,
+          description: `${log.action} from ${log.device}`,
+          affected: [`User #${log.user_id}`],
+        })),
+    [logs],
+  );
 
   const filteredLogs = useMemo(
     () =>
-      ACTIVITY_LOGS.filter(
+      logs.filter(
         (l) =>
           !search ||
           l.user_name.toLowerCase().includes(search.toLowerCase()) ||
           l.user_id.includes(search) ||
           l.ip.includes(search),
       ),
-    [search],
+    [logs, search],
   );
 
   const columns = useMemo<ColumnDef<ActivityLog, unknown>[]>(
@@ -179,7 +135,7 @@ export default function UserActivityPage() {
         cell: ({ getValue }) => (
           <Row gap={2} align="center">
             {/* Checkbox-style icon matching image 1 */}
-            <span className="h-4 w-4 rounded-[2px] border border-[var(--color-border)] flex items-center justify-center shrink-0" />
+            <span className="h-4 w-4 rounded-sm border border-(--color-border) flex items-center justify-center shrink-0" />
             <Text variant="caption" color="secondary">
               {getValue<string>()}
             </Text>
@@ -205,7 +161,7 @@ export default function UserActivityPage() {
         header: "Action",
         cell: ({ row }) => (
           <Row gap={2} align="center">
-            <span className="text-[var(--color-brand)] text-[13px]">
+            <span className="text-(--color-brand) text-[0.8125rem]">
               {row.original.action_icon}
             </span>
             <Stack gap={0}>
@@ -261,27 +217,27 @@ export default function UserActivityPage() {
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="Total Activities (24h)"
-          value="2,847"
-          icon={<Activity size={16} className="text-[var(--color-brand)]" />}
+          value={logs.length.toLocaleString()}
+          icon={<Activity size={16} className="text-(--color-brand)" />}
         />
         <StatCard
           label="Active Users"
-          value="1,247"
-          icon={<LogIn size={16} className="text-[var(--color-success-mid)]" />}
+          value={logs.filter((log) => log.status === "success").length.toLocaleString()}
+          icon={<LogIn size={16} className="text-(--color-success-mid)" />}
           status="success"
         />
         <StatCard
           label="Failed Attempts"
-          value="34"
+          value={logs.filter((log) => log.status === "failed").length.toLocaleString()}
           icon={
-            <ShieldAlert size={16} className="text-[var(--color-danger)]" />
+            <ShieldAlert size={16} className="text-(--color-danger)" />
           }
           status="danger"
         />
         <StatCard
           label="Flagged Patterns"
-          value="5"
-          icon={<Sparkles size={16} className="text-[var(--color-warning)]" />}
+          value={behaviorPatterns.length}
+          icon={<Sparkles size={16} className="text-(--color-warning)" />}
           status="warning"
         />
       </div>
@@ -294,20 +250,20 @@ export default function UserActivityPage() {
         />
         <Card.Body padded>
           <Stack gap={4}>
-            {BEHAVIOR_PATTERNS.map((pattern) => (
+            {behaviorPatterns.map((pattern) => (
               <Row
                 key={pattern.id}
                 justify="between"
                 align="center"
                 gap={4}
-                className="py-2 border-b border-[var(--color-border)] last:border-0"
+                className="py-2 border-b border-(--color-border) last:border-0"
               >
                 <Stack gap={1}>
                   <Row gap={2} align="center">
                     {/* Severity pill */}
                     <span
                       className={[
-                        "inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold",
+                        "inline-flex items-center px-2 py-0.5 rounded-full text-[0.6875rem] font-semibold",
                         severityStyle[pattern.severity],
                       ].join(" ")}
                     >
@@ -344,6 +300,11 @@ export default function UserActivityPage() {
                 </Button>
               </Row>
             ))}
+            {!behaviorPatterns.length && (
+              <Text variant="caption" color="muted">
+                No behavioral patterns detected.
+              </Text>
+            )}
           </Stack>
         </Card.Body>
       </Card>
@@ -362,13 +323,13 @@ export default function UserActivityPage() {
         />
 
         {/* Toolbar: search + filter buttons */}
-        <Box px={5} py={3} className="border-b border-[var(--color-border)]">
+        <Box px={5} py={3} className="border-b border-(--color-border)">
           <Row justify="between" align="center" gap={3}>
             <SearchInput
               value={search}
               onChange={setSearch}
               placeholder="Search by user name, ID, or IP address..."
-              className="flex-1 max-w-[480px]"
+              className="flex-1 max-w-[30rem]"
             />
             <Row gap={2} align="center">
               <FilterButton label="All Actions" />
@@ -381,7 +342,7 @@ export default function UserActivityPage() {
           data={filteredLogs}
           columns={columns}
           emptyTitle="No activity logs"
-          emptyMessage="No activity found matching your search"
+          emptyMessage={isLoading ? "Loading activity logs..." : "No activity found matching your search"}
           stickyHeader
         />
       </Card>

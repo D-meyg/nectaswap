@@ -1,5 +1,5 @@
-import { usePageTitle } from "@/layouts/AppLayout";
-import { useMemo } from "react";
+﻿import { usePageTitle } from "@/layouts/AppLayout";
+import { useMemo, useState } from "react";
 import { Plus, Eye, Copy, RotateCcw, Trash2, Info } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
@@ -8,9 +8,11 @@ import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { DataTable } from "@/components/tables/DataTable";
 import { useClipboard } from "@/hooks/ui/useClipboard";
+import { useApiKeys } from "@/hooks/queries/useSettings";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface APIKey {
@@ -78,11 +80,11 @@ const API_KEYS: APIKey[] = [
 ];
 
 const PERM_COLORS: Record<string, string> = {
-  Read: "bg-[var(--color-success-subtle)] text-[var(--color-success-mid)] border border-[var(--color-success-muted)]",
+  Read: "bg-(--color-success-subtle) text-(--color-success-mid) border border-(--color-success-muted)",
   Write:
-    "bg-[var(--color-brand)]/10 text-[var(--color-brand)] border border-[var(--color-brand)]/20",
+    "bg-(--color-brand)/10 text-(--color-brand) border border-(--color-brand)/20",
   Delete:
-    "bg-[var(--color-danger-subtle)] text-[var(--color-danger)] border border-[var(--color-danger-muted)]",
+    "bg-(--color-danger-subtle) text-(--color-danger) border border-(--color-danger-muted)",
 };
 
 function MaskedKey({ value }: { value: string }) {
@@ -92,20 +94,84 @@ function MaskedKey({ value }: { value: string }) {
       <Text
         variant="micro"
         color="secondary"
-        className="font-mono truncate max-w-[200px]"
+        className="font-mono truncate max-w-[12.5rem]"
       >
         {value}
       </Text>
-      <button className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]">
+      <button className="text-(--color-text-muted) hover:text-(--color-text-primary)">
         <Eye size={12} />
       </button>
       <button
         onClick={() => copy(value)}
-        className="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
+        className="text-(--color-text-muted) hover:text-(--color-text-primary)"
       >
         <Copy size={12} />
       </button>
     </Row>
+  );
+}
+
+function GenerateKeyModal({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Modal open={open} onClose={onClose} size="md" className="max-w-[27rem]">
+      <Modal.Header
+        title="Generate New API Key"
+        onClose={onClose}
+        className="border-b-0 px-5 pb-2 pt-5 [&_h4]:text-[1rem] [&_h4]:leading-5"
+      />
+      <Modal.Body className="px-5 pb-3 pt-0">
+        <Stack gap={4}>
+          <Stack gap={1}>
+            <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
+              Key Name
+            </Text>
+            <input
+              className="h-9 w-full rounded-(--radius-sm) border border-(--color-border) px-3 font-geom text-[0.75rem] outline-none transition-colors placeholder:text-(--color-text-tertiary) focus:border-(--color-brand)"
+              placeholder="e.g., Production API Key"
+            />
+          </Stack>
+
+          <Stack gap={1}>
+            <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
+              Service
+            </Text>
+            <input className="h-9 w-full rounded-(--radius-sm) border border-(--color-border) px-3 font-geom text-[0.75rem] outline-none transition-colors focus:border-(--color-brand)" />
+          </Stack>
+
+          <Stack gap={2}>
+            <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
+              Permissions
+            </Text>
+            {["Read", "Write", "Delete"].map((permission) => (
+              <label
+                key={permission}
+                className="flex w-fit items-center gap-2 font-geom text-[0.75rem] font-medium text-(--color-text-primary)"
+              >
+                <input
+                  type="checkbox"
+                  className="h-3.5 w-3.5 rounded border-(--color-border) accent-(--color-brand)"
+                />
+                {permission}
+              </label>
+            ))}
+          </Stack>
+        </Stack>
+      </Modal.Body>
+      <Modal.Footer className="grid grid-cols-2 gap-3 border-t-0 bg-white px-5 pb-5 pt-2">
+        <Button variant="secondary" size="sm" className="h-9 justify-center text-[0.75rem]" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button size="sm" className="h-9 justify-center text-[0.75rem]" onClick={onClose}>
+          Generate Key
+        </Button>
+      </Modal.Footer>
+    </Modal>
   );
 }
 
@@ -114,6 +180,10 @@ export default function APIKeysPage() {
     "API Keys",
     "Manage API keys and integrations for external services",
   );
+
+  const { data: apiKeys = [], isLoading } = useApiKeys();
+  const [generateOpen, setGenerateOpen] = useState(false);
+  const keys = apiKeys.length ? (apiKeys as APIKey[]) : API_KEYS;
 
   const columns = useMemo<ColumnDef<APIKey, unknown>[]>(
     () => [
@@ -154,7 +224,7 @@ export default function APIKeysPage() {
               <span
                 key={p}
                 className={[
-                  "inline-flex items-center px-1.5 py-0.5 rounded-[3px] text-[11px] font-medium",
+                  "inline-flex items-center px-1.5 py-0.5 rounded text-[0.6875rem] font-medium",
                   PERM_COLORS[p] ?? "",
                 ].join(" ")}
               >
@@ -204,7 +274,7 @@ export default function APIKeysPage() {
               >
                 <RotateCcw
                   size={13}
-                  className="text-[var(--color-text-muted)]"
+                  className="text-(--color-text-muted)"
                 />
               </Button>
             </Tooltip>
@@ -214,7 +284,7 @@ export default function APIKeysPage() {
                 size="sm"
                 className="h-7 w-7 p-0 flex items-center justify-center"
               >
-                <Trash2 size={13} className="text-[var(--color-danger)]" />
+                <Trash2 size={13} className="text-(--color-danger)" />
               </Button>
             </Tooltip>
           </Row>
@@ -230,34 +300,35 @@ export default function APIKeysPage() {
         <Row
           justify="between"
           align="center"
-          className="px-5 py-4 border-b border-[var(--color-border)]"
+          className="px-5 py-4 border-b border-(--color-border)"
         >
           <Text variant="caption" color="secondary">
             Manage API keys for external integrations and services
           </Text>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setGenerateOpen(true)}>
             <Plus size={13} />
             Generate New Key
           </Button>
         </Row>
         <DataTable
-          data={API_KEYS}
+          data={keys}
           columns={columns}
+          loading={isLoading}
           emptyTitle="No API keys"
           emptyMessage="No API keys generated yet"
         />
       </Card>
 
       {/* Security best practices banner */}
-      <Box className="rounded-[var(--radius-md)] border border-[var(--color-warning-border)] bg-[var(--color-warning-subtle)] px-5 py-4">
+      <Box className="rounded-(--radius-md) border border-(--color-warning-border) bg-(--color-warning-subtle) px-5 py-4">
         <Row gap={2} align="start" className="mb-2">
           <Info
             size={14}
-            className="text-[var(--color-warning-dark)] shrink-0 mt-0.5"
+            className="text-(--color-warning-dark) shrink-0 mt-0.5"
           />
           <Text
             variant="caption"
-            className="text-[var(--color-warning-dark)]"
+            className="text-(--color-warning-dark)"
             weight="semibold"
           >
             Security Best Practices
@@ -272,12 +343,14 @@ export default function APIKeysPage() {
           <Text
             key={i}
             variant="micro"
-            className="text-[var(--color-warning-dark)] block ml-6"
+            className="text-(--color-warning-dark) block ml-6"
           >
             • {tip}
           </Text>
         ))}
       </Box>
+
+      <GenerateKeyModal open={generateOpen} onClose={() => setGenerateOpen(false)} />
     </Box>
   );
 }

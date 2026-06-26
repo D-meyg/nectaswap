@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { RefreshCw, SlidersHorizontal, Download } from "lucide-react";
 import {
   AreaChart,
@@ -22,6 +22,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatCard } from "@/components/ui/StatCard";
 import { usePageTitle } from "@/layouts/AppLayout";
+import { useCardStats } from "@/hooks/queries/useCards";
+import { useDashboardStats } from "@/hooks/queries/useDashboard";
 
 const revenueTransactionData = [
   { month: "Jan", revenue: 48, transactions: 700 },
@@ -76,7 +78,7 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-card)] px-3 py-2 min-w-[120px]">
+    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[7.5rem]">
       <Text variant="micro" color="muted" className="mb-1 block">
         {label}
       </Text>
@@ -88,7 +90,7 @@ function ChartTooltip({ active, payload, label }: {
           />
           <Text variant="micro" color="secondary" as="span">
             {p.name}:{" "}
-            <span className="font-semibold text-[var(--color-text-primary)]">
+            <span className="font-semibold text-(--color-text-primary)">
               {typeof p.value === "number" ? p.value.toLocaleString() : p.value}
             </span>
           </Text>
@@ -104,6 +106,17 @@ export default function AnalyticsPage() {
     "Comprehensive analytics dashboard with key performance metrics",
   );
   const [activeDate, setActiveDate] = useState("Last 30 days");
+  const { data: dashboardStats = {} } = useDashboardStats();
+  const { data: cardStats = {} } = useCardStats();
+  const stats = dashboardStats as Record<string, any>;
+  const cards = cardStats as Record<string, any>;
+
+  const totalRevenue = stats.total_revenue ?? stats.totalRevenue ?? stats.revenue ?? "₦812M";
+  const totalTransactions = stats.total_transactions ?? stats.totalTransactions ?? stats.transactions ?? "23,400";
+  const activeUsers = stats.active_users ?? stats.activeUsers ?? stats.users ?? "18,950";
+  const activeCards = cards.active_cards ?? cards.activeCards ?? cards.active ?? "7,140";
+  const avgTransaction = stats.average_transaction ?? stats.avgTransaction ?? "₦34,700";
+  const successRate = stats.success_rate ?? stats.successRate ?? "98.7%";
 
   return (
     <div className="p-6 space-y-5">
@@ -114,15 +127,15 @@ export default function AnalyticsPage() {
             <RefreshCw size={13} />
             Refresh
           </Button>
-          <div className="flex items-center border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden">
+          <div className="flex items-center border border-(--color-border) rounded-(--radius-sm) overflow-hidden">
             {DATE_FILTERS.map((f) => (
               <button
                 key={f}
                 onClick={() => setActiveDate(f)}
-                className={`px-3 py-[6px] text-[12px] font-medium border-r border-[var(--color-border)] last:border-r-0 transition-colors ${
+                className={`px-3 py-1.5 text-xs font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
                   activeDate === f
-                    ? "bg-[var(--color-brand)] text-white"
-                    : "bg-white text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+                    ? "bg-(--color-brand) text-white"
+                    : "bg-white text-(--color-text-secondary) hover:bg-(--color-bg-subtle)"
                 }`}
               >
                 {f}
@@ -146,28 +159,28 @@ export default function AnalyticsPage() {
       <Grid cols={4} gap={4}>
         <StatCard
           label="Total Revenue"
-          value="₦812M"
+          value={String(totalRevenue)}
           delta={18.5}
           deltaLabel="vs last month"
           status="success"
         />
         <StatCard
           label="Total Transactions"
-          value="23,400"
+          value={String(totalTransactions)}
           delta={12.3}
           deltaLabel="vs last month"
           status="info"
         />
         <StatCard
           label="Active Users"
-          value="18,950"
+          value={String(activeUsers)}
           delta={9.7}
           deltaLabel="vs last month"
           status="success"
         />
         <StatCard
           label="Active Cards"
-          value="7,140"
+          value={String(activeCards)}
           delta={-5.4}
           deltaLabel="vs last month"
           status="warning"
@@ -404,25 +417,25 @@ export default function AnalyticsPage() {
       <Grid cols={4} gap={4}>
         <StatCard
           label="Avg Transaction"
-          value="₦34,700"
+          value={String(avgTransaction)}
           delta={5.3}
           deltaLabel="vs last period"
         />
         <StatCard
           label="Total Users"
-          value="1,950"
+          value={String(stats.new_users ?? stats.newUsers ?? "1,950")}
           delta={12.8}
           deltaLabel="this month"
         />
         <StatCard
           label="Cards Issued"
-          value="770"
+          value={String(cards.issued_cards ?? cards.issuedCards ?? cards.total_cards ?? "770")}
           delta={8.4}
           deltaLabel="this month"
         />
         <StatCard
           label="Success Rate"
-          value="98.7%"
+          value={String(successRate)}
           delta={0.3}
           deltaLabel="improved"
         />

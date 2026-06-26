@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react'
+﻿import { AlertTriangle } from 'lucide-react'
 import { Modal } from '@/components/ui/Modal'
 import { Button } from '@/components/ui/Button'
 import { Text } from '@/components/ui/Text'
@@ -30,8 +30,8 @@ export function ConfirmModal({
       <Modal.Header title={title} onClose={close} />
       <Modal.Body>
         <div className="flex gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-danger-subtle)]">
-            <AlertTriangle size={16} className="text-[var(--color-danger)]" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--color-danger-subtle)">
+            <AlertTriangle size={16} className="text-(--color-danger)" />
           </div>
           <Text variant="caption" color="secondary">{description}</Text>
         </div>

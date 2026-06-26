@@ -1,4 +1,4 @@
-import { Card }      from '@/components/ui/Card'
+﻿import { Card }      from '@/components/ui/Card'
 import { Button }    from '@/components/ui/Button'
 import { EmptyState }from '@/components/ui/EmptyState'
 import { CardItem }  from './CardItem'
@@ -21,20 +21,21 @@ export function CardList({
     <Card>
       <Card.Header
         title={`User Cards (${cards.length})`}
+        className="px-4 py-3 [&_h4]:text-xs [&_h4]:leading-4"
         action={
-          <Button size="sm" onClick={onIssueCard}>
+          <Button size="sm" onClick={onIssueCard} className="h-7 px-3 text-[0.6875rem]">
             Issue New Card
           </Button>
         }
       />
-      <Card.Body padded>
+      <Card.Body className="p-3">
         {cards.length === 0 ? (
           <EmptyState
             icon={CreditCard}
             title="No Cards Issued"
             description="This user doesn't have any Naira cards yet"
             action={
-              <Button size="sm" onClick={onIssueCard}>
+              <Button size="sm" onClick={onIssueCard} className="h-[1.875rem] px-3 text-[0.6875rem]">
                 Issue First Card
               </Button>
             }

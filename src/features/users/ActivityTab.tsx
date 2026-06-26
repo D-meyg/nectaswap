@@ -1,12 +1,12 @@
-import { Card } from "@/components/ui/Card";
+﻿import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
+import { Box } from "@/components/ui/Box";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Activity } from "lucide-react";
 import { useUserActivity } from "@/hooks/queries/useUserDetail";
-import { DUMMY_ACTIVITY } from "@/lib/dummyData";
 import type { ActivityEvent } from "@/api/types";
 
 interface ActivityTabProps {
@@ -19,56 +19,48 @@ interface ActivityTabProps {
 //         IP • device bottom row in muted text
 function ActivityEntry({
   event,
-  isLast,
 }: {
   event: ActivityEvent;
-  isLast: boolean;
 }) {
   return (
-    <div
-      className={[
-        "px-5 py-4",
-        !isLast ? "border-b border-[var(--color-border)]" : "",
-      ].join(" ")}
-    >
-      {/* Top row: title + timestamp */}
-      <Row justify="between" align="start" gap={4}>
-        <Text variant="caption" color="primary" weight="semibold">
-          {event.title}
-        </Text>
-        <Text variant="micro" color="muted" className="shrink-0">
-          {event.created_at}
-        </Text>
-      </Row>
+    <Card className="rounded-[6px] border-(--color-border) bg-white shadow-none">
+      <Box px={4} py={3}>
+        <Row justify="between" align="start" gap={4}>
+          <Stack gap={1} className="min-w-0">
+            <Text variant="caption" color="primary" weight="semibold" className="text-xs leading-4">
+              {event.title}
+            </Text>
+            <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
+              {event.txn_id
+                ? `${event.txn_id} - ${event.description}`
+                : event.description}
+            </Text>
+            <Row gap={2} align="center" className="mt-0.5 flex-wrap">
+              <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                IP: {event.ip}
+              </Text>
+              <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                •
+              </Text>
+              <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                {event.device}
+              </Text>
+            </Row>
+          </Stack>
 
-      {/* Description — TXN ID or auth message */}
-      <Text variant="caption" color="secondary" className="mt-0.5 block">
-        {event.txn_id
-          ? `${event.txn_id} - ${event.description}`
-          : event.description}
-      </Text>
-
-      {/* IP • device — muted micro text */}
-      <Row gap={1} align="center" className="mt-1">
-        <Text variant="micro" color="muted">
-          IP: {event.ip}
-        </Text>
-        <Text variant="micro" color="muted">
-          •
-        </Text>
-        <Text variant="micro" color="muted">
-          {event.device}
-        </Text>
-      </Row>
-    </div>
+          <Text variant="caption" color="secondary" className="shrink-0 text-[0.6875rem] leading-4">
+            {event.created_at}
+          </Text>
+        </Row>
+      </Box>
+    </Card>
   );
 }
 
 export function ActivityTab({ userId }: ActivityTabProps) {
   const { data: apiEvents, isLoading } = useUserActivity(userId);
 
-  // Fall back to dummy data while API not connected
-  const events = apiEvents && apiEvents.length > 0 ? apiEvents : DUMMY_ACTIVITY;
+  const events = apiEvents ?? [];
 
   if (isLoading && !apiEvents) {
     return (
@@ -91,14 +83,13 @@ export function ActivityTab({ userId }: ActivityTabProps) {
   }
 
   return (
-    <Card noPadding>
-      {events.map((event, i) => (
+    <Stack gap={2}>
+      {events.map((event) => (
         <ActivityEntry
           key={event.id}
           event={event}
-          isLast={i === events.length - 1}
         />
       ))}
-    </Card>
+    </Stack>
   );
 }

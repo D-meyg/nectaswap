@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { usePageTitle } from "@/layouts/AppLayout";
 import { useState, useMemo } from "react";
 import { Download, Settings, Eye } from "lucide-react";
@@ -13,12 +14,21 @@ import { CodeBadge } from "@/components/ui/CodeBadge";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { useDebounce } from "@/hooks/ui/useDebounce";
-import { DUMMY_REFERRERS, DUMMY_REFERRED_USERS_FULL } from "@/lib/dummyData";
+import { useReferralStats, useReferrers, useReferredUsers } from "@/hooks/queries/useReferrals";
 import type { ColumnDef } from "@tanstack/react-table";
 
-type Referrer = (typeof DUMMY_REFERRERS)[0];
-type ReferredUser = (typeof DUMMY_REFERRED_USERS_FULL)[0];
+type Referrer = Record<string, any>;
+type ReferredUser = Record<string, any>;
 type TabValue = "referrers" | "referred";
+
+function toNumber(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function text(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
 
 function ReferrerStatus({ status }: { status: string }) {
   return (
@@ -32,8 +42,8 @@ function ReferrerStatus({ status }: { status: string }) {
   );
 }
 
-function fmt(n: number) {
-  return `₦ ${n.toLocaleString()}`;
+function fmt(value: unknown) {
+  return `₦ ${toNumber(value).toLocaleString()}`;
 }
 
 export default function ReferralProgramPage() {
@@ -45,27 +55,38 @@ export default function ReferralProgramPage() {
   const [tab, setTab] = useState<TabValue>("referrers");
   const [search, setSearch] = useState("");
   const debounced = useDebounce(search, 400);
+  const { data: stats = {} } = useReferralStats();
+  const { data: apiReferrers = [], isLoading: loadingReferrers } = useReferrers();
+  const { data: apiReferred = [], isLoading: loadingReferred } = useReferredUsers();
+  const referrers = useMemo(
+    () => (Array.isArray(apiReferrers) ? apiReferrers : []),
+    [apiReferrers],
+  ) as Referrer[];
+  const referredUsers = useMemo(
+    () => (Array.isArray(apiReferred) ? apiReferred : []),
+    [apiReferred],
+  ) as ReferredUser[];
 
   const filteredReferrers = useMemo(
     () =>
-      DUMMY_REFERRERS.filter(
+      referrers.filter(
         (r) =>
           !debounced ||
-          r.name.toLowerCase().includes(debounced.toLowerCase()) ||
-          r.code.toLowerCase().includes(debounced.toLowerCase()),
+          text(r.name ?? r.full_name).toLowerCase().includes(debounced.toLowerCase()) ||
+          text(r.code ?? r.referral_code).toLowerCase().includes(debounced.toLowerCase()),
       ),
-    [debounced],
+    [referrers, debounced],
   );
 
   const filteredReferred = useMemo(
     () =>
-      DUMMY_REFERRED_USERS_FULL.filter(
+      referredUsers.filter(
         (r) =>
           !debounced ||
-          r.name.toLowerCase().includes(debounced.toLowerCase()) ||
-          r.referred_by.toLowerCase().includes(debounced.toLowerCase()),
+          text(r.name ?? r.full_name).toLowerCase().includes(debounced.toLowerCase()) ||
+          text(r.referred_by ?? r.referrer_name).toLowerCase().includes(debounced.toLowerCase()),
       ),
-    [debounced],
+    [referredUsers, debounced],
   );
 
   // ── Referrers columns ───────────────────────────────────
@@ -124,7 +145,7 @@ export default function ReferralProgramPage() {
           <Text
             variant="caption"
             weight="semibold"
-            className="text-[var(--color-warning-dark)]"
+            className="text-(--color-warning-dark)"
           >
             {fmt(getValue<number>())}
           </Text>
@@ -144,7 +165,7 @@ export default function ReferralProgramPage() {
             size="sm"
             className="h-7 w-7 p-0 flex items-center justify-center"
           >
-            <Eye size={14} className="text-[var(--color-text-muted)]" />
+            <Eye size={14} className="text-(--color-text-muted)" />
           </Button>
         ),
       },
@@ -219,29 +240,27 @@ export default function ReferralProgramPage() {
     [],
   );
 
-  const totalEarnings = DUMMY_REFERRERS.reduce((s, r) => s + r.earnings, 0);
-  const totalPending = DUMMY_REFERRERS.reduce((s, r) => s + r.pending, 0);
-  const avgReferrals = (
-    DUMMY_REFERRERS.reduce((s, r) => s + r.total, 0) / DUMMY_REFERRERS.length
-  ).toFixed(1);
+  const totalEarnings = (stats as any).earnings_paid ?? referrers.reduce((s, r) => s + toNumber(r.earnings), 0);
+  const totalPending = (stats as any).pending_payouts ?? referrers.reduce((s, r) => s + toNumber(r.pending), 0);
+  const avgReferrals = toNumber((stats as any).avg_referrals ?? (referrers.reduce((s, r) => s + toNumber(r.total), 0) / Math.max(referrers.length, 1))).toFixed(1);
 
   return (
     <Box p={6} className="space-y-5">
       {/* 6 stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
-        <StatCard label="Total Referrers" value={DUMMY_REFERRERS.length} />
+        <StatCard label="Total Referrers" value={(stats as any).total_referrers ?? referrers.length} />
         <StatCard
           label="Referred Users"
-          value={DUMMY_REFERRED_USERS_FULL.length}
+          value={(stats as any).referred_users ?? referredUsers.length}
         />
         <StatCard
           label="Earnings Paid"
-          value={`₦ ${(totalEarnings / 1_000_000).toFixed(1)}M`}
+          value={`₦ ${(toNumber(totalEarnings) / 1_000_000).toFixed(1)}M`}
           status="success"
         />
         <StatCard
           label="Pending Payouts"
-          value={`₦ ${(totalPending / 1000).toFixed(0)}K`}
+          value={`₦ ${(toNumber(totalPending) / 1000).toFixed(0)}K`}
           status="warning"
         />
         <StatCard label="Avg Referrals" value={avgReferrals} />
@@ -250,13 +269,13 @@ export default function ReferralProgramPage() {
 
       <Card noPadding>
         {/* Toggle tabs */}
-        <Box px={5} py={4} className="border-b border-[var(--color-border)]">
+        <Box px={5} py={4} className="border-b border-(--color-border)">
           <Row gap={2} align="center">
             {(["referrers", "referred"] as TabValue[]).map((t) => {
               const label =
                 t === "referrers"
-                  ? `Referrers (${DUMMY_REFERRERS.length})`
-                  : `Referred Users (${DUMMY_REFERRED_USERS_FULL.length})`;
+                  ? `Referrers (${referrers.length})`
+                  : `Referred Users (${referredUsers.length})`;
               return (
                 <button
                   key={t}
@@ -265,11 +284,11 @@ export default function ReferralProgramPage() {
                     setSearch("");
                   }}
                   className={[
-                    "inline-flex items-center px-4 py-2 rounded-[var(--radius-sm)]",
-                    "text-[13px] font-medium transition-colors",
+                    "inline-flex items-center px-4 py-2 rounded-(--radius-sm)",
+                    "text-[0.8125rem] font-medium transition-colors",
                     tab === t
-                      ? "bg-[var(--color-brand)] text-white"
-                      : "bg-[var(--color-bg-subtle)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
+                      ? "bg-(--color-brand) text-white"
+                      : "bg-(--color-bg-subtle) text-(--color-text-secondary) hover:text-(--color-text-primary)",
                   ].join(" ")}
                 >
                   {label}
@@ -280,7 +299,7 @@ export default function ReferralProgramPage() {
         </Box>
 
         {/* Toolbar */}
-        <Box px={5} py={3} className="border-b border-[var(--color-border)]">
+        <Box px={5} py={3} className="border-b border-(--color-border)">
           <Row justify="between" align="center" gap={3}>
             <SearchInput
               value={search}
@@ -290,7 +309,7 @@ export default function ReferralProgramPage() {
                   ? "Search referrers..."
                   : "Search referred users..."
               }
-              className="max-w-[320px] flex-1"
+              className="max-w-80 flex-1"
             />
             <Row gap={2} align="center">
               <Button variant="secondary" size="sm">
@@ -311,6 +330,7 @@ export default function ReferralProgramPage() {
             data={filteredReferrers}
             columns={referrerCols}
             total={filteredReferrers.length}
+            loading={loadingReferrers}
             emptyTitle="No referrers found"
             emptyMessage="Try adjusting your search"
           />
@@ -319,6 +339,7 @@ export default function ReferralProgramPage() {
             data={filteredReferred}
             columns={referredCols}
             total={filteredReferred.length}
+            loading={loadingReferred}
             emptyTitle="No referred users found"
             emptyMessage="Try adjusting your search"
           />

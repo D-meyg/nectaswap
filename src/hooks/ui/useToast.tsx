@@ -1,39 +1,18 @@
-
-
 import { toast } from 'sonner'
 
-/**
- * useToast — central wrapper around sonner.
- * Why: no component should import sonner directly.
- * If we ever swap toast libraries, we change ONE file.
- *
- * Usage:
- *   const toast = useToast()
- *   toast.success('Account frozen')
- *   toast.error('Something went wrong')
- *   toast.info('Processing...')
- *   toast.warning('Balance below threshold')
- *   toast.loading('Uploading document...')
- *   toast.dismiss()        — dismiss all
- *   toast.promise(fn, {
- *     loading: 'Saving...',
- *     success: 'Saved!',
- *     error:   'Failed to save',
- *   })
- */
 export function useToast() {
   return {
-    success: (message: string, description?: string) =>
-      toast.success(message, { description }),
+    success: (title: string, description?: string) =>
+      toast.success(title, { description }),
 
-    error: (message: string, description?: string) =>
-      toast.error(message, { description }),
+    error: (title: string, description?: string) =>
+      toast.error(title, { description }),
 
-    info: (message: string, description?: string) =>
-      toast(message, { description }),
+    info: (title: string, description?: string) =>
+      toast(title, { description }),
 
-    warning: (message: string, description?: string) =>
-      toast.warning(message, { description }),
+    warning: (title: string, description?: string) =>
+      toast.warning(title, { description }),
 
     loading: (message: string) =>
       toast.loading(message),
@@ -41,9 +20,16 @@ export function useToast() {
     dismiss: (id?: string | number) =>
       toast.dismiss(id),
 
-    promise: <T>(
+    promise: <T,>(
       fn: Promise<T>,
       msgs: { loading: string; success: string; error: string }
     ) => toast.promise(fn, msgs),
+
+    show: ({ type, title, message }: { type: 'success' | 'error' | 'info' | 'warning'; title: string; message: string }) => {
+      if (type === 'success') return toast.success(title, { description: message });
+      if (type === 'error') return toast.error(title, { description: message });
+      if (type === 'warning') return toast.warning(title, { description: message });
+      return toast(title, { description: message });
+    }
   }
 }

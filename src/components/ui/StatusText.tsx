@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 interface StatusTextProps {
   status: string;
@@ -47,7 +47,7 @@ export function StatusText({ status, className }: StatusTextProps) {
   return (
     <span
       className={cn(
-        "font-geom text-[13px] font-semibold tracking-wide uppercase leading-none",
+        "font-geom text-[0.8125rem] font-semibold tracking-wide uppercase leading-none",
         color,
         className,
       )}

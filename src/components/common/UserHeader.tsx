@@ -1,7 +1,8 @@
-import { Lock, Mail } from "lucide-react";
+﻿import { Lock, Mail } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
+import { Stack } from "@/components/ui/Stack";
 import { cn } from "@/lib/utils";
 
 interface UserLike {
@@ -30,7 +31,7 @@ function UserStatus({ status }: { status?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[11.5px] font-semibold tracking-wide uppercase leading-none",
+        "inline-flex items-center rounded-sm px-1.5 py-0.5 font-geom text-[10.5px] font-semibold uppercase leading-none",
         isFrozen
           ? "bg-(--color-danger-subtle) text-(--color-danger)"
           : "bg-(--color-success-bg) text-(--color-success-dark)"
@@ -54,53 +55,59 @@ export function UserHeader({
   const isFrozen = user.status?.toLowerCase() === "frozen";
 
   return (
-    <section className={cn("mb-8", className)}>
+    <section className={cn("mb-3", className)}>
       <Row
         align="start"
         justify="between"
-        gap={4}
+        gap={3}
         className="flex-col sm:flex-row"
       >
-        <div className="min-w-0">
-          <Row align="center" gap={3} className="mb-1.5 min-w-0">
+        <Stack gap={1} className="min-w-0">
+          <Row align="center" gap={2} className="min-w-0">
             <Text
               as="h2"
               variant="heading"
               color="primary"
               weight="semibold"
               truncate
-              className="text-[28px] tracking-tight leading-[34px]"
+              className="text-[1.375rem] leading-7"
             >
               {name}
             </Text>
 
             <UserStatus status={user.status} />
 
-            <Text variant="caption" color="secondary" weight="medium" as="span" className="ml-1">
+            <Text
+              variant="caption"
+              color="secondary"
+              weight="medium"
+              as="span"
+              className="ml-0.5 text-[0.6875rem]"
+            >
               ID: {id}
             </Text>
           </Row>
 
-          <Row align="center" gap={3}>
-            <Text variant="caption" color="secondary" as="span">
+          <Row align="center" gap={2}>
+            <Text variant="caption" color="secondary" as="span" className="text-[0.6875rem]">
               {email}
             </Text>
 
-            <span className="h-1.5 w-1.5 rounded-full bg-(--color-border-02)" />
+            <span className="h-1 w-1 rounded-full bg-(--color-border-02)" />
 
-            <Text variant="caption" color="secondary" as="span">
+            <Text variant="caption" color="secondary" as="span" className="text-[0.6875rem]">
               Last active: {lastActive}
             </Text>
           </Row>
-        </div>
+        </Stack>
 
-        <Row align="center" gap={3} className="w-full sm:w-auto mt-4 sm:mt-0">
+        <Row align="center" gap={2} className="w-full sm:mt-1 sm:w-auto">
           <Button
             variant="secondary"
             size="md"
-            className="h-[40px] px-4 w-full sm:w-auto"
+            className="h-8 w-full px-3 text-[0.6875rem] sm:w-auto"
           >
-            <Mail size={16} />
+            <Mail size={14} />
             Send Message
           </Button>
 
@@ -109,9 +116,9 @@ export function UserHeader({
             size="md"
             loading={freezeLoading}
             onClick={onFreeze}
-            className="h-[40px] px-4 w-full sm:w-auto"
+            className="h-8 w-full px-3 text-[0.6875rem] sm:w-auto"
           >
-            <Lock size={16} />
+            <Lock size={14} />
             {isFrozen ? "Unfreeze Account" : "Freeze Account"}
           </Button>
         </Row>

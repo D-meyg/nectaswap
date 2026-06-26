@@ -1,51 +1,88 @@
-import { useQuery } from '@tanstack/react-query'
-import { dashboardService } from '@/services/dashboardService'
-import { QUERY_KEYS } from '@/lib/constants'
+import { useQuery } from "@tanstack/react-query";
+import { dashboardService } from "@/services/dashboardService";
+import type {
+  DashboardStats,
+  WalletAsset,
+  LiveAlert,
+  RecentConversion,
+  RecentActivityEntry,
+  KYCSubmission,
+  SystemHealth,
+} from "@/api/types";
 
 export function useDashboardStats() {
-  return useQuery({
-    queryKey: QUERY_KEYS.DASHBOARD,
-    queryFn:  dashboardService.stats,
-    refetchInterval: 30_000,
-  })
+  return useQuery<DashboardStats>({
+    queryKey: ["dashboard", "stats"],
+    queryFn: async () => {
+      const res = await dashboardService.getStats();
+      return res.data;
+    },
+    staleTime: 60_000,
+  });
 }
 
-export function useLiveAlerts() {
-  return useQuery({
-    queryKey: [...QUERY_KEYS.DASHBOARD, 'alerts'],
-    queryFn:  dashboardService.alerts,
-    refetchInterval: 15_000,
-  })
+export function useDashboardLiquidity() {
+  return useQuery<WalletAsset[]>({
+    queryKey: ["dashboard", "liquidity"],
+    queryFn: async () => {
+      const res = await dashboardService.getLiquidity();
+      return res.data;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useDashboardAlerts(limit = 10) {
+  return useQuery<LiveAlert[]>({
+    queryKey: ["dashboard", "alerts", limit],
+    queryFn: async () => {
+      const res = await dashboardService.getAlerts(limit);
+      return res.data;
+    },
+    staleTime: 15_000,
+  });
+}
+
+export function useDashboardRecentConversions(limit = 10) {
+  return useQuery<RecentConversion[]>({
+    queryKey: ["dashboard", "recent-conversions", limit],
+    queryFn: async () => {
+      const res = await dashboardService.getRecentConversions(limit);
+      return res.data;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useDashboardRecentActivity(limit = 10) {
+  return useQuery<RecentActivityEntry[]>({
+    queryKey: ["dashboard", "recent-activity", limit],
+    queryFn: async () => {
+      const res = await dashboardService.getRecentActivity(limit);
+      return res.data;
+    },
+    staleTime: 30_000,
+  });
+}
+
+export function useDashboardKYCQueue(limit = 10) {
+  return useQuery<KYCSubmission[]>({
+    queryKey: ["dashboard", "kyc-queue", limit],
+    queryFn: async () => {
+      const res = await dashboardService.getKYCQueue(limit);
+      return res.data;
+    },
+    staleTime: 60_000,
+  });
 }
 
 export function useSystemHealth() {
-  return useQuery({
-    queryKey: QUERY_KEYS.SYSTEM_HEALTH,
-    queryFn:  dashboardService.health,
-    refetchInterval: 60_000,
-  })
-}
-
-export function useRecentConversions() {
-  return useQuery({
-    queryKey: [...QUERY_KEYS.DASHBOARD, 'conversions'],
-    queryFn:  dashboardService.recentConversions,
-    refetchInterval: 30_000,
-  })
-}
-
-export function useLiquiditySnapshot() {
-  return useQuery({
-    queryKey: [...QUERY_KEYS.DASHBOARD, 'liquidity'],
-    queryFn:  dashboardService.liquiditySnapshot,
-    refetchInterval: 30_000,
-  })
-}
-
-export function useRecentActivity() {
-  return useQuery({
-    queryKey: [...QUERY_KEYS.DASHBOARD, 'activity'],
-    queryFn:  dashboardService.activity,
-    refetchInterval: 20_000,
-  })
+  return useQuery<SystemHealth[]>({
+    queryKey: ["dashboard", "system-health"],
+    queryFn: async () => {
+      const res = await dashboardService.getSystemHealth();
+      return res.data;
+    },
+    staleTime: 60_000,
+  });
 }

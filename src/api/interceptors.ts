@@ -1,44 +1,92 @@
-import type { AxiosInstance } from 'axios'
+import { client } from "./client";
+import { ENDPOINTS } from "./endpoints";
+import { useAuthStore } from "@/store/authStore";
+import axios from "axios";
 
-/**
- * Separated from client.ts so interceptors can be tested in isolation
- * and swapped out without touching the axios instance setup.
- */
-export function applyInterceptors(client: AxiosInstance) {
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
 
-  // ── Request: attach Bearer token ──────────────────────
-  client.interceptors.request.use(
-    (config) => {
-      const token = localStorage.getItem('auth_token')
-      if (token) config.headers.Authorization = `Bearer ${token}`
-      return config
-    },
-    (error) => Promise.reject(error)
-  )
-
-  // ── Response: global error handling ───────────────────
-  client.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      const status = error.response?.status
-
-      // 401 → token expired or invalid, force logout
-      if (status === 401) {
-        localStorage.removeItem('auth_token')
-        window.location.href = '/login'
-      }
-
-      // 403 → user doesn't have permission
-      if (status === 403) {
-        console.warn('[Auth] Forbidden — insufficient permissions')
-      }
-
-      // 500+ → server error, let query hooks handle retry
-      if (status >= 500) {
-        console.error('[API] Server error', error.response?.data)
-      }
-
-      return Promise.reject(error)
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
     }
-  )
-}
+  });
+  failedQueue = [];
+};
+
+client.interceptors.request.use(
+  (config) => {
+    const token = useAuthStore.getState().token;
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+client.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return client(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = useAuthStore.getState().refreshToken;
+
+      if (!refreshToken) {
+        useAuthStore.getState().clearAuth();
+        return Promise.reject(error);
+      }
+
+      try {
+        const { data } = await axios.post(
+          `${client.defaults.baseURL || ""}${ENDPOINTS.AUTH.REFRESH}`,
+          {},
+          {
+            headers: {
+              "refresh-token": refreshToken,
+            },
+          },
+        );
+
+        const newToken = data.data.access_token;
+        const newRefreshToken = data.data.refresh_token;
+
+        useAuthStore.getState().setTokens(newToken, newRefreshToken);
+        client.defaults.headers.common.Authorization = `Bearer ${newToken}`;
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
+        processQueue(null, newToken);
+        return client(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError as Error, null);
+        useAuthStore.getState().clearAuth();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);

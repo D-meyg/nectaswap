@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+﻿import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, Ban, Mail, UserPlus, SlidersHorizontal } from "lucide-react";
 
@@ -7,7 +7,6 @@ import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Box } from "@/components/ui/Box";
-import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { FilterButton } from "@/components/ui/FilterButton";
@@ -20,7 +19,7 @@ import { Stack } from "@/components/ui/Stack";
 
 import { useDebounce } from "@/hooks/ui/useDebounce";
 import { useFreezeAccount } from "@/hooks/mutations/useUserMutations";
-import { DUMMY_USERS_EXTENDED } from "@/lib/dummyData";
+import { useUsers } from "@/hooks/queries/useUsers";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface UserRow {
@@ -33,6 +32,44 @@ interface UserRow {
   risk_score: number;
   status: string;
   kyc_tier: string;
+}
+
+function toNumber(value: unknown) {
+  const parsed = Number(value ?? 0);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function stringValue(value: unknown, fallback = "") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function normalizeUser(value: unknown): UserRow {
+  const item =
+    value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const nestedUser =
+    item.user && typeof item.user === "object"
+      ? (item.user as Record<string, unknown>)
+      : {};
+  const id = stringValue(
+    item.id ?? item.user_id ?? nestedUser.id ?? nestedUser.user_id,
+    "unknown",
+  );
+  const name = stringValue(
+    item.name ?? item.full_name ?? nestedUser.name ?? nestedUser.full_name,
+    "Unknown User",
+  );
+
+  return {
+    id,
+    name,
+    email: stringValue(item.email ?? nestedUser.email, "N/A"),
+    kyc_status: stringValue(item.kyc_status ?? item.kycStatus, "pending"),
+    balance: toNumber(item.balance ?? item.wallet_balance),
+    total_volume: toNumber(item.total_volume ?? item.totalVolume ?? item.transactions_count),
+    risk_score: toNumber(item.risk_score ?? item.riskScore),
+    status: stringValue(item.status, "active"),
+    kyc_tier: stringValue(item.kyc_tier ?? item.kyc_level ?? item.tier, "N/A"),
+  };
 }
 
 export default function UsersPage() {
@@ -49,15 +86,27 @@ export default function UsersPage() {
 
   const debouncedSearch = useDebounce(search, 400);
   const freeze = useFreezeAccount();
+  const { data: apiUsers = [], isLoading } = useUsers({
+    page,
+    search: debouncedSearch || undefined,
+    status: statusFilter || undefined,
+    kyc_status: kycFilter || undefined,
+  });
+
+  const users = useMemo(
+    () => (Array.isArray(apiUsers) ? apiUsers.map(normalizeUser) : []),
+    [apiUsers],
+  );
+
 
   const filtered = useMemo(
     () =>
-      DUMMY_USERS_EXTENDED.filter((u) => {
+      users.filter((u) => {
         const matchSearch =
           !debouncedSearch ||
           u.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
           u.email.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
-          u.id.includes(debouncedSearch);
+          u.id.toLowerCase().includes(debouncedSearch.toLowerCase());
         const matchStatus =
           !statusFilter ||
           u.status.toLowerCase() === statusFilter.toLowerCase();
@@ -65,7 +114,7 @@ export default function UsersPage() {
           !kycFilter || u.kyc_status.toLowerCase() === kycFilter.toLowerCase();
         return matchSearch && matchStatus && matchKyc;
       }),
-    [debouncedSearch, statusFilter, kycFilter],
+    [users, debouncedSearch, statusFilter, kycFilter],
   );
 
   const handleView = useCallback(
@@ -85,7 +134,6 @@ export default function UsersPage() {
             className="flex items-center gap-3.5 text-left hover:opacity-80 transition-opacity outline-none"
             onClick={() => handleView(row.original.id)}
           >
-            <Avatar name={row.original.name} size="md" />
             <Stack gap={0}>
               <Text variant="caption" color="primary" weight="semibold">
                 {row.original.name}
@@ -181,7 +229,7 @@ export default function UsersPage() {
   );
 
   return (
-    <Box p={6} className="mx-auto w-full max-w-[1600px] lg:p-8">
+    <Box p={6} className="mx-auto w-full max-w-[100rem] lg:p-8">
       <Card className="mb-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Box px={5} py={4}>
           <Row
@@ -197,7 +245,7 @@ export default function UsersPage() {
                 setPage(1);
               }}
               placeholder="Search by name, email, or user ID..."
-              className="w-full sm:max-w-[380px]"
+              className="w-full sm:max-w-[23.75rem]"
             />
 
             <Row
@@ -226,7 +274,7 @@ export default function UsersPage() {
 
       <Card noPadding className="shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Box px={5} py={5} className="border-b border-(--color-border)">
-          <Stack gap={0.5}>
+          <Stack gap={1}>
             <Text variant="subtitle" color="primary" weight="semibold">
               All Users
             </Text>
@@ -239,7 +287,7 @@ export default function UsersPage() {
         <DataTable
           data={filtered}
           columns={columns}
-          loading={false}
+          loading={isLoading}
           total={filtered.length}
           page={page}
           pageSize={10}

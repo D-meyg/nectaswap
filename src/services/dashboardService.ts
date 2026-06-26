@@ -1,15 +1,47 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type {
-  DashboardStats, LiveAlert, SystemHealth,
-  RecentConversion, RecentActivityEntry, WalletAsset,
-} from '@/api/types'
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 
 export const dashboardService = {
-  stats:              () => client.get<DashboardStats>(ENDPOINTS.DASHBOARD.STATS).then(r => r.data),
-  alerts:             () => client.get<LiveAlert[]>(ENDPOINTS.DASHBOARD.ALERTS).then(r => r.data),
-  health:             () => client.get<SystemHealth[]>(ENDPOINTS.DASHBOARD.HEALTH).then(r => r.data),
-  activity:           () => client.get<RecentActivityEntry[]>(ENDPOINTS.DASHBOARD.ACTIVITY).then(r => r.data),
-  recentConversions:  () => client.get<RecentConversion[]>(ENDPOINTS.RECENT.CONVERSIONS).then(r => r.data),
-  liquiditySnapshot:  () => client.get<WalletAsset[]>(ENDPOINTS.WALLETS.SNAPSHOT).then(r => r.data),
-}
+  getStats: async () => {
+    const { data } = await client.get(ENDPOINTS.DASHBOARD.STATS);
+    return data;
+  },
+
+  getLiquidity: async () => {
+    const { data } = await client.get(ENDPOINTS.DASHBOARD.LIQUIDITY);
+    return data;
+  },
+
+  getAlerts: async (limit = 10) => {
+    const { data } = await client.get(ENDPOINTS.DASHBOARD.ALERTS, {
+      params: { limit },
+    });
+    return data;
+  },
+
+  getRecentConversions: async (limit = 10) => {
+    const { data } = await client.get(ENDPOINTS.DASHBOARD.RECENT_CONVERSIONS, {
+      params: { limit },
+    });
+    return data;
+  },
+
+  getRecentActivity: async (limit = 10) => {
+    const { data } = await client.get(ENDPOINTS.DASHBOARD.RECENT_ACTIVITY, {
+      params: { limit },
+    });
+    return data;
+  },
+
+  getKYCQueue: async (limit = 10) => {
+    const { data } = await client.get(ENDPOINTS.DASHBOARD.KYC_QUEUE, {
+      params: { limit },
+    });
+    return data;
+  },
+
+  getSystemHealth: async () => {
+    const { data } = await client.get(ENDPOINTS.DASHBOARD.SYSTEM_HEALTH);
+    return data;
+  },
+};

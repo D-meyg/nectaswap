@@ -1,17 +1,24 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type { Note } from '@/api/types'
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 
 export const noteService = {
-  list:   (userId: string) =>
-    client.get<Note[]>(ENDPOINTS.NOTES.LIST(userId)).then(r => r.data),
+  getUserNotes: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.NOTES(userId));
+    return data;
+  },
 
-  add:    (userId: string, content: string) =>
-    client.post<Note>(ENDPOINTS.NOTES.ADD(userId), { content }).then(r => r.data),
+  createUserNote: async (
+    userId: string,
+    payload: { note: string; is_pinned: boolean },
+  ) => {
+    const { data } = await client.post(ENDPOINTS.USERS.NOTES(userId), payload);
+    return data;
+  },
 
-  pin:    (noteId: string) =>
-    client.post(ENDPOINTS.NOTES.PIN(noteId)).then(r => r.data),
-
-  delete: (noteId: string) =>
-    client.delete(ENDPOINTS.NOTES.DELETE(noteId)).then(r => r.data),
-}
+  deleteUserNote: async (userId: string, noteId: string) => {
+    const { data } = await client.delete(
+      `${ENDPOINTS.USERS.NOTES(userId)}/${noteId}`,
+    );
+    return data;
+  },
+};

@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { AppProviders } from '@/providers/AppProviders'
 import { router } from '@/router'
+import '@/api/interceptors'
 import '@/styles/globals.css'
 
 createRoot(document.getElementById('root')!).render(

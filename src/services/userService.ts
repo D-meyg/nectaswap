@@ -1,24 +1,102 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type { PaginatedResponse, User, UserDetail } from '@/api/types'
-import { PAGE_SIZE } from '@/lib/constants'
-
-interface ListParams { page?: number; search?: string; status?: string }
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 
 export const userService = {
-  list: (params: ListParams = {}) =>
-    client
-      .get<PaginatedResponse<User>>(ENDPOINTS.USERS.LIST, {
-        params: { page_size: PAGE_SIZE, ...params },
-      })
-      .then(r => r.data),
+  getUsers: async (params?: Record<string, unknown>) => {
+    const { data } = await client.get(ENDPOINTS.USERS.LIST, { params });
+    return data;
+  },
 
-  get:      (id: string) =>
-    client.get<UserDetail>(ENDPOINTS.USERS.DETAIL(id)).then(r => r.data),
+  getUserDetail: async (id: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.DETAIL(id));
+    return data;
+  },
 
-  freeze:   (id: string) =>
-    client.post(ENDPOINTS.USERS.FREEZE(id)).then(r => r.data),
+  restrictUser: async (payload: { user_id: string; status: boolean }) => {
+    const { data } = await client.patch(ENDPOINTS.USERS.RESTRICTION, payload);
+    return data;
+  },
 
-  unfreeze: (id: string) =>
-    client.post(ENDPOINTS.USERS.UNFREEZE(id)).then(r => r.data),
-}
+  softRestrictUser: async (payload: { user_id: string; status: boolean }) => {
+    const { data } = await client.patch(
+      ENDPOINTS.USERS.SOFT_RESTRICTION,
+      payload,
+    );
+    return data;
+  },
+
+  executeWalletAction: async (payload: {
+    user_id: string;
+    action: "debit" | "credit";
+    amount: number;
+    description: string;
+    pin: string;
+  }) => {
+    const { data } = await client.post(ENDPOINTS.USERS.WALLET_ACTION, payload);
+    return data;
+  },
+
+  freezeAllCards: async (userId: string) => {
+    const { data } = await client.patch(ENDPOINTS.USERS.FREEZE_CARDS(userId));
+    return data;
+  },
+
+  getUserOverview: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.OVERVIEW(userId));
+    return data;
+  },
+
+  getUserKYC: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.KYC(userId));
+    return data;
+  },
+
+  getUserCards: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.CARDS(userId));
+    return data;
+  },
+
+  getUserTransactions: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.TRANSACTIONS(userId));
+    return data;
+  },
+
+  getUserReferrals: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.REFERRALS(userId));
+    return data;
+  },
+
+  getUserActivity: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.ACTIVITY(userId));
+    return data;
+  },
+
+  getUserNotes: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.NOTES(userId));
+    return data;
+  },
+
+  createUserNote: async (
+    userId: string,
+    payload: { note: string; is_pinned: boolean },
+  ) => {
+    const { data } = await client.post(ENDPOINTS.USERS.NOTES(userId), payload);
+    return data;
+  },
+
+  getUserAuditLog: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.AUDIT_LOG(userId));
+    return data;
+  },
+
+  sendNotification: async (
+    userId: string,
+    payload: { title: string; message: string; priority: string },
+  ) => {
+    const { data } = await client.post(
+      ENDPOINTS.USERS.SEND_NOTIFICATION(userId),
+      payload,
+    );
+    return data;
+  },
+};

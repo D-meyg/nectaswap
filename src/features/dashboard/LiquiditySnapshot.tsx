@@ -30,7 +30,7 @@ export function LiquiditySnapshot({ assets, loading }: LiquiditySnapshotProps) {
         header: "Balance",
         cell: ({ getValue }) => (
           <Text variant="caption" color="primary">
-            {getValue<number>().toLocaleString()}
+            {(getValue<number>() ?? 0).toLocaleString()}
           </Text>
         ),
       },
@@ -47,7 +47,8 @@ export function LiquiditySnapshot({ assets, loading }: LiquiditySnapshotProps) {
         accessorKey: "threshold",
         header: "Threshold",
         cell: ({ getValue }) => {
-          const pct = Math.min(100, getValue<number>());
+          const raw = getValue<number>();
+          const pct = Number.isFinite(raw) ? Math.min(100, raw) : 0;
           return (
             <div className="flex items-center gap-2 w-40">
               <ProgressBar value={pct} max={100} className="flex-1" />

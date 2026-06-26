@@ -67,6 +67,9 @@
     --color-bg-page: #f5f6f8;
     --color-bg-card: #ffffff;
     --color-bg-subtle: #f9fafb;
+    --color-bg-section: #f8fafc;
+    --color-modal-overlay: rgba(17, 24, 39, 0.62);
+    --color-modal-surface: #ffffff;
 
     --radius-sm: 4px;
     --radius-md: 6px;

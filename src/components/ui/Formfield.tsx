@@ -86,7 +86,11 @@ export function FormField<T extends FieldValues = FieldValues>({
   } = useFormContext<T>();
 
   // Navigate nested error paths (e.g. "address.city")
+<<<<<<< HEAD
   const error = name.split(".").reduce(
+=======
+  const error = String(name || "").split(".").reduce(
+>>>>>>> refactoring/dummy-data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (acc: any, key) => acc?.[key],
     errors,
@@ -151,4 +155,8 @@ export function FormField<T extends FieldValues = FieldValues>({
       }}
     />
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> refactoring/dummy-data

@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { Download } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { StatCard } from "@/components/ui/StatCard";
 import { usePageTitle } from "@/layouts/AppLayout";
+import { useDashboardStats } from "@/hooks/queries/useDashboard";
+import { useFeeRevenue } from "@/hooks/queries/useRates";
 
 const revenuePerformanceData = [
   { month: "Jan 25", gross: 52,  net: 48,  fees: 4  },
@@ -57,14 +59,14 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-[var(--color-border)] rounded-[var(--radius-md)] shadow-[var(--shadow-card)] px-3 py-2 min-w-[140px]">
+    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[8.75rem]">
       <Text variant="micro" color="muted" className="mb-1 block">{label}</Text>
       {payload.map((p) => (
         <div key={String(p.name)} className="flex items-center gap-2">
           <span className="h-2 w-2 rounded-full shrink-0" style={{ background: String(p.color) }} />
           <Text variant="micro" color="secondary" as="span">
             {p.name}:{" "}
-            <span className="font-semibold text-[var(--color-text-primary)]">
+            <span className="font-semibold text-(--color-text-primary)">
               {typeof p.value === "number" ? `₦${p.value}M` : p.value}
             </span>
           </Text>
@@ -77,20 +79,32 @@ function ChartTooltip({ active, payload, label }: {
 export default function RevenueAnalyticsPage() {
   usePageTitle("Revenue Analytics", "Track revenue, fees, and financial performance over time");
   const [activeDate, setActiveDate] = useState("Last 12 months");
+  const { data: dashboardStats = {} } = useDashboardStats();
+  const { data: feeRevenue = {} } = useFeeRevenue();
+  const stats = { ...(dashboardStats as Record<string, any>), ...(feeRevenue as Record<string, any>) };
+
+  const totalRevenue = stats.total_revenue ?? stats.totalRevenue ?? stats.revenue ?? "₦812M";
+  const netRevenue = stats.net_revenue ?? stats.netRevenue ?? "₦771M";
+  const transactionFees = stats.transaction_fees ?? stats.transactionFees ?? stats.fees ?? "₦40.6M";
+  const avgRevenueDay = stats.avg_revenue_per_day ?? stats.avgRevenuePerDay ?? "₦2.7M";
+  const revenuePerTransaction = stats.revenue_per_transaction ?? stats.revenuePerTransaction ?? "₦34,700";
+  const growthRate = stats.growth_rate ?? stats.growthRate ?? "18.5%";
+  const cardRevenue = stats.card_revenue ?? stats.cardRevenue ?? "₦8.9M";
+  const feeMargin = stats.fee_margin ?? stats.feeMargin ?? "5.0%";
 
   return (
     <div className="p-6 space-y-5">
       {/* Toolbar */}
       <Row justify="between" align="center">
-        <div className="flex items-center border border-[var(--color-border)] rounded-[var(--radius-sm)] overflow-hidden">
+        <div className="flex items-center border border-(--color-border) rounded-(--radius-sm) overflow-hidden">
           {DATE_FILTERS.map((f) => (
             <button
               key={f}
               onClick={() => setActiveDate(f)}
-              className={`px-3 py-[6px] text-[12px] font-medium border-r border-[var(--color-border)] last:border-r-0 transition-colors ${
+              className={`px-3 py-1.5 text-xs font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
                 activeDate === f
-                  ? "bg-[var(--color-brand)] text-white"
-                  : "bg-white text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)]"
+                  ? "bg-(--color-brand) text-white"
+                  : "bg-white text-(--color-text-secondary) hover:bg-(--color-bg-subtle)"
               }`}
             >
               {f}
@@ -108,10 +122,10 @@ export default function RevenueAnalyticsPage() {
 
       {/* Top stat cards */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Total Revenue"    value="₦812M"  delta={18.5}  deltaLabel="vs last period" status="success" />
-        <StatCard label="Net Revenue"      value="₦771M"  delta={14.3}  deltaLabel="vs last period" status="success" />
-        <StatCard label="Transaction Fees" value="₦40.6M" delta={17.8}  deltaLabel="5% of gross"   status="info" />
-        <StatCard label="Avg Revenue/Day"  value="₦2.7M"  delta={-0.35} deltaLabel="vs last period" status="warning" />
+        <StatCard label="Total Revenue"    value={String(totalRevenue)}  delta={18.5}  deltaLabel="vs last period" status="success" />
+        <StatCard label="Net Revenue"      value={String(netRevenue)}  delta={14.3}  deltaLabel="vs last period" status="success" />
+        <StatCard label="Transaction Fees" value={String(transactionFees)} delta={17.8}  deltaLabel="5% of gross"   status="info" />
+        <StatCard label="Avg Revenue/Day"  value={String(avgRevenueDay)}  delta={-0.35} deltaLabel="vs last period" status="warning" />
       </Grid>
 
       {/* Revenue Performance Over Time */}
@@ -165,7 +179,7 @@ export default function RevenueAnalyticsPage() {
                       <Text variant="caption" color="primary" weight="semibold">{c.revenue}</Text>
                     </Row>
                   </Row>
-                  <div className="relative h-1.5 w-full bg-[var(--color-border)] rounded-full overflow-hidden">
+                  <div className="relative h-1.5 w-full bg-(--color-border) rounded-full overflow-hidden">
                     <div className="absolute left-0 top-0 h-full rounded-full" style={{ width: `${c.share}%`, background: c.color }} />
                   </div>
                   <Row justify="between">
@@ -186,7 +200,7 @@ export default function RevenueAnalyticsPage() {
                 <Row key={f.name} justify="between" align="center">
                   <Text variant="caption" color="primary">{f.name}</Text>
                   <Row gap={3} align="center">
-                    <div className="relative h-1.5 w-[120px] bg-[var(--color-border)] rounded-full overflow-hidden">
+                    <div className="relative h-1.5 w-[7.5rem] bg-(--color-border) rounded-full overflow-hidden">
                       <div className="absolute left-0 top-0 h-full rounded-full" style={{ width: `${f.share}%`, background: f.color }} />
                     </div>
                     <Text variant="caption" color="primary" weight="semibold" className="w-10 text-right">{f.amount}</Text>
@@ -194,7 +208,7 @@ export default function RevenueAnalyticsPage() {
                   </Row>
                 </Row>
               ))}
-              <div className="pt-2 border-t border-[var(--color-border)] flex justify-between items-center">
+              <div className="pt-2 border-t border-(--color-border) flex justify-between items-center">
                 <Text variant="caption" color="primary" weight="medium">Total Fee Revenue</Text>
                 <Text variant="caption" color="brand"   weight="semibold">₦123M</Text>
               </div>
@@ -227,10 +241,10 @@ export default function RevenueAnalyticsPage() {
 
       {/* Bottom stats */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Revenue / Transaction" value="₦34,700" deltaLabel="Average transaction value" />
-        <StatCard label="Growth Rate"           value="18.5%"   delta={18.5} deltaLabel="Month over month" />
-        <StatCard label="Card Revenue"          value="₦8.9M"   delta={8.4}  deltaLabel="From card services" />
-        <StatCard label="Fee Margin"            value="5.0%"    deltaLabel="Average fee percentage" />
+        <StatCard label="Revenue / Transaction" value={String(revenuePerTransaction)} deltaLabel="Average transaction value" />
+        <StatCard label="Growth Rate"           value={String(growthRate)}   delta={18.5} deltaLabel="Month over month" />
+        <StatCard label="Card Revenue"          value={String(cardRevenue)}   delta={8.4}  deltaLabel="From card services" />
+        <StatCard label="Fee Margin"            value={String(feeMargin)}    deltaLabel="Average fee percentage" />
       </Grid>
     </div>
   );

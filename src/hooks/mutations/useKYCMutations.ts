@@ -1,42 +1,38 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
-import { kycService } from '@/services/kycService'
-import { QUERY_KEYS } from '@/lib/constants'
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { kycService } from "@/services/kycService";
+import { useToast } from "@/hooks/ui/useToast";
 
-export function useApproveKYC() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: (kycId: string) => kycService.approve(kycId),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: QUERY_KEYS.KYC_QUEUE })
-      toast.success('KYC approved successfully')
-    },
-    onError: () => toast.error('Failed to approve KYC'),
-  })
-}
+export function useReviewKYCApplication() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
 
-export function useRejectKYC() {
-  const qc = useQueryClient()
   return useMutation({
-    mutationFn: ({ kycId, reason }: { kycId: string; reason: string }) =>
-      kycService.reject(kycId, reason),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: QUERY_KEYS.KYC_QUEUE })
-      toast.success('KYC rejected')
-    },
-    onError: () => toast.error('Failed to reject KYC'),
-  })
-}
+    mutationFn: ({
+      id,
+      action,
+      rejection_reason,
+    }: {
+      id: string;
+      action: "approve" | "reject";
+      rejection_reason?: string;
+    }) => kycService.reviewApplication(id, { action, rejection_reason }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["kyc"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "kyc-queue"] });
 
-export function useRequestResubmission() {
-  const qc = useQueryClient()
-  return useMutation({
-    mutationFn: ({ kycId, message }: { kycId: string; message: string }) =>
-      kycService.resubmit(kycId, message),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: QUERY_KEYS.KYC_QUEUE })
-      toast.success('Resubmission requested')
+      toast.show({
+        type: "success",
+        title: "Application Reviewed",
+        message: `The KYC application was successfully ${variables.action}ed.`,
+      });
     },
-    onError: () => toast.error('Failed to request resubmission'),
-  })
+    onError: (error: Error) => {
+      toast.show({
+        type: "error",
+        title: "Review Failed",
+        message: error.message || "Failed to process the KYC review.",
+      });
+    },
+  });
 }

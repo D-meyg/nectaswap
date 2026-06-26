@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+﻿import { cn } from "@/lib/utils";
 
 type KYCStatus = "Verified" | "Pending" | "Expired" | string;
 
@@ -18,7 +18,7 @@ export function KYCBadge({ status, className }: KYCBadgeProps) {
   return (
     <span
       className={cn(
-        "text-[13px] font-semibold tracking-wide uppercase",
+        "text-[0.8125rem] font-semibold tracking-wide uppercase",
         color,
         className,
       )}

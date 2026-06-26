@@ -1,8 +1,13 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type { ActivityEvent } from '@/api/types'
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 
 export const activityService = {
-  list: (userId: string) =>
-    client.get<ActivityEvent[]>(ENDPOINTS.ACTIVITY.LIST(userId)).then(r => r.data),
-}
+  getUserActivity: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.ACTIVITY(userId));
+    return data;
+  },
+  getUserAuditLog: async (userId: string) => {
+    const { data } = await client.get(ENDPOINTS.USERS.AUDIT_LOG(userId));
+    return data;
+  },
+};

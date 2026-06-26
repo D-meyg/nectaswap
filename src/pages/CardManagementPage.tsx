@@ -1,3 +1,4 @@
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { usePageTitle } from "@/layouts/AppLayout";
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -15,19 +16,31 @@ import { FilterButton } from "@/components/ui/FilterButton";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { useDebounce } from "@/hooks/ui/useDebounce";
-import { DUMMY_ALL_CARDS, type CardRow } from "@/lib/dummyData";
+import { useCards, useCardStats } from "@/hooks/queries/useCards";
 import type { ColumnDef } from "@tanstack/react-table";
+
+type CardRow = {
+  id: string;
+  masked: string;
+  expiry: string;
+  user_name: string;
+  user_email: string;
+  type: "Virtual" | "Physical";
+  balance: number;
+  spend_30d: number;
+  status: "Active" | "Frozen" | "Pending" | "Blocked";
+};
 
 // Card type pill — "Virtual" purple, "Physical" brand blue
 function CardTypePill({ type }: { type: "Virtual" | "Physical" }) {
   const style =
     type === "Virtual"
-      ? "text-[var(--color-brand)] bg-[rgba(78,43,204,0.08)]"
+      ? "text-(--color-brand) bg-[rgba(78,43,204,0.08)]"
       : "text-[#0A85D1] bg-[rgba(10,133,209,0.08)]";
   return (
     <span
       className={[
-        "inline-flex px-2 py-0.5 rounded-full text-[12px] font-medium",
+        "inline-flex px-2 py-0.5 rounded-full text-xs font-medium",
         style,
       ].join(" ")}
     >
@@ -39,20 +52,26 @@ function CardTypePill({ type }: { type: "Virtual" | "Physical" }) {
 // Card status text — plain colored text matching image 1
 function CardStatus({ status }: { status: CardRow["status"] }) {
   const colors: Record<CardRow["status"], string> = {
-    Active: "text-[var(--color-success-mid)]",
-    Frozen: "text-[var(--color-warning-dark)]",
-    Pending: "text-[var(--color-warning)]",
-    Blocked: "text-[var(--color-danger)]",
+    Active: "text-(--color-success-mid)",
+    Frozen: "text-(--color-warning-dark)",
+    Pending: "text-(--color-warning)",
+    Blocked: "text-(--color-danger)",
   };
   return (
-    <span className={["text-[13px] font-medium", colors[status]].join(" ")}>
+    <span className={["text-[0.8125rem] font-medium", colors[status]].join(" ")}>
       {status}
     </span>
   );
 }
 
 // Format NGN compact
-function fmt(n: number) {
+function toNumber(value: unknown) {
+  const numberValue = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(numberValue) ? numberValue : 0;
+}
+
+function fmt(value: unknown) {
+  const n = toNumber(value);
   if (n === 0) return "₦ 0";
   if (n >= 1_000_000) return `₦ ${(n / 1_000_000).toFixed(1)}M`;
   return `₦ ${n.toLocaleString()}`;
@@ -69,19 +88,29 @@ export default function CardManagementPage() {
   const [typeFilter] = useState("");
   const [page, setPage] = useState(1);
   const debounced = useDebounce(search, 400);
+  const { data: apiCards = [], isLoading } = useCards({
+    page,
+    search: debounced || undefined,
+    type: typeFilter || undefined,
+  });
+  const { data: cardStats = {} } = useCardStats();
+  const cards = useMemo(
+    () => (Array.isArray(apiCards) ? (apiCards as CardRow[]) : []),
+    [apiCards],
+  );
 
   const filtered = useMemo(
     () =>
-      DUMMY_ALL_CARDS.filter((c) => {
+      cards.filter((c) => {
         const matchSearch =
           !debounced ||
-          c.masked.includes(debounced) ||
-          c.user_name.toLowerCase().includes(debounced.toLowerCase()) ||
-          c.id.includes(debounced);
+          String(c.masked || "").includes(debounced) ||
+          String(c.user_name || "").toLowerCase().includes(debounced.toLowerCase()) ||
+          String(c.id || "").includes(debounced);
         const matchType = !typeFilter || c.type === typeFilter;
         return matchSearch && matchType;
       }),
-    [debounced, typeFilter],
+    [cards, debounced, typeFilter],
   );
 
   const handleView = useCallback(
@@ -89,14 +118,10 @@ export default function CardManagementPage() {
     [navigate],
   );
 
-  const totalCards = DUMMY_ALL_CARDS.length;
-  const activeCards = DUMMY_ALL_CARDS.filter(
-    (c) => c.status === "Active",
-  ).length;
-  const blockedCards = DUMMY_ALL_CARDS.filter(
-    (c) => c.status === "Blocked" || c.status === "Frozen",
-  ).length;
-  const totalSpend = DUMMY_ALL_CARDS.reduce((s, c) => s + c.spend_30d, 0);
+  const totalCards = (cardStats as any).total_cards ?? cards.length;
+  const activeCards = (cardStats as any).active_cards ?? cards.filter((c) => c.status === "Active").length;
+  const blockedCards = (cardStats as any).blocked_cards ?? cards.filter((c) => c.status === "Blocked" || c.status === "Frozen").length;
+  const totalSpend = (cardStats as any).total_spend_24h ?? cards.reduce((s, c) => s + toNumber(c.spend_30d), 0);
 
   const columns = useMemo<ColumnDef<CardRow, unknown>[]>(
     () => [
@@ -185,7 +210,7 @@ export default function CardManagementPage() {
                 className="h-7 w-7 p-0 flex items-center justify-center"
                 onClick={() => handleView(row.original.id)}
               >
-                <Eye size={14} className="text-[var(--color-text-muted)]" />
+                <Eye size={14} className="text-(--color-text-muted)" />
               </Button>
             </Tooltip>
             <Tooltip content="Freeze card" side="top">
@@ -194,7 +219,7 @@ export default function CardManagementPage() {
                 size="sm"
                 className="h-7 w-7 p-0 flex items-center justify-center"
               >
-                <Lock size={14} className="text-[var(--color-text-muted)]" />
+                <Lock size={14} className="text-(--color-text-muted)" />
               </Button>
             </Tooltip>
           </Row>
@@ -213,7 +238,7 @@ export default function CardManagementPage() {
         <StatCard label="Blocked Cards" value={blockedCards} status="danger" />
         <StatCard
           label="Total Spend (24h)"
-          value={`₦ ${(totalSpend / 1_000_000).toFixed(1)}M`}
+          value={`₦ ${(toNumber(totalSpend) / 1_000_000).toFixed(1)}M`}
         />
       </div>
 
@@ -228,7 +253,7 @@ export default function CardManagementPage() {
                 setPage(1);
               }}
               placeholder="Search by card number, user, or ID..."
-              className="flex-1 max-w-[380px]"
+              className="flex-1 max-w-[23.75rem]"
             />
             <Row gap={2} align="center">
               <FilterButton
@@ -246,7 +271,7 @@ export default function CardManagementPage() {
 
       {/* Table */}
       <Card noPadding>
-        <Box px={5} py={4} className="border-b border-[var(--color-border)]">
+        <Box px={5} py={4} className="border-b border-(--color-border)">
           <Text variant="subtitle" color="primary" weight="semibold" as="p">
             All Cards
           </Text>
@@ -263,6 +288,7 @@ export default function CardManagementPage() {
           onPageChange={setPage}
           emptyTitle="No cards found"
           emptyMessage="Try adjusting your search or filters"
+          loading={isLoading}
           stickyHeader
         />
       </Card>

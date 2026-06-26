@@ -1,20 +1,32 @@
-import client from '@/api/client'
-import { ENDPOINTS } from '@/api/endpoints'
-import type { AdminUser } from '@/api/types'
-
-interface LoginPayload  { email: string; password: string }
-interface LoginResponse { user: AdminUser; token: string }
+import { client } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
+import type { LoginPayload, AcceptInvitePayload } from "@/api/types";
 
 export const authService = {
-  login:   (payload: LoginPayload) =>
-    client.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, payload).then(r => r.data),
+  login: async (payload: LoginPayload) => {
+    const { data } = await client.post(ENDPOINTS.AUTH.LOGIN, payload);
+    return data;
+  },
 
-  logout:  () =>
-    client.post(ENDPOINTS.AUTH.LOGOUT).then(r => r.data),
+  verifyOtp: async (payload: { v_id: string; otp: string }) => {
+    const { data } = await client.post(ENDPOINTS.AUTH.VERIFY_OTP, payload);
+    return data;
+  },
 
-  me:      () =>
-    client.get<AdminUser>(ENDPOINTS.AUTH.ME).then(r => r.data),
+  acceptInvitation: async (payload: AcceptInvitePayload) => {
+    const { data } = await client.post(
+      ENDPOINTS.AUTH.ACCEPT_INVITATION,
+      payload,
+    );
+    return data;
+  },
 
-  refresh: () =>
-    client.post<{ token: string }>(ENDPOINTS.AUTH.REFRESH).then(r => r.data),
-}
+  refresh: async (refreshToken: string) => {
+    const { data } = await client.post(
+      ENDPOINTS.AUTH.REFRESH,
+      {},
+      { headers: { "refresh-token": refreshToken } },
+    );
+    return data;
+  },
+};

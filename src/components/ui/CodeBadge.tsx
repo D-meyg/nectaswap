@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+﻿import { cn } from '@/lib/utils'
 import { useClipboard } from '@/hooks/ui/useClipboard'
 import { Copy, Check } from 'lucide-react'
 import { Text } from './Text'
@@ -22,7 +22,7 @@ export function CodeBadge({ code, className }: CodeBadgeProps) {
   return (
     <div className={cn(
       'inline-flex items-center gap-2',
-      'rounded-[var(--radius-sm)] border border-[var(--color-brand)]/30',
+      'rounded-(--radius-sm) border border-(--color-brand)/30',
       'bg-[rgba(78,43,204,0.06)] px-3 py-2',
       className
     )}>
@@ -37,7 +37,7 @@ export function CodeBadge({ code, className }: CodeBadgeProps) {
       </Text>
       <button
         onClick={() => copy(code)}
-        className="text-[var(--color-brand)] hover:opacity-70 transition-opacity"
+        className="text-(--color-brand) hover:opacity-70 transition-opacity"
         aria-label="Copy code"
       >
         {copied

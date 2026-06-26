@@ -1,25 +1,34 @@
-import { useQuery } from '@tanstack/react-query'
-import { userService } from '@/services/userService'
-import { QUERY_KEYS } from '@/lib/constants'
+import { useQuery } from "@tanstack/react-query";
+import { userService } from "@/services/userService";
+import { unwrapApiData, unwrapApiList } from "@/utils/apiData";
 
 interface UseUsersParams {
-  page?:   number
-  search?: string
-  status?: string
+  page?: number;
+  search?: string;
+  status?: string;
+  kyc_status?: string;
+  [key: string]: unknown;
 }
 
-export function useUsers(params: UseUsersParams = {}) {
-  const { page = 1, search = '', status } = params
-  return useQuery({
-    queryKey: [...QUERY_KEYS.USERS, page, search, status],
-    queryFn:  () => userService.list({ page, search, status }),
-  })
+export function useUsers(params?: UseUsersParams) {
+  return useQuery<unknown[]>({
+    queryKey: ["users", params],
+    queryFn: async () => {
+      const res = await userService.getUsers(params as Record<string, unknown>);
+      return unwrapApiList(res, ["users"]);
+    },
+    staleTime: 30_000,
+  });
 }
 
-export function useUser(id: string) {
+export function useUserReferrals(userId: string | undefined) {
   return useQuery({
-    queryKey: QUERY_KEYS.USER(id),
-    queryFn:  () => userService.get(id),
-    enabled:  !!id,
-  })
+    queryKey: ["user-referrals", userId],
+    queryFn: async () => {
+      const res = await userService.getUserReferrals(userId!);
+      return unwrapApiData(res, null);
+    },
+    enabled: !!userId,
+    staleTime: 60_000,
+  });
 }

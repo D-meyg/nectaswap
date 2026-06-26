@@ -42,6 +42,8 @@ export const router = createBrowserRouter([
           { path: "/users", element: <UsersPage /> },
           { path: "/users/:id", element: <UserDetailPage /> },
           { path: "/transactions", element: <TransactionsPage /> },
+          { path: "/transactions/pending", element: <TransactionsPage /> },
+          { path: "/transactions/failed", element: <TransactionsPage /> },
           { path: "/transactions/:id", element: <TransactionDetailPage /> },
           { path: "/cards", element: <CardManagementPage /> },
           { path: "/cards/:id", element: <CardDetailPage /> },

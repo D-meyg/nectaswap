@@ -1,8 +1,12 @@
-export { authService }        from './authService'
-export { userService }        from './userService'
-export { transactionService } from './transactionService'
-export { dashboardService }   from './dashboardService'
-export { kycService }         from './kycService'
-export { cardService }        from './cardService'
-export { activityService }    from './activityService'
-export { noteService }        from './noteService'
+export { authService } from "./authService";
+export { dashboardService } from "./dashboardService";
+export { userService } from "./userService";
+export { transactionService } from "./transactionService";
+export { cardService } from "./cardService";
+export { kycService } from "./kycService";
+export { complianceService } from "./complianceService";
+export { adminService } from "./adminService";
+export { settingsService } from "./settingsService";
+
+export { noteService } from "./noteService";
+export { activityService } from "./activityService";

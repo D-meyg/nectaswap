@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+﻿import { Outlet } from "react-router-dom";
 import {
   createContext,
   useCallback,
@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useLocation } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
@@ -66,16 +67,18 @@ function PageTitleProvider({ children }: { children: ReactNode }) {
 }
 
 export function AppLayout() {
+  const location = useLocation();
+
   return (
     <PageTitleProvider>
-      <div className="flex h-screen overflow-hidden bg-[var(--color-bg-page)] font-geom text-[var(--color-text-primary)]">
+      <div className="flex h-screen overflow-hidden bg-(--color-bg-page) font-geom text-(--color-text-primary)">
         <Sidebar />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <TopBar />
 
-          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-bg-page)]">
-            <ErrorBoundary>
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-(--color-bg-page)">
+            <ErrorBoundary key={location.pathname}>
               <Outlet />
             </ErrorBoundary>
           </main>
