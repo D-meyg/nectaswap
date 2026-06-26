@@ -2,21 +2,21 @@
 
 @font-face {
   font-family: "Geom";
-  src: url("@/assets/fonts/Geom-Regular.woff2") format("woff2");
+  src: url("@/assets/fonts/Geom-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Geom";
-  src: url("@/assets/fonts/Geom-Medium.woff2") format("woff2");
+  src: url("@/assets/fonts/Geom-Medium.ttf") format("truetype");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Geom";
-  src: url("@/assets/fonts/Geom-SemiBold.woff2") format("woff2");
+  src: url("@/assets/fonts/Geom-SemiBold.ttf") format("truetype");
   font-weight: 600;
   font-style: normal;
   font-display: swap;

@@ -25,6 +25,11 @@ export const kycService = {
     return data;
   },
 
+  requestResubmission: async (id: string, payload?: { reason?: string }) => {
+    const { data } = await client.post(ENDPOINTS.KYC.REQUEST_RESUBMISSION(id), payload);
+    return data;
+  },
+
   getGeneralKYC: async () => {
     const { data } = await client.get(ENDPOINTS.KYC.GENERAL);
     return data;

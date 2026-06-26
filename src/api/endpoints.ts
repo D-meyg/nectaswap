@@ -56,6 +56,8 @@ export const ENDPOINTS = {
     DETAIL: (id: string) => `/api/v1/admin/kyc-management/applications/${id}`,
     REVIEW: (id: string) =>
       `/api/v1/admin/kyc-management/applications/${id}/review`,
+    REQUEST_RESUBMISSION: (id: string) =>
+      `/api/v1/admin/kyc-management/applications/${id}/request-resubmission`,
     GENERAL: "/api/v1/admin/kyc",
   },
   LEVELS: {
@@ -85,6 +87,7 @@ export const ENDPOINTS = {
     ACTIVITY: (id: string) => `/api/v1/admin/cards/${id}/activity`,
     FREEZE: (id: string) => `/api/v1/admin/cards/${id}/freeze`,
     UNFREEZE: (id: string) => `/api/v1/admin/cards/${id}/unfreeze`,
+    ISSUE: "/api/v1/admin/cards/issue",
   },
   COMPLIANCE: {
     STATS: "/api/v1/admin/compliance/stats",

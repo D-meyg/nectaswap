@@ -21,6 +21,18 @@ export function useUsers(params?: UseUsersParams) {
   });
 }
 
+export function useUser(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["users", userId],
+    queryFn: async () => {
+      const res = await userService.getUserDetail(userId!);
+      return res.data;
+    },
+    enabled: !!userId,
+    staleTime: 30_000,
+  });
+}
+
 export function useUserReferrals(userId: string | undefined) {
   return useQuery({
     queryKey: ["user-referrals", userId],

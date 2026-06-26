@@ -17,17 +17,10 @@ interface DrawerProps {
 }
 
 const sizeMap: Record<DrawerSize, string> = {
-<<<<<<< HEAD
-  sm: "w-[320px]",
-  md: "w-[480px]",
-  lg: "w-[600px]",
-  xl: "w-[760px]",
-=======
   sm: "w-80",
   md: "w-[30rem]",
   lg: "w-[37.5rem]",
   xl: "w-[47.5rem]",
->>>>>>> refactoring/dummy-data
 };
 
 function DrawerRoot({
@@ -63,11 +56,7 @@ function DrawerRoot({
     <div className="fixed inset-0" style={{ zIndex: "var(--z-modal)" }}>
       {/* Backdrop */}
       <div
-<<<<<<< HEAD
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
-=======
         className="absolute inset-0 bg-black/40 backdrop-blur-[0.125rem]"
->>>>>>> refactoring/dummy-data
         onClick={closeable ? onClose : undefined}
       />
       {/* Panel — slides in from side */}
@@ -106,11 +95,7 @@ function DrawerHeader({
     <div
       className={cn(
         "flex items-start justify-between gap-4 px-5 py-4 shrink-0",
-<<<<<<< HEAD
-        "border-b border-[var(--color-border)]",
-=======
         "border-b border-(--color-border)",
->>>>>>> refactoring/dummy-data
         className,
       )}
     >
@@ -127,11 +112,7 @@ function DrawerHeader({
       {onClose && (
         <button
           onClick={onClose}
-<<<<<<< HEAD
-          className="flex h-7 w-7 items-center justify-center rounded-[var(--radius-sm)] text-[var(--color-text-tertiary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors"
-=======
           className="flex h-7 w-7 items-center justify-center rounded-(--radius-sm) text-(--color-text-tertiary) hover:bg-(--color-bg-subtle) hover:text-(--color-text-primary) transition-colors"
->>>>>>> refactoring/dummy-data
           aria-label="Close drawer"
         >
           <X size={15} />
@@ -168,11 +149,7 @@ function DrawerFooter({
     <div
       className={cn(
         "flex items-center justify-end gap-2 px-5 py-4 shrink-0",
-<<<<<<< HEAD
-        "border-t border-[var(--color-border)] bg-[var(--color-bg-subtle)]",
-=======
         "border-t border-(--color-border) bg-(--color-bg-subtle)",
->>>>>>> refactoring/dummy-data
         className,
       )}
     >

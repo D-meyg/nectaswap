@@ -1,5 +1,5 @@
 // 1. Import the actual SVG file here so your bundler processes it
-import logo from "./logo.svg";
+import logo from "@/assets/icons/logo.svg";
 
 interface NectaLogoProps {
   height?: number;

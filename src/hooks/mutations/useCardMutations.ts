@@ -42,6 +42,23 @@ export function useUnfreezeCard() {
   });
 }
 
+export function useIssueCard() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: cardService.issueCard,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      toast.show({ type: "success", title: "Card Issued", message: "A new card has been issued successfully." });
+    },
+    onError: (error: Error) => {
+      toast.show({ type: "error", title: "Issue Failed", message: error.message || "Failed to issue card." });
+    },
+  });
+}
+
 export function useUpdateCardLimits() {
   const queryClient = useQueryClient();
   const toast = useToast();

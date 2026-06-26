@@ -37,6 +37,11 @@ export const cardService = {
     return data;
   },
 
+  issueCard: async (payload: { user_id: string; [key: string]: unknown }) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.ISSUE, payload);
+    return data;
+  },
+
   updateLimits: async (payload: {
     card_id: string;
     daily_limit: number;

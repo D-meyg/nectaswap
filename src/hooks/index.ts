@@ -5,7 +5,7 @@ export { useClipboard } from './ui/useClipboard'
 export { useAuth }      from './ui/useAuth'
 
 // Query hooks
-export { useDashboardStats, useLiveAlerts, useSystemHealth } from './queries/useDashboard'
+export { useDashboardStats, useDashboardAlerts as useLiveAlerts, useSystemHealth } from './queries/useDashboard'
 export { useUsers, useUser }                                  from './queries/useUsers'
 export { useTransactions }                                    from './queries/useTransactions'
 export { useKYCQueue }                                        from './queries/useKYC'
@@ -15,8 +15,8 @@ export {
   useUserActivity,
   useUserNotes,
   useKYCHistory,
-  useKYCDetail,
 } from './queries/useUserDetail'
+export { useKYCDetail } from './queries/useKYC'
 
 // Mutation hooks
 export { useFreezeAccount, useUnfreezeAccount } from './mutations/useUserMutations'
