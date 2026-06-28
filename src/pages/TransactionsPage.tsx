@@ -56,6 +56,7 @@ interface FailedTx {
 
 interface TransactionRow {
   id: string;
+  transaction_id: string;
   time: string;
   user_name: string;
   user_id: string;
@@ -110,6 +111,7 @@ function normalizeTransaction(value: unknown): TransactionRow {
 
   return {
     id: stringValue(item.reference ?? receipt.reference ?? item.transaction_id ?? item.id, "TX-N/A"),
+    transaction_id: stringValue(item.transaction_id ?? item.id, ""),
     time: created.time,
     user_name: stringValue(item.sender ?? receipt.sender ?? item.user_name ?? item.customer_name ?? user.full_name ?? user.name, "Unknown User"),
     user_id: stringValue(item.user_id ?? user.user_id ?? user.id, "N/A"),
@@ -126,20 +128,24 @@ function normalizeTransaction(value: unknown): TransactionRow {
 function normalizePending(value: unknown): PendingTx {
   const item =
     value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const receipt =
+    item.receipt && typeof item.receipt === "object"
+      ? (item.receipt as Record<string, unknown>)
+      : {};
   const user =
     item.user && typeof item.user === "object"
       ? (item.user as Record<string, unknown>)
       : {};
-  const created = dateParts(item.created_at ?? item.timestamp ?? item.date);
+  const created = dateParts(item.created_at ?? item.timestamp ?? receipt.date);
 
   return {
-    id: stringValue(item.id ?? item.transaction_id, "TX-N/A"),
+    id: stringValue(item.transaction_id ?? receipt.reference ?? item.reference ?? item.id, "TX-N/A"),
     timestamp: `${created.date} ${created.time}`.trim(),
-    user: stringValue(item.user_name ?? user.full_name ?? user.name, "Unknown User"),
+    user: stringValue(receipt.sender ?? item.sender ?? user.name ?? user.full_name ?? item.user_name, "Unknown User"),
     userId: stringValue(item.user_id ?? user.user_id ?? user.id, "N/A"),
-    amount: item.amount ?? item.ngn_amount ? formatNaira(item.amount ?? item.ngn_amount) : "₦0",
-    crypto: stringValue(item.crypto ?? item.crypto_amount ?? item.asset, "N/A"),
-    reason: stringValue(item.reason ?? item.review_reason, "Manual review required"),
+    amount: formatNaira(item.amount ?? receipt.amount ?? item.ngn_amount),
+    crypto: stringValue(item.kind ?? item.method ?? item.payment_method ?? item.crypto ?? item.asset, "N/A"),
+    reason: stringValue(item.reason ?? item.review_reason ?? item.description, "Manual review required"),
     risk: stringValue(item.risk ?? item.risk_level, "medium").toLowerCase() as PendingTx["risk"],
     waitTime: stringValue(item.wait_time ?? item.waitTime, "N/A"),
   };
@@ -148,17 +154,25 @@ function normalizePending(value: unknown): PendingTx {
 function normalizeFailed(value: unknown): FailedTx {
   const item =
     value && typeof value === "object" ? (value as Record<string, unknown>) : {};
-  const created = dateParts(item.created_at ?? item.timestamp ?? item.date);
+  const receipt =
+    item.receipt && typeof item.receipt === "object"
+      ? (item.receipt as Record<string, unknown>)
+      : {};
+  const user =
+    item.user && typeof item.user === "object"
+      ? (item.user as Record<string, unknown>)
+      : {};
+  const created = dateParts(item.created_at ?? item.timestamp ?? receipt.date);
 
   return {
-    id: stringValue(item.id ?? item.transaction_id, "TX-N/A"),
+    id: stringValue(item.transaction_id ?? receipt.reference ?? item.reference ?? item.id, "TX-N/A"),
     timestamp: `${created.date} ${created.time}`.trim(),
-    user: stringValue(item.user_name ?? item.user, "Unknown User"),
-    userId: stringValue(item.user_id, "N/A"),
-    amount: item.amount ?? item.ngn_amount ? formatNaira(item.amount ?? item.ngn_amount) : "₦0",
-    crypto: stringValue(item.crypto ?? item.crypto_amount ?? item.asset, "N/A"),
-    failureReason: stringValue(item.failureReason ?? item.failure_reason ?? item.reason, "N/A"),
-    errorCode: stringValue(item.errorCode ?? item.error_code, "N/A"),
+    user: stringValue(receipt.sender ?? item.sender ?? user.name ?? item.user_name, "Unknown User"),
+    userId: stringValue(item.user_id ?? user.user_id ?? user.id, "N/A"),
+    amount: formatNaira(item.amount ?? receipt.amount ?? item.ngn_amount),
+    crypto: stringValue(item.kind ?? item.method ?? item.payment_method ?? receipt.method, "N/A"),
+    failureReason: stringValue(item.description ?? item.failureReason ?? item.failure_reason ?? item.reason, "N/A"),
+    errorCode: stringValue(item.errorCode ?? item.error_code ?? item.status, "N/A"),
     retryable: Boolean(item.retryable),
   };
 }
@@ -388,8 +402,6 @@ export default function TransactionsPage() {
   );
 
 
-  console.log(failedTransactions);
-
   const pendingCols = useMemo<ColumnDef<PendingTx, unknown>[]>(
     () => [
       {
@@ -573,7 +585,7 @@ export default function TransactionsPage() {
             variant="ghost"
             size="sm"
             className="h-7 w-7 p-0"
-            onClick={() => navigate(`/transactions/${row.original.id}`)}
+            onClick={() => navigate(`/transactions/${row.original.transaction_id || row.original.id}`)}
           >
             <Eye size={14} />
           </Button>

@@ -19,55 +19,12 @@ import { useDashboardStats } from "@/hooks/queries/useDashboard";
 
 // ── Data ─────────────────────────────────────────────────
 
-const growthTrendData = [
-  { month: "Jan", totalUsers: 18000, newUsers: 1200, activeUsers: 12000 },
-  { month: "Feb", totalUsers: 19200, newUsers: 1150, activeUsers: 12800 },
-  { month: "Mar", totalUsers: 20400, newUsers: 1300, activeUsers: 13500 },
-  { month: "Apr", totalUsers: 21600, newUsers: 1100, activeUsers: 14000 },
-  { month: "May", totalUsers: 22700, newUsers: 1400, activeUsers: 14800 },
-  { month: "Jun", totalUsers: 23800, newUsers: 1350, activeUsers: 15500 },
-  { month: "Jul", totalUsers: 24500, newUsers: 1600, activeUsers: 16000 },
-  { month: "Aug", totalUsers: 24900, newUsers: 1750, activeUsers: 16200 },
-  { month: "Sep", totalUsers: 25100, newUsers: 1680, activeUsers: 16500 },
-  { month: "Oct", totalUsers: 25500, newUsers: 1820, activeUsers: 16800 },
-  { month: "Nov", totalUsers: 25900, newUsers: 1900, activeUsers: 17200 },
-  { month: "Dec", totalUsers: 26153, newUsers: 1950, activeUsers: 17680 },
-];
-
-const usersByRegion = [
-  { region: "Lagos",         users: 8910, growth: +15.2, color: "#4E2BCC" },
-  { region: "Abuja",         users: 5240, growth: +12.4, color: "#4E2BCC" },
-  { region: "Port Harcourt", users: 5060, growth: -5.9,  color: "#4E2BCC" },
-  { region: "Ibadan",        users: 2450, growth: +12.3, color: "#4E2BCC" },
-  { region: "Kano",          users: 1960, growth: +4.7,  color: "#4E2BCC" },
-  { region: "Others",        users: 3805, growth: -3.2,  color: "#4E2BCC" },
-];
-const maxRegion = Math.max(...usersByRegion.map((r) => r.users));
-
-const kycDistribution = [
-  { name: "KYC 0", value: 4780,  share: 9.5,  color: "#E5E7EB" },
-  { name: "KYC 1", value: 12480, share: 47.7, color: "#06B6D4" },
-  { name: "KYC 2", value: 6120,  share: 33.0, color: "#4E2BCC" },
-  { name: "KYC 3", value: 1263,  share: 5.0,  color: "#00A63E" },
-];
-
-const weeklyActivityData = [
-  { day: "Mon", active: 7200, inactive: 2800 },
-  { day: "Tue", active: 7500, inactive: 2500 },
-  { day: "Wed", active: 8100, inactive: 2200 },
-  { day: "Thu", active: 7800, inactive: 2400 },
-  { day: "Fri", active: 8500, inactive: 2000 },
-  { day: "Sat", active: 6200, inactive: 3100 },
-  { day: "Sun", active: 5400, inactive: 3600 },
-];
-
-const acquisitionChannels = [
-  { name: "Organic Search", users: 6490, share: 58.7, cac: "₦0",     color: "#4E2BCC" },
-  { name: "Referrals",      users: 6530, share: 21.3, cac: "₦1,088", color: "#06B6D4" },
-  { name: "Social Media",   users: 4330, share: 16.3, cac: "₦2,960", color: "#F7931A" },
-  { name: "Paid Ads",       users: 5690, share: 14.5, cac: "₦7,341", color: "#00A63E" },
-  { name: "Others",         users: 2723, share: 10.6, cac: "₦1,200", color: "#8B5CF6" },
-];
+const growthTrendData: { month: string; totalUsers: number; newUsers: number; activeUsers: number }[] = [];
+const usersByRegion: { region: string; users: number; growth: number; color: string }[] = [];
+const maxRegion = 1;
+const kycDistribution: { name: string; value: number; share: number; color: string }[] = [];
+const weeklyActivityData: { day: string; active: number; inactive: number }[] = [];
+const acquisitionChannels: { name: string; users: number; share: number; cac: string; color: string }[] = [];
 
 // ── Cohort table data + columns ───────────────────────────
 
@@ -82,13 +39,7 @@ type CohortRow = {
   m6: number | null;
 };
 
-const cohortData: CohortRow[] = [
-  { cohort: "Dec 2025", m0: 100, m1: 82, m2: 65,  m3: 58,  m4: null, m5: null, m6: null },
-  { cohort: "Nov 2025", m0: 100, m1: 80, m2: 63,  m3: 56,  m4: 92,  m5: null, m6: null },
-  { cohort: "Oct 2025", m0: 100, m1: 79, m2: 60,  m3: 53,  m4: 49,  m5: 46,  m6: null },
-  { cohort: "Sep 2025", m0: 100, m1: 81, m2: 58,  m3: 51,  m4: 48,  m5: 68,  m6: null },
-  { cohort: "Aug 2025", m0: 100, m1: 70, m2: 56,  m3: 49,  m4: 45,  m5: 42,  m6: 42  },
-];
+const cohortData: CohortRow[] = [];
 
 function CohortBadge({ value }: { value: number | null }) {
   if (value === null) return <span className="text-(--color-text-muted) text-xs">—</span>;
@@ -160,10 +111,10 @@ export default function UserGrowthPage() {
   const { data: dashboardStats = {} } = useDashboardStats();
   const stats = dashboardStats as Record<string, any>;
 
-  const totalUsers = stats.total_users ?? stats.totalUsers ?? "26,153";
-  const newUsers = stats.new_users ?? stats.newUsers ?? "1,950";
-  const activeUsers = stats.active_users ?? stats.activeUsers ?? "7,680";
-  const churnRate = stats.churn_rate ?? stats.churnRate ?? "0.71%";
+  const totalUsers = stats.total_users ?? stats.totalUsers ?? null;
+  const newUsers = stats.new_users ?? stats.newUsers ?? null;
+  const activeUsers = stats.active_users ?? stats.activeUsers ?? null;
+  const churnRate = stats.churn_rate ?? stats.churnRate ?? null;
 
   return (
     <div className="p-6 space-y-5">
@@ -195,10 +146,10 @@ export default function UserGrowthPage() {
 
       {/* Top stats */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Total Users"  value={String(totalUsers)} delta={9.5}  deltaLabel="vs last month"      status="success" />
-        <StatCard label="New Users"    value={String(newUsers)}  delta={13.8} deltaLabel="this month"         status="success" />
-        <StatCard label="Active Users" value={String(activeUsers)}  delta={3.9}  deltaLabel="vs last 6 months"   status="info" />
-        <StatCard label="Churn Rate"   value={String(churnRate)}  delta={-4.4} deltaLabel="improved"           status="danger" />
+        <StatCard label="Total Users"  value={totalUsers != null ? String(totalUsers) : "N/A"} delta={9.5}  deltaLabel="vs last month"      status="success" />
+        <StatCard label="New Users"    value={newUsers != null ? String(newUsers) : "N/A"}  delta={13.8} deltaLabel="this month"         status="success" />
+        <StatCard label="Active Users" value={activeUsers != null ? String(activeUsers) : "N/A"}  delta={3.9}  deltaLabel="vs last 6 months"   status="info" />
+        <StatCard label="Churn Rate"   value={churnRate != null ? String(churnRate) : "N/A"}  delta={-4.4} deltaLabel="improved"           status="danger" />
       </Grid>
 
       {/* Growth & Activity Trends */}
@@ -310,6 +261,9 @@ export default function UserGrowthPage() {
           <Card.Header title="User Acquisition Channels" subtitle="Source performance and CAC" />
           <Card.Body padded>
             <Stack gap={3}>
+              {acquisitionChannels.length === 0 && (
+                <Text variant="caption" color="muted">No acquisition data available</Text>
+              )}
               {acquisitionChannels.map((c) => (
                 <Stack key={c.name} gap={1}>
                   <Row justify="between" align="center">
@@ -347,10 +301,10 @@ export default function UserGrowthPage() {
 
       {/* Bottom stats */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Avg Lifetime Value" value="₦142,500" deltaLabel="Per user" />
-        <StatCard label="Avg CAC"            value="₦1,847"   deltaLabel="Cost to acquire" />
-        <StatCard label="Mobile Users"       value="89.2%"    delta={2.1}  deltaLabel="Access via mobile" />
-        <StatCard label="30-Day Retention"   value="72%"      delta={3.0}  deltaLabel="Still active after 30 days" />
+        <StatCard label="Avg Lifetime Value" value="N/A" deltaLabel="Per user" />
+        <StatCard label="Avg CAC"            value="N/A" deltaLabel="Cost to acquire" />
+        <StatCard label="Mobile Users"       value="N/A" deltaLabel="Access via mobile" />
+        <StatCard label="30-Day Retention"   value="N/A" deltaLabel="Still active after 30 days" />
       </Grid>
     </div>
   );

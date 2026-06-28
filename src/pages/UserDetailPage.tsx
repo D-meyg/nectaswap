@@ -63,7 +63,9 @@ export default function UserDetailPage() {
   const [activeTab, setActiveTab] = useState<TabValue>("overview");
 
   const { data: apiUser, isLoading } = useUserDetail(id);
-  const { data: apiCards = [] } = useUserCards(id);
+  const rawApiUser = apiUser as unknown as Record<string, unknown> | undefined;
+  const userId = rawApiUser?.user_id ? String(rawApiUser.user_id) : id;
+  const { data: apiCards = [] } = useUserCards(userId);
 
   const user = (apiUser ?? DUMMY_USER_DETAIL) as UserDetail;
   const cards = Array.isArray(apiCards) ? apiCards : [];
@@ -75,11 +77,11 @@ export default function UserDetailPage() {
     if (!user) return;
 
     if (user.status === "frozen") {
-      unfreezeMutation.mutate(id);
+      unfreezeMutation.mutate(userId);
     } else {
-      freezeMutation.mutate(id);
+      freezeMutation.mutate(userId);
     }
-  }, [user, id, freezeMutation, unfreezeMutation]);
+  }, [user, userId, freezeMutation, unfreezeMutation]);
 
   const freezeLoading = freezeMutation.isPending || unfreezeMutation.isPending;
 
@@ -171,31 +173,31 @@ export default function UserDetailPage() {
             </TabPanel>
 
             <TabPanel value="kyc" className="pt-0">
-              <KYCTab userId={id} />
+              <KYCTab userId={userId} />
             </TabPanel>
 
             <TabPanel value="cards" className="pt-0">
-              <CardsTab userId={id} />
+              <CardsTab userId={userId} />
             </TabPanel>
 
             <TabPanel value="transactions" className="pt-0">
-              <TransactionsTab userId={id} />
+              <TransactionsTab userId={userId} />
             </TabPanel>
 
             <TabPanel value="referrals" className="pt-0">
-              <ReferralsTab userId={id} />
+              <ReferralsTab userId={userId} />
             </TabPanel>
 
             <TabPanel value="activity" className="pt-0">
-              <ActivityTab userId={id} />
+              <ActivityTab userId={userId} />
             </TabPanel>
 
             <TabPanel value="notes" className="pt-0">
-              <NotesTab userId={id} />
+              <NotesTab userId={userId} />
             </TabPanel>
 
             <TabPanel value="audit" className="pt-0">
-              <AuditLogTab userId={id} />
+              <AuditLogTab userId={userId} />
             </TabPanel>
           </Box>
 

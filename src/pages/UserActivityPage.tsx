@@ -66,9 +66,6 @@ export default function UserActivityPage() {
   const [search, setSearch] = useState("");
   const { data: apiLogs = [], isLoading } = useDashboardRecentActivity(100);
 
-
-  console.log("Activity", apiLogs)
-
   const logs = useMemo<ActivityLog[]>(
     () =>
       Array.isArray(apiLogs)
@@ -82,10 +79,13 @@ export default function UserActivityPage() {
                 ? (item.user as Record<string, unknown>)
                 : {};
 
+            const firstName = String(item.first_name ?? user.first_name ?? "");
+            const lastName = String(item.last_name ?? user.last_name ?? "");
+            const joinedName = [firstName, lastName].filter(Boolean).join(" ");
             return {
               id: String(item.id ?? item.log_id ?? index),
-              timestamp: String(item.timestamp ?? item.created_at ?? item.date ?? "—"),
-              user_name: String(item.user_name ?? item.name ?? user.name ?? user.email ?? "Unknown user"),
+              timestamp: String(item.time ?? item.timestamp ?? item.activity_timestamp ?? item.created_at ?? item.date ?? "—"),
+              user_name: joinedName || String(item.user_name ?? item.name ?? user.name ?? item.username ?? item.admin ?? user.email ?? "Unknown user"),
               user_id: String(item.user_id ?? user.id ?? "—"),
               action: String(item.action ?? item.event ?? item.type ?? "Activity"),
               action_icon: String(item.action_icon ?? "→"),

@@ -95,7 +95,30 @@ export default function CardManagementPage() {
   });
   const { data: cardStats = {} } = useCardStats();
   const cards = useMemo(
-    () => (Array.isArray(apiCards) ? (apiCards as CardRow[]) : []),
+    () =>
+      (Array.isArray(apiCards) ? apiCards : []).map((item): CardRow => {
+        const card = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+        const other = card.other_data && typeof card.other_data === "object"
+          ? (card.other_data as Record<string, unknown>)
+          : {};
+        const rawStatus = String(card.status ?? other.status ?? "Pending").toUpperCase();
+        const statusMap: Record<string, CardRow["status"]> = {
+          ACTIVE: "Active", FROZEN: "Frozen", PENDING: "Pending", BLOCKED: "Blocked",
+          CANCELLED: "Blocked",
+        };
+        const rawType = String(other.type ?? card.card_type ?? "VIRTUAL").toUpperCase();
+        return {
+          id: String(card.card_id ?? card.id ?? ""),
+          masked: String(card.masked_pan ?? card.masked ?? ""),
+          expiry: String(card.expiry ?? other.expiry ?? "N/A"),
+          user_name: String(card.card_name ?? other.name ?? "N/A"),
+          user_email: String(card.user_email ?? "N/A"),
+          type: rawType === "PHYSICAL" ? "Physical" : "Virtual",
+          balance: Number(other.balance ?? card.balance ?? 0),
+          spend_30d: Number(card.spend_30d ?? card.total_debit ?? 0),
+          status: statusMap[rawStatus] ?? "Pending",
+        };
+      }),
     [apiCards],
   );
 

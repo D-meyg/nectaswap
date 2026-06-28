@@ -42,8 +42,12 @@ function ReferrerStatus({ status }: { status: string }) {
   );
 }
 
-function fmt(value: unknown) {
-  return `₦ ${toNumber(value).toLocaleString()}`;
+function fmt(value: unknown): string {
+  const n = toNumber(value);
+  if (n >= 1_000_000_000) return `₦${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `₦${(n / 1_000).toFixed(1)}K`;
+  return `₦${n.toLocaleString()}`;
 }
 
 export default function ReferralProgramPage() {
@@ -59,11 +63,45 @@ export default function ReferralProgramPage() {
   const { data: apiReferrers = [], isLoading: loadingReferrers } = useReferrers();
   const { data: apiReferred = [], isLoading: loadingReferred } = useReferredUsers();
   const referrers = useMemo(
-    () => (Array.isArray(apiReferrers) ? apiReferrers : []),
+    () =>
+      (Array.isArray(apiReferrers) ? apiReferrers : []).map((item) => {
+        const r = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+        return {
+          name: text(r.name ?? r.full_name ?? r.user_name, "N/A"),
+          email: text(r.email, "N/A"),
+          referral_code: text(r.referral_code ?? r.code, "N/A"),
+          total_referrals: Number(r.total_referrals ?? r.total ?? 0),
+          active_referrals: Number(r.active_referrals ?? r.active ?? 0),
+          total_earnings: Number(r.total_earnings ?? r.earnings ?? 0),
+          pending_earnings: Number(r.pending_earnings ?? r.pending ?? 0),
+          status: text(r.status, "Active"),
+        };
+      }),
     [apiReferrers],
   ) as Referrer[];
+
   const referredUsers = useMemo(
-    () => (Array.isArray(apiReferred) ? apiReferred : []),
+    () =>
+      (Array.isArray(apiReferred) ? apiReferred : []).map((item) => {
+        const r = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+        const userField = r.user;
+        const userFromField =
+          typeof userField === "string"
+            ? userField
+            : userField && typeof userField === "object"
+              ? text((userField as Record<string, unknown>).name ?? (userField as Record<string, unknown>).full_name, "")
+              : "";
+        return {
+          name: text(r.name ?? r.full_name ?? r.user_name, "") || userFromField || "N/A",
+          email: text(r.email, "N/A"),
+          referred_by: text(r.referred_by ?? r.referrer_name, "N/A"),
+          referral_code: text(r.referral_code ?? r.ref_code, "N/A"),
+          commission_earned: Number(r.commission_earned ?? r.commission ?? 0),
+          user_volume: Number(r.user_volume ?? r.volume ?? 0),
+          first_tx_date: text(r.first_tx_date ?? r.first_tx, "N/A"),
+          status: text(r.status, "Active"),
+        };
+      }),
     [apiReferred],
   ) as ReferredUser[];
 
@@ -72,8 +110,8 @@ export default function ReferralProgramPage() {
       referrers.filter(
         (r) =>
           !debounced ||
-          text(r.name ?? r.full_name).toLowerCase().includes(debounced.toLowerCase()) ||
-          text(r.code ?? r.referral_code).toLowerCase().includes(debounced.toLowerCase()),
+          text(r.name).toLowerCase().includes(debounced.toLowerCase()) ||
+          text(r.referral_code).toLowerCase().includes(debounced.toLowerCase()),
       ),
     [referrers, debounced],
   );
@@ -83,8 +121,8 @@ export default function ReferralProgramPage() {
       referredUsers.filter(
         (r) =>
           !debounced ||
-          text(r.name ?? r.full_name).toLowerCase().includes(debounced.toLowerCase()) ||
-          text(r.referred_by ?? r.referrer_name).toLowerCase().includes(debounced.toLowerCase()),
+          text(r.name).toLowerCase().includes(debounced.toLowerCase()) ||
+          text(r.referred_by).toLowerCase().includes(debounced.toLowerCase()),
       ),
     [referredUsers, debounced],
   );
@@ -107,12 +145,12 @@ export default function ReferralProgramPage() {
         ),
       },
       {
-        accessorKey: "code",
+        accessorKey: "referral_code",
         header: "Referral Code",
         cell: ({ getValue }) => <CodeBadge code={getValue<string>()} />,
       },
       {
-        accessorKey: "total",
+        accessorKey: "total_referrals",
         header: "Total Referrals",
         cell: ({ getValue }) => (
           <Text variant="caption" color="primary" weight="semibold">
@@ -121,7 +159,7 @@ export default function ReferralProgramPage() {
         ),
       },
       {
-        accessorKey: "active",
+        accessorKey: "active_referrals",
         header: "Active",
         cell: ({ getValue }) => (
           <Text variant="caption" color="success" weight="semibold">
@@ -130,7 +168,7 @@ export default function ReferralProgramPage() {
         ),
       },
       {
-        accessorKey: "earnings",
+        accessorKey: "total_earnings",
         header: "Total Earnings",
         cell: ({ getValue }) => (
           <Text variant="caption" color="primary" weight="semibold">
@@ -139,7 +177,7 @@ export default function ReferralProgramPage() {
         ),
       },
       {
-        accessorKey: "pending",
+        accessorKey: "pending_earnings",
         header: "Pending",
         cell: ({ getValue }) => (
           <Text
@@ -199,13 +237,13 @@ export default function ReferralProgramPage() {
               {row.original.referred_by}
             </Text>
             <Text variant="micro" color="muted" as="p">
-              {row.original.ref_code}
+              {row.original.referral_code}
             </Text>
           </Stack>
         ),
       },
       {
-        accessorKey: "commission",
+        accessorKey: "commission_earned",
         header: "Commission Earned",
         cell: ({ getValue }) => (
           <Text variant="caption" color="success" weight="semibold">
@@ -214,7 +252,7 @@ export default function ReferralProgramPage() {
         ),
       },
       {
-        accessorKey: "volume",
+        accessorKey: "user_volume",
         header: "User Volume",
         cell: ({ getValue }) => (
           <Text variant="caption" color="primary" weight="medium">
@@ -223,7 +261,7 @@ export default function ReferralProgramPage() {
         ),
       },
       {
-        accessorKey: "first_tx",
+        accessorKey: "first_tx_date",
         header: "First TX Date",
         cell: ({ getValue }) => (
           <Text variant="caption" color="secondary">
@@ -240,9 +278,9 @@ export default function ReferralProgramPage() {
     [],
   );
 
-  const totalEarnings = (stats as any).earnings_paid ?? referrers.reduce((s, r) => s + toNumber(r.earnings), 0);
-  const totalPending = (stats as any).pending_payouts ?? referrers.reduce((s, r) => s + toNumber(r.pending), 0);
-  const avgReferrals = toNumber((stats as any).avg_referrals ?? (referrers.reduce((s, r) => s + toNumber(r.total), 0) / Math.max(referrers.length, 1))).toFixed(1);
+  const totalEarnings = (stats as any).earnings_paid ?? referrers.reduce((s, r) => s + toNumber(r.total_earnings), 0);
+  const totalPending = (stats as any).pending_payouts ?? referrers.reduce((s, r) => s + toNumber(r.pending_earnings), 0);
+  const avgReferrals = toNumber((stats as any).avg_referrals ?? (referrers.reduce((s, r) => s + toNumber(r.total_referrals), 0) / Math.max(referrers.length, 1))).toFixed(1);
 
   return (
     <Box p={6} className="space-y-5">
@@ -255,16 +293,16 @@ export default function ReferralProgramPage() {
         />
         <StatCard
           label="Earnings Paid"
-          value={`₦ ${(toNumber(totalEarnings) / 1_000_000).toFixed(1)}M`}
+          value={fmt(totalEarnings)}
           status="success"
         />
         <StatCard
           label="Pending Payouts"
-          value={`₦ ${(toNumber(totalPending) / 1000).toFixed(0)}K`}
+          value={fmt(totalPending)}
           status="warning"
         />
         <StatCard label="Avg Referrals" value={avgReferrals} />
-        <StatCard label="Conversion Rate" value="85.2%" />
+        <StatCard label="Conversion Rate" value={(stats as any).conversion_rate ?? "N/A"} />
       </div>
 
       <Card noPadding>

@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { userService } from "@/services/userService";
 import type { UserDetail, ActivityEvent, Note, KYCHistoryEvent, Card } from "@/api/types";
 
+
 export function useUserDetail(userId: string) {
   return useQuery<UserDetail>({
     queryKey: ["users", userId, "detail"],
@@ -63,6 +64,18 @@ export function useUserAuditLog(userId: string) {
     queryFn: async () => {
       const res = await userService.getUserAuditLog(userId);
       return res.data;
+    },
+    enabled: !!userId,
+  });
+}
+
+export function useUserTransactions(userId: string) {
+  return useQuery<unknown[]>({
+    queryKey: ["users", userId, "transactions"],
+    queryFn: async () => {
+      const res = await userService.getUserTransactions(userId);
+      const data = res?.data;
+      return Array.isArray(data) ? data : [];
     },
     enabled: !!userId,
   });

@@ -25,44 +25,10 @@ import { usePageTitle } from "@/layouts/AppLayout";
 import { useCardStats } from "@/hooks/queries/useCards";
 import { useDashboardStats } from "@/hooks/queries/useDashboard";
 
-const revenueTransactionData = [
-  { month: "Jan", revenue: 48, transactions: 700 },
-  { month: "Feb", revenue: 52, transactions: 820 },
-  { month: "Mar", revenue: 55, transactions: 900 },
-  { month: "Apr", revenue: 60, transactions: 980 },
-  { month: "May", revenue: 65, transactions: 1100 },
-  { month: "Jun", revenue: 72, transactions: 1250 },
-  { month: "Jul", revenue: 78, transactions: 1400 },
-  { month: "Aug", revenue: 82, transactions: 1600 },
-  { month: "Sep", revenue: 88, transactions: 1750 },
-  { month: "Oct", revenue: 92, transactions: 1900 },
-  { month: "Nov", revenue: 98, transactions: 2200 },
-  { month: "Dec", revenue: 105, transactions: 2800 },
-];
-
-const cryptoDistribution = [
-  { name: "Bitcoin", value: 3450, color: "#F7931A" },
-  { name: "Ethereum", value: 2990, color: "#627EEA" },
-  { name: "USDT", value: 4120, color: "#26A17B" },
-  { name: "BNB", value: 1680, color: "#F3BA2F" },
-  { name: "Others", value: 1260, color: "#8B5CF6" },
-];
-
-const hourlyData = [
-  { hour: "00:00", txns: 45 },
-  { hour: "03:00", txns: 28 },
-  { hour: "06:00", txns: 62 },
-  { hour: "09:00", txns: 135 },
-  { hour: "12:00", txns: 198 },
-  { hour: "15:00", txns: 175 },
-  { hour: "18:00", txns: 210 },
-  { hour: "21:00", txns: 185 },
-];
-
-const cardStatusData = [
-  { type: "Virtual", active: 4200, pending: 120, frozen: 80 },
-  { type: "Physical", active: 3100, pending: 95, frozen: 65 },
-];
+const revenueTransactionData: { month: string; revenue: number; transactions: number }[] = [];
+const cryptoDistribution: { name: string; value: number; color: string }[] = [];
+const hourlyData: { hour: string; txns: number }[] = [];
+const cardStatusData: { type: string; active: number; pending: number; frozen: number }[] = [];
 
 const DATE_FILTERS = [
   "Last 7 days",
@@ -111,12 +77,31 @@ export default function AnalyticsPage() {
   const stats = dashboardStats as Record<string, any>;
   const cards = cardStats as Record<string, any>;
 
-  const totalRevenue = stats.total_revenue ?? stats.totalRevenue ?? stats.revenue ?? "₦812M";
-  const totalTransactions = stats.total_transactions ?? stats.totalTransactions ?? stats.transactions ?? "23,400";
-  const activeUsers = stats.active_users ?? stats.activeUsers ?? stats.users ?? "18,950";
-  const activeCards = cards.active_cards ?? cards.activeCards ?? cards.active ?? "7,140";
-  const avgTransaction = stats.average_transaction ?? stats.avgTransaction ?? "₦34,700";
-  const successRate = stats.success_rate ?? stats.successRate ?? "98.7%";
+  function fmtCurrency(v: unknown): string {
+    if (v == null) return "N/A";
+    const n = typeof v === "number" ? v : Number(String(v).replace(/[₦,\s]/g, ""));
+    if (!Number.isFinite(n)) return "N/A";
+    if (n >= 1_000_000_000) return `₦${(n / 1_000_000_000).toFixed(1)}B`;
+    if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `₦${(n / 1_000).toFixed(1)}K`;
+    return `₦${n.toLocaleString()}`;
+  }
+
+  function fmtNum(v: unknown): string {
+    if (v == null) return "N/A";
+    const n = typeof v === "number" ? v : Number(String(v).replace(/[,\s]/g, ""));
+    if (!Number.isFinite(n)) return "N/A";
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+    return n.toLocaleString();
+  }
+
+  const totalRevenue = stats.total_revenue ?? stats.totalRevenue ?? stats.revenue ?? null;
+  const totalTransactions = stats.total_transactions ?? stats.totalTransactions ?? stats.transactions ?? null;
+  const activeUsers = stats.active_users ?? stats.activeUsers ?? stats.users ?? null;
+  const activeCards = cards.active_cards ?? cards.activeCards ?? cards.active ?? null;
+  const avgTransaction = stats.average_transaction ?? stats.avgTransaction ?? null;
+  const successRate = stats.success_rate ?? stats.successRate ?? null;
 
   return (
     <div className="p-6 space-y-5">
@@ -159,28 +144,28 @@ export default function AnalyticsPage() {
       <Grid cols={4} gap={4}>
         <StatCard
           label="Total Revenue"
-          value={String(totalRevenue)}
+          value={fmtCurrency(totalRevenue)}
           delta={18.5}
           deltaLabel="vs last month"
           status="success"
         />
         <StatCard
           label="Total Transactions"
-          value={String(totalTransactions)}
+          value={fmtNum(totalTransactions)}
           delta={12.3}
           deltaLabel="vs last month"
           status="info"
         />
         <StatCard
           label="Active Users"
-          value={String(activeUsers)}
+          value={fmtNum(activeUsers)}
           delta={9.7}
           deltaLabel="vs last month"
           status="success"
         />
         <StatCard
           label="Active Cards"
-          value={String(activeCards)}
+          value={fmtNum(activeCards)}
           delta={-5.4}
           deltaLabel="vs last month"
           status="warning"
@@ -417,25 +402,25 @@ export default function AnalyticsPage() {
       <Grid cols={4} gap={4}>
         <StatCard
           label="Avg Transaction"
-          value={String(avgTransaction)}
+          value={fmtCurrency(avgTransaction)}
           delta={5.3}
           deltaLabel="vs last period"
         />
         <StatCard
           label="Total Users"
-          value={String(stats.new_users ?? stats.newUsers ?? "1,950")}
+          value={fmtNum(stats.new_users ?? stats.newUsers ?? stats.total_users ?? null)}
           delta={12.8}
           deltaLabel="this month"
         />
         <StatCard
           label="Cards Issued"
-          value={String(cards.issued_cards ?? cards.issuedCards ?? cards.total_cards ?? "770")}
+          value={fmtNum(cards.issued_cards ?? cards.issuedCards ?? cards.total_cards ?? null)}
           delta={8.4}
           deltaLabel="this month"
         />
         <StatCard
           label="Success Rate"
-          value={String(successRate)}
+          value={successRate != null ? String(successRate) : "N/A"}
           delta={0.3}
           deltaLabel="improved"
         />

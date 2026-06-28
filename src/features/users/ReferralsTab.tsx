@@ -26,6 +26,23 @@ interface ReferredUser {
   status: string
 }
 
+interface NormalizedRef {
+  referral_code: string
+  total_referrals: string | number
+  active_referrals: number
+  total_earnings: number
+  pending_earnings: number
+}
+
+function t(value: unknown, fallback = '—') {
+  return typeof value === 'string' && value.trim() ? value : fallback
+}
+
+function n(value: unknown) {
+  const parsed = Number(value ?? 0)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
 function ReferralStat({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
   return (
     <Card>
@@ -38,28 +55,57 @@ function ReferralStat({ label, value, sub }: { label: string; value: string | nu
   )
 }
 
-function refText(ref: Record<string, unknown> | null, key: string, fallback = '—') {
-  const value = ref?.[key]
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : fallback
-}
-
-function refNumber(ref: Record<string, unknown> | null, key: string) {
-  const value = Number(ref?.[key] ?? 0)
-  return Number.isFinite(value) ? value : 0
-}
-
 export function ReferralsTab({ userId }: ReferralsTabProps) {
   const { data, isLoading } = useUserReferrals(userId)
 
   const referralData =
-    data && typeof data === 'object' ? (data as Record<string, unknown>) : {}
-  const ref =
+    data && typeof data === 'object' && !Array.isArray(data)
+      ? (data as Record<string, unknown>)
+      : {}
+
+  // API may return flat or nested under `referral` key
+  const refSource =
     referralData.referral && typeof referralData.referral === 'object'
       ? (referralData.referral as Record<string, unknown>)
-      : null
-  const referredUsers: ReferredUser[] = Array.isArray(referralData.referred_users)
-    ? (referralData.referred_users as ReferredUser[])
-    : []
+      : referralData
+
+  const ref: NormalizedRef | null = (() => {
+    const code = t(refSource.referral_code ?? refSource.code, '')
+    if (!code) return null
+    return {
+      referral_code: code,
+      total_referrals: refSource.total_referrals ?? refSource.total ?? '—',
+      active_referrals: n(refSource.active_referrals ?? refSource.active),
+      total_earnings: n(refSource.total_earnings ?? refSource.earnings),
+      pending_earnings: n(refSource.pending_earnings ?? refSource.pending_payout ?? refSource.pending),
+    }
+  })()
+
+  const referredUsers: ReferredUser[] = useMemo(() => {
+    const rawList = Array.isArray(referralData.referred_users)
+      ? referralData.referred_users
+      : Array.isArray(data)
+        ? (data as unknown[])
+        : []
+    return (rawList as unknown[]).map((item, i) => {
+      const r = item && typeof item === 'object' ? (item as Record<string, unknown>) : {}
+      const userField = r.user
+      const nameFromUser =
+        typeof userField === 'string' ? userField
+        : userField && typeof userField === 'object'
+          ? t((userField as Record<string, unknown>).name ?? (userField as Record<string, unknown>).full_name, '')
+          : ''
+      return {
+        id: t(r.id, `ref-${i}`),
+        name: t(r.name ?? r.full_name ?? r.user_name, '') || nameFromUser || 'N/A',
+        email: t(r.email, 'N/A'),
+        join_date: t(r.first_tx_date ?? r.join_date ?? r.created_at, 'N/A'),
+        volume: n(r.user_volume ?? r.volume),
+        commission: n(r.commission_earned ?? r.commission),
+        status: t(r.status, 'Active'),
+      }
+    })
+  }, [data, referralData.referred_users])
 
   const columns = useMemo<ColumnDef<ReferredUser, unknown>[]>(() => [
     {
@@ -119,7 +165,7 @@ export function ReferralsTab({ userId }: ReferralsTabProps) {
     },
   ], [])
 
-  if (!isLoading && !ref) {
+  if (!isLoading && !ref && !referredUsers.length) {
     return (
       <Card>
         <Card.Body>
@@ -137,16 +183,16 @@ export function ReferralsTab({ userId }: ReferralsTabProps) {
             <Text variant="micro" color="muted" className="mb-2 block text-[0.625rem] leading-3">
               Referral Code
             </Text>
-            <CodeBadge code={refText(ref, 'code')} />
+            <CodeBadge code={ref?.referral_code ?? '—'} />
           </Box>
         </Card>
         <ReferralStat
           label="Total Referrals"
-          value={refText(ref, 'total_referrals')}
-          sub={ref?.active_referrals != null ? `${refNumber(ref, 'active_referrals')} active` : undefined}
+          value={String(ref?.total_referrals ?? '—')}
+          sub={ref?.active_referrals != null ? `${ref.active_referrals} active` : undefined}
         />
-        <ReferralStat label="Total Earnings" value={ref?.total_earnings != null ? formatNGN(refNumber(ref, 'total_earnings')) : '—'} />
-        <ReferralStat label="Pending Payout" value={ref?.pending_payout != null ? formatNGN(refNumber(ref, 'pending_payout')) : '—'} />
+        <ReferralStat label="Total Earnings" value={ref?.total_earnings != null ? formatNGN(ref.total_earnings) : '—'} />
+        <ReferralStat label="Pending Payout" value={ref?.pending_earnings != null ? formatNGN(ref.pending_earnings) : '—'} />
       </div>
 
       <Card noPadding>

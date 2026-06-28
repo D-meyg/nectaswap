@@ -43,6 +43,26 @@ function stringValue(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value : fallback;
 }
 
+function buildName(item: Record<string, unknown>, nested: Record<string, unknown>): string {
+  const firstName = stringValue(item.first_name ?? nested.first_name, "");
+  const lastName = stringValue(item.last_name ?? nested.last_name, "");
+  const joined = [firstName, lastName].filter(Boolean).join(" ");
+  return (
+    joined ||
+    stringValue(item.name ?? nested.name ?? item.full_name ?? nested.full_name, "") ||
+    stringValue(item.username ?? nested.username, "") ||
+    stringValue(item.admin ?? nested.admin, "") ||
+    "Unknown User"
+  );
+}
+
+function fmtBalance(n: number): string {
+  if (n >= 1_000_000_000) return `₦${(n / 1_000_000_000).toFixed(1)}B`;
+  if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `₦${(n / 1_000).toFixed(1)}K`;
+  return `₦${n.toLocaleString()}`;
+}
+
 function normalizeUser(value: unknown): UserRow {
   const item =
     value && typeof value === "object" ? (value as Record<string, unknown>) : {};
@@ -51,13 +71,10 @@ function normalizeUser(value: unknown): UserRow {
       ? (item.user as Record<string, unknown>)
       : {};
   const id = stringValue(
-    item.id ?? item.user_id ?? nestedUser.id ?? nestedUser.user_id,
+    item.user_id ?? nestedUser.user_id ?? item.id ?? nestedUser.id,
     "unknown",
   );
-  const name = stringValue(
-    item.name ?? item.full_name ?? nestedUser.name ?? nestedUser.full_name,
-    "Unknown User",
-  );
+  const name = buildName(item, nestedUser);
 
   return {
     id,
@@ -97,7 +114,6 @@ export default function UsersPage() {
     () => (Array.isArray(apiUsers) ? apiUsers.map(normalizeUser) : []),
     [apiUsers],
   );
-
 
   const filtered = useMemo(
     () =>
@@ -155,7 +171,7 @@ export default function UsersPage() {
         header: "Balance",
         cell: ({ getValue }) => (
           <Text variant="caption" color="primary" weight="semibold">
-            ₦{(getValue<number>() / 1_000_000).toFixed(1)}M
+            {fmtBalance(getValue<number>())}
           </Text>
         ),
       },

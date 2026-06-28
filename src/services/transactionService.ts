@@ -4,6 +4,8 @@ import { ENDPOINTS } from "@/api/endpoints";
 export const transactionService = {
   getTransactions: async (params?: Record<string, unknown>) => {
     const { data } = await client.get(ENDPOINTS.TRANSACTIONS.LIST, { params });
+
+    console.log("Transaction:", data)
     return data;
   },
 

@@ -1,4 +1,4 @@
-﻿import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
@@ -7,21 +7,41 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Activity } from "lucide-react";
 import { useUserActivity } from "@/hooks/queries/useUserDetail";
-import type { ActivityEvent } from "@/api/types";
 
 interface ActivityTabProps {
   userId: string;
 }
 
-// ── Single activity entry — matches image 8 exactly ──────
-// Layout: title (bold) + timestamp top row
-//         description below
-//         IP • device bottom row in muted text
-function ActivityEntry({
-  event,
-}: {
-  event: ActivityEvent;
-}) {
+interface NormalizedEvent {
+  id: string;
+  title: string;
+  description: string;
+  ip: string;
+  device: string;
+  created_at: string;
+}
+
+function str(value: unknown, fallback = "N/A") {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function normalizeEvent(item: unknown, index: number): NormalizedEvent {
+  const ev = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+  const details = ev.activity_details && typeof ev.activity_details === "object"
+    ? (ev.activity_details as Record<string, unknown>)
+    : {};
+
+  return {
+    id: str(ev.id, `event-${index}`),
+    title: str(ev.activity_type ?? ev.title ?? ev.type ?? ev.action, "Activity"),
+    description: str(ev.activity_description ?? ev.description, "N/A"),
+    ip: str(ev.request_ip ?? ev.ip ?? ev.ip_address, "N/A"),
+    device: str(details.device_name ?? ev.device ?? ev.device_name, "N/A"),
+    created_at: str(ev.activity_timestamp ?? ev.created_at ?? ev.timestamp, "N/A"),
+  };
+}
+
+function ActivityEntry({ event }: { event: NormalizedEvent }) {
   return (
     <Card className="rounded-[6px] border-(--color-border) bg-white shadow-none">
       <Box px={4} py={3}>
@@ -31,20 +51,20 @@ function ActivityEntry({
               {event.title}
             </Text>
             <Text variant="caption" color="secondary" className="text-[0.6875rem] leading-4">
-              {event.txn_id
-                ? `${event.txn_id} - ${event.description}`
-                : event.description}
+              {event.description}
             </Text>
             <Row gap={2} align="center" className="mt-0.5 flex-wrap">
               <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
                 IP: {event.ip}
               </Text>
-              <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
-                •
-              </Text>
-              <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
-                {event.device}
-              </Text>
+              {event.device !== "N/A" && (
+                <>
+                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">•</Text>
+                  <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                    {event.device}
+                  </Text>
+                </>
+              )}
             </Row>
           </Stack>
 
@@ -60,7 +80,9 @@ function ActivityEntry({
 export function ActivityTab({ userId }: ActivityTabProps) {
   const { data: apiEvents, isLoading } = useUserActivity(userId);
 
-  const events = apiEvents ?? [];
+  const events: NormalizedEvent[] = Array.isArray(apiEvents)
+    ? apiEvents.map(normalizeEvent)
+    : [];
 
   if (isLoading && !apiEvents) {
     return (
@@ -85,10 +107,7 @@ export function ActivityTab({ userId }: ActivityTabProps) {
   return (
     <Stack gap={2}>
       {events.map((event) => (
-        <ActivityEntry
-          key={event.id}
-          event={event}
-        />
+        <ActivityEntry key={event.id} event={event} />
       ))}
     </Stack>
   );

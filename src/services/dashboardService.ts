@@ -4,6 +4,7 @@ import { ENDPOINTS } from "@/api/endpoints";
 export const dashboardService = {
   getStats: async () => {
     const { data } = await client.get(ENDPOINTS.DASHBOARD.STATS);
+    console.log("Activity", data)
     return data;
   },
 

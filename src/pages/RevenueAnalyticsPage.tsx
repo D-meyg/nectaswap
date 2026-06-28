@@ -15,40 +15,10 @@ import { usePageTitle } from "@/layouts/AppLayout";
 import { useDashboardStats } from "@/hooks/queries/useDashboard";
 import { useFeeRevenue } from "@/hooks/queries/useRates";
 
-const revenuePerformanceData = [
-  { month: "Jan 25", gross: 52,  net: 48,  fees: 4  },
-  { month: "Feb 25", gross: 58,  net: 53,  fees: 5  },
-  { month: "Mar 25", gross: 63,  net: 57,  fees: 6  },
-  { month: "Apr 25", gross: 55,  net: 50,  fees: 5  },
-  { month: "May 25", gross: 68,  net: 62,  fees: 6  },
-  { month: "Jun 25", gross: 74,  net: 67,  fees: 7  },
-  { month: "Jul 25", gross: 79,  net: 71,  fees: 8  },
-  { month: "Aug 25", gross: 85,  net: 77,  fees: 8  },
-  { month: "Sep 25", gross: 90,  net: 82,  fees: 8  },
-  { month: "Oct 25", gross: 95,  net: 86,  fees: 9  },
-  { month: "Nov 25", gross: 100, net: 91,  fees: 9  },
-  { month: "Dec 25", gross: 110, net: 100, fees: 10 },
-];
-
-const dailyRevenueTrend = Array.from({ length: 30 }, (_, i) => ({
-  day: i + 1,
-  value: parseFloat((3.2 + Math.sin(i * 0.4) * 0.8 + (i % 3) * 0.1).toFixed(2)),
-}));
-
-const cryptoRevenue = [
-  { name: "Bitcoin",  txns: 6450, revenue: "₦293M", fees: "₦54M", share: 29.4, color: "#F7931A" },
-  { name: "Ethereum", txns: 4890, revenue: "₦190M", fees: "₦38M", share: 30.4, color: "#627EEA" },
-  { name: "USDT",     txns: 8150, revenue: "₦266M", fees: "₦53M", share: 34.9, color: "#26A17B" },
-  { name: "BNB",      txns: 4440, revenue: "₦193M", fees: "₦47M", share: 9.2,  color: "#F3BA2F" },
-  { name: "Others",   txns: 5560, revenue: "₦97M",  fees: "₦44M", share: 9.2,  color: "#8B5CF6" },
-];
-
-const feeBreakdown = [
-  { name: "Transaction Fees", amount: "₦30M", share: 72.5, color: "#4E2BCC" },
-  { name: "Card Issuance",    amount: "₦6M",  share: 16.5, color: "#06B6D4" },
-  { name: "Withdrawal Fees",  amount: "₦4M",  share: 7.5,  color: "#F7931A" },
-  { name: "Other Services",   amount: "₦3M",  share: 5.4,  color: "#8B5CF6" },
-];
+const revenuePerformanceData: { month: string; gross: number; net: number; fees: number }[] = [];
+const dailyRevenueTrend: { day: number; value: number }[] = [];
+const cryptoRevenue: { name: string; txns: number; revenue: string; fees: string; share: number; color: string }[] = [];
+const feeBreakdown: { name: string; amount: string; share: number; color: string }[] = [];
 
 const DATE_FILTERS = ["Last month", "Last 3 months", "Last 6 months", "Last 12 months", "Year to date"];
 
@@ -83,14 +53,24 @@ export default function RevenueAnalyticsPage() {
   const { data: feeRevenue = {} } = useFeeRevenue();
   const stats = { ...(dashboardStats as Record<string, any>), ...(feeRevenue as Record<string, any>) };
 
-  const totalRevenue = stats.total_revenue ?? stats.totalRevenue ?? stats.revenue ?? "₦812M";
-  const netRevenue = stats.net_revenue ?? stats.netRevenue ?? "₦771M";
-  const transactionFees = stats.transaction_fees ?? stats.transactionFees ?? stats.fees ?? "₦40.6M";
-  const avgRevenueDay = stats.avg_revenue_per_day ?? stats.avgRevenuePerDay ?? "₦2.7M";
-  const revenuePerTransaction = stats.revenue_per_transaction ?? stats.revenuePerTransaction ?? "₦34,700";
-  const growthRate = stats.growth_rate ?? stats.growthRate ?? "18.5%";
-  const cardRevenue = stats.card_revenue ?? stats.cardRevenue ?? "₦8.9M";
-  const feeMargin = stats.fee_margin ?? stats.feeMargin ?? "5.0%";
+  function fmtCur(v: unknown): string {
+    if (v == null) return "N/A";
+    const n = typeof v === "number" ? v : Number(String(v).replace(/[₦,\s]/g, ""));
+    if (!Number.isFinite(n)) return "N/A";
+    if (n >= 1_000_000_000) return `₦${(n / 1_000_000_000).toFixed(1)}B`;
+    if (n >= 1_000_000) return `₦${(n / 1_000_000).toFixed(1)}M`;
+    if (n >= 1_000) return `₦${(n / 1_000).toFixed(1)}K`;
+    return `₦${n.toLocaleString()}`;
+  }
+
+  const totalRevenue = stats.total_revenue ?? stats.totalRevenue ?? stats.revenue ?? stats.revenue_mtd ?? null;
+  const netRevenue = stats.net_revenue ?? stats.netRevenue ?? null;
+  const transactionFees = stats.revenue_24h ?? stats.transaction_fees ?? stats.transactionFees ?? stats.fees ?? null;
+  const avgRevenueDay = stats.avg_revenue_per_day ?? stats.avgRevenuePerDay ?? stats.revenue_mtd ?? null;
+  const revenuePerTransaction = stats.avg_fee_per_transaction ?? stats.revenue_per_transaction ?? stats.revenuePerTransaction ?? null;
+  const growthRate = stats.growth_rate ?? stats.growthRate ?? null;
+  const cardRevenue = stats.card_revenue ?? stats.cardRevenue ?? null;
+  const feeMargin = stats.fee_margin ?? stats.feeMargin ?? null;
 
   return (
     <div className="p-6 space-y-5">
@@ -122,10 +102,10 @@ export default function RevenueAnalyticsPage() {
 
       {/* Top stat cards */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Total Revenue"    value={String(totalRevenue)}  delta={18.5}  deltaLabel="vs last period" status="success" />
-        <StatCard label="Net Revenue"      value={String(netRevenue)}  delta={14.3}  deltaLabel="vs last period" status="success" />
-        <StatCard label="Transaction Fees" value={String(transactionFees)} delta={17.8}  deltaLabel="5% of gross"   status="info" />
-        <StatCard label="Avg Revenue/Day"  value={String(avgRevenueDay)}  delta={-0.35} deltaLabel="vs last period" status="warning" />
+        <StatCard label="Total Revenue (MTD)"  value={fmtCur(totalRevenue)}      delta={18.5}  deltaLabel="vs last period" status="success" />
+        <StatCard label="Net Revenue"          value={fmtCur(netRevenue)}         delta={14.3}  deltaLabel="vs last period" status="success" />
+        <StatCard label="Revenue (24h)"        value={fmtCur(transactionFees)}    delta={17.8}  deltaLabel="vs yesterday"   status="info" />
+        <StatCard label="Avg Revenue/Day"      value={fmtCur(avgRevenueDay)}      delta={-0.35} deltaLabel="vs last period" status="warning" />
       </Grid>
 
       {/* Revenue Performance Over Time */}
@@ -167,6 +147,9 @@ export default function RevenueAnalyticsPage() {
           <Card.Header title="Revenue by Cryptocurrency" subtitle="Asset performance breakdown" />
           <Card.Body padded>
             <Stack gap={4}>
+              {cryptoRevenue.length === 0 && (
+                <Text variant="caption" color="muted">No crypto revenue data available</Text>
+              )}
               {cryptoRevenue.map((c) => (
                 <Stack key={c.name} gap={1}>
                   <Row justify="between" align="center">
@@ -208,9 +191,12 @@ export default function RevenueAnalyticsPage() {
                   </Row>
                 </Row>
               ))}
+              {feeBreakdown.length === 0 && (
+                <Text variant="caption" color="muted">No fee data available</Text>
+              )}
               <div className="pt-2 border-t border-(--color-border) flex justify-between items-center">
                 <Text variant="caption" color="primary" weight="medium">Total Fee Revenue</Text>
-                <Text variant="caption" color="brand"   weight="semibold">₦123M</Text>
+                <Text variant="caption" color="brand"   weight="semibold">{fmtCur(stats.total_fee_revenue ?? stats.totalFeeRevenue ?? null)}</Text>
               </div>
             </Stack>
           </Card.Body>
@@ -241,10 +227,10 @@ export default function RevenueAnalyticsPage() {
 
       {/* Bottom stats */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Revenue / Transaction" value={String(revenuePerTransaction)} deltaLabel="Average transaction value" />
-        <StatCard label="Growth Rate"           value={String(growthRate)}   delta={18.5} deltaLabel="Month over month" />
-        <StatCard label="Card Revenue"          value={String(cardRevenue)}   delta={8.4}  deltaLabel="From card services" />
-        <StatCard label="Fee Margin"            value={String(feeMargin)}    deltaLabel="Average fee percentage" />
+        <StatCard label="Avg Fee / Transaction" value={fmtCur(revenuePerTransaction)} deltaLabel="Average fee per transaction" />
+        <StatCard label="Growth Rate"           value={growthRate != null ? String(growthRate) : "N/A"} delta={growthRate != null ? 18.5 : undefined} deltaLabel="Month over month" />
+        <StatCard label="Card Revenue"          value={fmtCur(cardRevenue)} delta={cardRevenue != null ? 8.4 : undefined} deltaLabel="From card services" />
+        <StatCard label="Fee Margin"            value={feeMargin != null ? String(feeMargin) : "N/A"} deltaLabel="Average fee percentage" />
       </Grid>
     </div>
   );

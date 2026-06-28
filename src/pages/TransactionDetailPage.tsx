@@ -51,56 +51,81 @@ function splitDate(value: unknown) {
 }
 
 function normalizeTransactionDetail(value: unknown, id: string): TransactionDetail {
-  const item =
-    value && typeof value === "object"
-      ? (value as Partial<TransactionDetail> & Record<string, unknown>)
-      : {};
-  const receipt =
-    item.receipt && typeof item.receipt === "object"
-      ? (item.receipt as Record<string, unknown>)
-      : {};
+  const raw = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+
+  // API wraps fields under `overview` key
+  const item: Record<string, unknown> = raw.overview && typeof raw.overview === "object"
+    ? (raw.overview as Record<string, unknown>)
+    : raw;
+
+  const receipt = item.receipt && typeof item.receipt === "object"
+    ? (item.receipt as Record<string, unknown>)
+    : {};
+
+  const bankDetails = item.bank_details && typeof item.bank_details === "object"
+    ? (item.bank_details as Record<string, unknown>)
+    : {};
+
+  const userObj = item.user && typeof item.user === "object"
+    ? (item.user as Record<string, unknown>)
+    : {};
+
+  // Technical details are under `technical` key at root level
+  const technical = raw.technical && typeof raw.technical === "object"
+    ? (raw.technical as Record<string, unknown>)
+    : {};
+
+  // Ledger entries under `ledger` (not `ledger_entries`)
+  const ledger = Array.isArray(raw.ledger) ? raw.ledger as Record<string, unknown>[] : [];
+
+  // Timeline under `timeline`
+  const timeline = Array.isArray(raw.timeline) ? raw.timeline as Record<string, unknown>[] : [];
+
   const created = splitDate(item.created_at ?? item.date ?? receipt.date);
   const updated = splitDate(item.updated_at ?? item.completed_at ?? receipt.date);
-  const amount = item.amount ?? receipt.amount;
+  const amount = item.ngn_amount ?? item.amount ?? receipt.amount;
   const fee = item.fee ?? receipt.fee;
-  const title = text(item.title ?? receipt.title, DUMMY_TX_DETAIL.title);
   const status = normalizeStatus(item.status ?? receipt.status);
-  const sender = text(item.sender ?? receipt.sender ?? item.user_name, DUMMY_TX_DETAIL.user_name);
+  const titleStr = text(receipt.title ?? item.title, status === "completed" ? "Transaction Completed" : "Transaction");
 
   return {
     ...DUMMY_TX_DETAIL,
-    ...item,
-    id: text(item.reference ?? receipt.reference ?? item.transaction_id ?? item.id ?? id, DUMMY_TX_DETAIL.id),
-    title,
+    id: text(item.transaction_id ?? receipt.reference ?? item.reference ?? String(raw.id ?? id), id),
+    title: titleStr,
     status,
-    user_name: sender,
-    date: `${created.date} ${created.time}`.trim(),
+    user_name: text(receipt.sender ?? item.sender ?? userObj.name ?? item.user_name, "N/A"),
+    date: `${created.date} ${created.time}`.trim() || "N/A",
     processing_time: text(item.processing_time, status === "completed" ? "Completed" : "Pending"),
     from_crypto: text(item.crypto_currency ?? item.kind ?? item.method, "NGN").toUpperCase(),
-    from_amount: text(item.asset_value ?? item.crypto_amount, "0"),
+    from_amount: String(item.crypto_amount ?? item.asset_value ?? 0),
     from_ngn_equiv: formatNaira(amount),
     to_ngn: formatNaira(amount),
-    exchange_rate: text(item.exchange_rate, "N/A"),
+    exchange_rate: item.exchange_rate != null ? String(item.exchange_rate) : "N/A",
     tx_fee: formatNaira(fee),
-    user_email: text(item.user_email, "N/A"),
-    user_id: text(item.user_id, "N/A"),
-    ip_address: text(item.ip_address, "N/A"),
-    bank_name: text(receipt.beneficiary_bank ?? item.bank_name, "N/A"),
-    account_number: text(receipt.beneficiary_account ?? item.account_number, "N/A"),
-    account_name: text(receipt.beneficiary ?? item.receiver ?? item.account_name, "N/A"),
+    user_email: text(userObj.email ?? item.user_email, "N/A"),
+    user_id: text(userObj.user_id ?? item.user_id, "N/A"),
+    ip_address: text(item.ip_address ?? receipt.ip_address, "N/A"),
+    bank_name: text(receipt.beneficiary_bank ?? bankDetails.bank_name ?? item.bank_name, "N/A"),
+    account_number: text(receipt.beneficiary_account ?? bankDetails.account_number ?? item.account_number, "N/A"),
+    account_name: text(receipt.beneficiary ?? bankDetails.account_name ?? item.receiver ?? item.account_name, "N/A"),
     bank_reference: text(receipt.reference ?? item.reference, "N/A"),
-    settlement_status: status === "completed" ? "Settled" : status,
-    tx_hash: text(item.crypto_transaction_hash ?? item.provider_transaction_id ?? item.session_id ?? receipt.session_id, "N/A"),
-    network: text(item.crypto_network ?? item.payment_method, "N/A"),
-    confirmations: text(item.crypto_status, "N/A"),
-    from_wallet: text(item.crypto_address ?? item.beneficiary_id, "N/A"),
+    settlement_status: item.settlement_status ? text(item.settlement_status) : (status === "completed" ? "Settled" : status),
+    tx_hash: text(technical.transaction_hash ?? item.crypto_transaction_hash ?? item.provider_transaction_id, "N/A"),
+    network: text(technical.network ?? item.crypto_network ?? item.payment_method, "N/A"),
+    confirmations: technical.confirmations != null ? String(technical.confirmations) : "N/A",
+    from_wallet: text(technical.from_wallet ?? item.crypto_address, "N/A"),
     blockchain: status === "completed" ? "Confirmed" : "Pending",
     settlement: status === "completed" ? "Settled" : "Pending",
     started: created.time || "N/A",
     completed: status === "completed" ? updated.time || created.time || "N/A" : "Pending",
     total_time: text(item.processing_time, status === "completed" ? "Completed" : "Pending"),
-    ledger_entries: Array.isArray(item.ledger_entries)
-      ? item.ledger_entries
+    ledger_entries: ledger.length > 0
+      ? ledger.map(e => ({
+          account: text(e.account, "Account"),
+          operation: text(e.operation ?? e.type, "Debit"),
+          amount: formatNaira(e.amount),
+          balance_after: formatNaira(e.balance_after),
+        }))
       : [
           {
             account: "Wallet Balance",
@@ -115,11 +140,15 @@ function normalizeTransactionDetail(value: unknown, id: string): TransactionDeta
             balance_after: formatNaira(item.balance_after),
           },
         ],
-    timeline: Array.isArray(item.timeline)
-      ? item.timeline
+    timeline: timeline.length > 0
+      ? timeline.map(e => ({
+          event: text(e.event ?? e.status ?? e.title, "Event"),
+          description: text(e.description ?? e.message, ""),
+          timestamp: text(e.timestamp ?? e.created_at, ""),
+        }))
       : [
           {
-            event: title,
+            event: titleStr,
             description: text(item.description ?? receipt.note, "Transaction created"),
             timestamp: `${created.date} ${created.time}`.trim(),
           },
@@ -210,9 +239,7 @@ function RightSidebar({ tx }: { tx: TransactionDetail }) {
               <Text variant="caption" color="secondary" className="text-[0.6875rem]">
                 Transaction
               </Text>
-              <Text variant="caption" color="success" weight="semibold" className="rounded-(--radius-sm) bg-(--color-success-bg) px-2 py-0.5 text-[0.625rem]">
-                Completed
-              </Text>
+              <TxStatusPill status={tx.status} />
             </Row>
             <Row justify="between" align="center" className="h-[1.875rem] rounded-(--radius-sm) border border-(--color-border) bg-white px-3">
               <Text variant="caption" color="secondary" className="text-[0.6875rem]">

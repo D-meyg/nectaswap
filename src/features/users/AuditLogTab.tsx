@@ -35,14 +35,14 @@ function normalizeAuditEntry(value: unknown, index: number): AuditEntry {
 
   return {
     id: text(item.id, `audit-${index}`),
-    action: text(item.action ?? item.event ?? item.title, "Activity"),
-    by: text(item.by ?? item.admin_name ?? item.admin ?? admin.name, "System"),
+    action: text(item.activity_type ?? item.action ?? item.event ?? item.title, "Activity"),
+    by: text(item.admin ?? item.by ?? item.admin_name ?? item.admin_id ?? admin.name, "System"),
     description: text(
-      item.description ?? item.target ?? item.details,
+      item.activity_description ?? item.description ?? item.target ?? item.details,
       "No details provided",
     ),
-    ip: text(item.ip ?? item.ip_address, "N/A"),
-    created_at: text(item.created_at ?? item.timestamp ?? item.date, "N/A"),
+    ip: text(item.request_ip ?? item.ip ?? item.ip_address, "N/A"),
+    created_at: text(item.time ?? item.activity_timestamp ?? item.created_at ?? item.timestamp ?? item.date, "N/A"),
   };
 }
 

@@ -36,7 +36,7 @@ export const ENDPOINTS = {
   TRANSACTIONS: {
     LIST: "/api/v1/admin/transactions",
     STATUS: "/api/v1/admin/transactions/status",
-    DETAIL: (id: string) => `/api/v1/admin/transactions/${id}`,
+    DETAIL: (id: string) => `/api/v1/admin/transactions/single/${id}`,
     PENDING_APPROVALS: "/api/v1/admin/transactions/pending/approvals",
     APPROVE_FLAG: (flagId: string) =>
       `/api/v1/admin/transactions/pending/${flagId}/approve`,

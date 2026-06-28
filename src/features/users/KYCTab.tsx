@@ -117,8 +117,13 @@ interface KYCTabProps {
 }
 
 export function KYCTab({ userId }: KYCTabProps) {
-  const { data: history, isLoading } = useKYCHistory(userId);
-  const docs: KYCDocument[] = (history as any)?.documents ?? [];
+  const { data: rawKyc, isLoading } = useKYCHistory(userId);
+  const kycData = rawKyc as any;
+  const docs: KYCDocument[] = kycData?.documents ?? [];
+  const historyEvents: Array<{ id: string; event: string; date: string; by: string; description: string }> =
+    Array.isArray(kycData?.history) ? kycData.history :
+    Array.isArray(kycData?.events) ? kycData.events :
+    Array.isArray(kycData) ? kycData : [];
 
   return (
     <Stack gap={4}>
@@ -147,7 +152,7 @@ export function KYCTab({ userId }: KYCTabProps) {
               <Skeleton className="h-[3.75rem] w-full rounded-(--radius-md)" />
               <Skeleton className="h-[3.75rem] w-full rounded-(--radius-md)" />
             </Stack>
-          ) : !history || history.length === 0 ? (
+          ) : historyEvents.length === 0 ? (
             <EmptyState
               icon={Clock}
               title="No history yet"
@@ -155,11 +160,11 @@ export function KYCTab({ userId }: KYCTabProps) {
             />
           ) : (
             <div className="space-y-3">
-              {history.map((event, i) => (
+              {historyEvents.map((event, i) => (
                 <TimelineEvent
-                  key={event.id}
+                  key={event.id ?? i}
                   event={event}
-                  isLast={i === history.length - 1}
+                  isLast={i === historyEvents.length - 1}
                 />
               ))}
             </div>

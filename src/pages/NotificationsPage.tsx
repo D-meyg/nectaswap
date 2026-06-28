@@ -44,69 +44,6 @@ function PriorityTag({ p }: { p: Priority }) {
   );
 }
 
-const RECENT_NOTIFS = [
-  {
-    title: "System Maintenance Scheduled",
-    body: "Our platform will undergo maintenance on Feb 5th from 2AM-4AM WAT.",
-    segment: "All Users",
-    count: 12453,
-    recipients: 12453,
-    sent_by: "System",
-    sent_at: "2024-02-01 10:30",
-    priority: "info" as Priority,
-  },
-  {
-    title: "Complete Your KYC Verification",
-    body: "You're almost there! Complete your KYC to unlock full platform features.",
-    segment: "KYC Pending",
-    count: 4219,
-    recipients: 4219,
-    sent_by: "System",
-    sent_at: "2024-01-31 14:00",
-    priority: "warning" as Priority,
-  },
-  {
-    title: "New Feature: Instant Card Funding",
-    body: "You can now instantly fund your Naira card from your crypto wallet!",
-    segment: "KYC Completed",
-    count: 8234,
-    recipients: 8234,
-    sent_by: "System",
-    sent_at: "2024-01-30 09:15",
-    priority: "info" as Priority,
-  },
-] satisfies NotificationItem[];
-
-const NOTIF_HISTORY = [
-  {
-    title: "System Maintenance Scheduled",
-    body: "Our platform will undergo maintenance on Feb 5th from 2AM-4AM WAT.",
-    segment: "All Users",
-    recipients: 12453,
-    sent_by: "Sarah Chen",
-    sent_at: "2024-02-01 10:30",
-    priority: "info" as Priority,
-  },
-  {
-    title: "Complete Your KYC Verification",
-    body: "You're almost there! Complete your KYC to unlock full platform features.",
-    segment: "KYC Pending",
-    recipients: 4219,
-    sent_by: "James Wilson",
-    sent_at: "2024-01-31 14:00",
-    priority: "warning" as Priority,
-  },
-  {
-    title: "New Feature: Instant Card Funding",
-    body: "You can now instantly fund your Naira card from your crypto wallet!",
-    segment: "KYC Completed",
-    recipients: 8234,
-    sent_by: "Maria Garcia",
-    sent_at: "2024-01-30 09:15",
-    priority: "info" as Priority,
-  },
-];
-
 const SEGMENT_DATA = {
   all: {
     label: "All Users",
@@ -178,10 +115,7 @@ export default function NotificationsPage() {
   const createNotification = useCreateNotification();
 
   const notifications = useMemo<NotificationItem[]>(
-    () =>
-      apiNotifications.length
-        ? apiNotifications.map(normalizeNotification)
-        : NOTIF_HISTORY.map(normalizeNotification),
+    () => (Array.isArray(apiNotifications) ? apiNotifications : []).map(normalizeNotification),
     [apiNotifications],
   );
 
@@ -548,11 +482,11 @@ export default function NotificationsPage() {
             <Card.Header title="Recent Notifications" />
             <Card.Body padded>
               <Stack gap={3}>
-                {(apiNotifications.length ? notifications.slice(0, 3) : RECENT_NOTIFS).map((n, i) => (
+                {notifications.slice(0, 3).map((n, i) => (
                   <Box
                     key={i}
                     className={
-                      i < (apiNotifications.length ? notifications.slice(0, 3) : RECENT_NOTIFS).length - 1
+                      i < Math.min(notifications.length, 3) - 1
                         ? "pb-3 border-b border-(--color-border)"
                         : ""
                     }

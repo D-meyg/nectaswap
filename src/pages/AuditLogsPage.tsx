@@ -35,6 +35,19 @@ function text(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value : fallback;
 }
 
+function formatTimestamp(value: unknown): string {
+  const raw = text(value, "");
+  if (!raw) return "N/A";
+  try {
+    return new Intl.DateTimeFormat("en-NG", {
+      day: "2-digit", month: "short", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    }).format(new Date(raw));
+  } catch {
+    return raw;
+  }
+}
+
 function normalizeResult(value: unknown): AuditLog["result"] {
   const result = text(value, "Success").toLowerCase();
   if (result === "failed" || result === "failure") return "Failed";
@@ -60,16 +73,16 @@ function normalizeAudit(value: unknown): AuditLog {
   const category = text(item.category ?? item.module, "System");
 
   return {
-    timestamp: text(item.timestamp ?? item.created_at ?? item.date, "N/A"),
-    admin: text(item.admin_name ?? item.admin ?? admin.name, "System"),
-    action: text(item.action ?? item.event, "Activity"),
-    target: text(item.target ?? item.description, "N/A"),
+    timestamp: formatTimestamp(item.activity_timestamp ?? item.timestamp ?? item.created_at ?? item.time ?? item.date),
+    admin: text(item.admin_name ?? item.admin_id ?? item.admin ?? admin.name, "System"),
+    action: text(item.activity_type ?? item.action ?? item.event, "Activity"),
+    target: text(item.activity_description ?? item.target ?? item.description, "N/A"),
     category,
     category_color: text(item.category_color, categoryColor(category)),
     result: normalizeResult(item.result ?? item.status),
-    ip_address: text(item.ip_address ?? item.ip, "N/A"),
+    ip_address: text(item.request_ip ?? item.ip_address ?? item.ip, "N/A"),
     log_id: text(item.log_id ?? item.id, "#000001"),
-    details: text(item.details ?? item.description, "No details provided."),
+    details: text(item.activity_description ?? item.details ?? item.description, "No details provided."),
   };
 }
 

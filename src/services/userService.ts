@@ -4,6 +4,7 @@ import { ENDPOINTS } from "@/api/endpoints";
 export const userService = {
   getUsers: async (params?: Record<string, unknown>) => {
     const { data } = await client.get(ENDPOINTS.USERS.LIST, { params });
+    console.log("SRVICE", data)
     return data;
   },
 

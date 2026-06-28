@@ -26,58 +26,26 @@ interface APIKey {
   status: "Active" | "Revoked";
 }
 
-const API_KEYS: APIKey[] = [
-  {
-    name: "Production API Key",
-    created: "Jan 15, 2024",
-    key: "nswp_live_••••••••••••••••••••••••••••••••••••",
-    service: "Main Platform",
-    permissions: ["Read", "Write", "Delete"],
-    usage: "45,234 calls",
-    last_used: "2 hours ago",
-    status: "Active",
-  },
-  {
-    name: "Mobile App API",
-    created: "Jan 20, 2024",
-    key: "nswp_live_••••••••••••••••••••••••••••••••••••",
-    service: "Mobile Application",
-    permissions: ["Read", "Write"],
-    usage: "128,456 calls",
-    last_used: "5 minutes ago",
-    status: "Active",
-  },
-  {
-    name: "Webhook Service",
-    created: "Feb 1, 2024",
-    key: "nswp_live_••••••••••••••••••••••••••••••••••••",
-    service: "Webhook Handler",
-    permissions: ["Read"],
-    usage: "8,923 calls",
-    last_used: "1 hour ago",
-    status: "Active",
-  },
-  {
-    name: "Test Environment",
-    created: "Feb 5, 2024",
-    key: "nswp_test_••••••••••••••••••••••••••••••••••••",
-    service: "Testing",
-    permissions: ["Read", "Write"],
-    usage: "234 calls",
-    last_used: "3 days ago",
-    status: "Active",
-  },
-  {
-    name: "Old Integration Key",
-    created: "Dec 10, 2023",
-    key: "nswp_live_••••••••••••••••••••••••••••••••••••",
-    service: "Legacy System",
-    permissions: ["Read"],
-    usage: "67,890 calls",
-    last_used: "2 weeks ago",
-    status: "Revoked",
-  },
-];
+function normalizeApiKey(value: unknown): APIKey {
+  const item = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const rawPerms = item.permissions;
+  const perms: string[] = Array.isArray(rawPerms)
+    ? (rawPerms as unknown[]).map(String)
+    : typeof rawPerms === "string" && rawPerms
+      ? [rawPerms]
+      : [];
+  const rawStatus = String(item.status ?? "active").toLowerCase();
+  return {
+    name: String(item.name ?? item.key_name ?? "API Key"),
+    created: String(item.created_at ?? item.created ?? item.date ?? "N/A"),
+    key: String(item.key ?? item.api_key ?? item.token ?? "••••••••••••••••"),
+    service: String(item.service ?? item.description ?? "N/A"),
+    permissions: perms,
+    usage: String(item.usage ?? item.call_count ?? item.usage_count ?? "N/A"),
+    last_used: String(item.last_used ?? item.last_used_at ?? item.last_accessed ?? "N/A"),
+    status: rawStatus === "revoked" || rawStatus === "inactive" ? "Revoked" : "Active",
+  };
+}
 
 const PERM_COLORS: Record<string, string> = {
   Read: "bg-(--color-success-subtle) text-(--color-success-mid) border border-(--color-success-muted)",
@@ -183,7 +151,10 @@ export default function APIKeysPage() {
 
   const { data: apiKeys = [], isLoading } = useApiKeys();
   const [generateOpen, setGenerateOpen] = useState(false);
-  const keys = apiKeys.length ? (apiKeys as APIKey[]) : API_KEYS;
+  const keys = useMemo(
+    () => (Array.isArray(apiKeys) ? apiKeys.map(normalizeApiKey) : []),
+    [apiKeys],
+  );
 
   const columns = useMemo<ColumnDef<APIKey, unknown>[]>(
     () => [
