@@ -122,7 +122,7 @@ function normalizeTransactionDetail(value: unknown, id: string): TransactionDeta
     ledger_entries: ledger.length > 0
       ? ledger.map(e => ({
           account: text(e.account, "Account"),
-          operation: text(e.operation ?? e.type, "Debit"),
+          operation: text(e.operation ?? e.type, "Debit") as "Debit" | "Credit",
           amount: formatNaira(e.amount),
           balance_after: formatNaira(e.balance_after),
         }))

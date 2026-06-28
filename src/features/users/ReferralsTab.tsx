@@ -74,7 +74,7 @@ export function ReferralsTab({ userId }: ReferralsTabProps) {
     if (!code) return null
     return {
       referral_code: code,
-      total_referrals: refSource.total_referrals ?? refSource.total ?? '—',
+      total_referrals: (refSource.total_referrals ?? refSource.total ?? '—') as string | number,
       active_referrals: n(refSource.active_referrals ?? refSource.active),
       total_earnings: n(refSource.total_earnings ?? refSource.earnings),
       pending_earnings: n(refSource.pending_earnings ?? refSource.pending_payout ?? refSource.pending),
