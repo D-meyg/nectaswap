@@ -8,8 +8,11 @@ import { cn } from "@/lib/utils";
 interface UserLike {
   id?: string | number;
   user_id?: string | number;
+  first_name?: string;
+  last_name?: string;
   name?: string;
   full_name?: string;
+  username?: string;
   email?: string;
   status?: string;
   last_active?: string;
@@ -48,7 +51,10 @@ export function UserHeader({
   freezeLoading,
   className,
 }: UserHeaderProps) {
-  const name = user.name || user.full_name || "Unknown User";
+  const firstName = user.first_name?.trim() ?? "";
+  const lastName = user.last_name?.trim() ?? "";
+  const joined = [firstName, lastName].filter(Boolean).join(" ");
+  const name = joined || user.name || user.full_name || user.username || "Unknown User";
   const email = user.email || "unknown@email.com";
   const id = user.id || user.user_id || "1";
   const lastActive = user.last_active || user.lastActive || "N/A";

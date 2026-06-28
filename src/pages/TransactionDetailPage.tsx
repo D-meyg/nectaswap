@@ -86,7 +86,10 @@ function normalizeTransactionDetail(value: unknown, id: string): TransactionDeta
   const amount = item.ngn_amount ?? item.amount ?? receipt.amount;
   const fee = item.fee ?? receipt.fee;
   const status = normalizeStatus(item.status ?? receipt.status);
-  const titleStr = text(receipt.title ?? item.title, status === "completed" ? "Transaction Completed" : "Transaction");
+  const rawKind = text(item.kind ?? item.method ?? item.transaction_type ?? receipt.method ?? receipt.title ?? item.title, "");
+  const titleStr = rawKind
+    ? rawKind.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+    : status === "completed" ? "Transaction Completed" : "Transaction";
 
   return {
     ...DUMMY_TX_DETAIL,
