@@ -10,3 +10,4 @@ export { settingsService } from "./settingsService";
 
 export { noteService } from "./noteService";
 export { activityService } from "./activityService";
+export { analyticsService } from "./analyticsService";

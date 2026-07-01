@@ -2,6 +2,11 @@ import { client } from "@/api/client";
 import { ENDPOINTS } from "@/api/endpoints";
 
 export const adminService = {
+  getMe: async () => {
+    const { data } = await client.get(ENDPOINTS.TEAM.ME);
+    return data;
+  },
+
   getAdmins: async () => {
     const { data } = await client.get(ENDPOINTS.ADMINS.LIST);
     return data;

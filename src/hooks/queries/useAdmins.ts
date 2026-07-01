@@ -1,6 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { adminService } from "@/services/adminService";
 import { unwrapApiList, unwrapApiObject } from "@/utils/apiData";
+import type { TeamMeData } from "@/api/types";
+
+export function useTeamMe() {
+  return useQuery<TeamMeData>({
+    queryKey: ["team", "me"],
+    queryFn: async () => {
+      const res = await adminService.getMe();
+      return res.data;
+    },
+    staleTime: 5 * 60_000,
+  });
+}
 
 export function useAdmins() {
   return useQuery<unknown[]>({

@@ -111,7 +111,7 @@ export default function WalletsPage() {
               balance: String(item.balance ?? item.amount ?? "0"),
               unit: String(item.unit ?? item.asset ?? item.symbol ?? ""),
               usd_value: String(item.usd_value ?? item.value_usd ?? item.value ?? "—"),
-              threshold: Number(item.threshold ?? item.threshold_percent ?? 0),
+              threshold: Number(item.threshold_pct ?? item.threshold ?? item.threshold_percent ?? 0),
               status: String(item.status ?? "healthy"),
             };
           })

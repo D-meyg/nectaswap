@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Download } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
@@ -15,18 +15,12 @@ import { Card } from "@/components/ui/Card";
 import { StatCard } from "@/components/ui/StatCard";
 import { DataTable } from "@/components/tables/DataTable";
 import { usePageTitle } from "@/layouts/AppLayout";
-import { useDashboardStats } from "@/hooks/queries/useDashboard";
+import { useAnalyticsUserGrowth } from "@/hooks/queries/useAnalytics";
 
-// ── Data ─────────────────────────────────────────────────
+const KYC_COLORS = ["#4E2BCC", "#06B6D4", "#00A63E", "#F7931A"];
+const CHANNEL_COLORS = ["#4E2BCC", "#06B6D4", "#00A63E", "#F7931A", "#E7000B"];
 
-const growthTrendData: { month: string; totalUsers: number; newUsers: number; activeUsers: number }[] = [];
-const usersByRegion: { region: string; users: number; growth: number; color: string }[] = [];
-const maxRegion = 1;
-const kycDistribution: { name: string; value: number; share: number; color: string }[] = [];
-const weeklyActivityData: { day: string; active: number; inactive: number }[] = [];
-const acquisitionChannels: { name: string; users: number; share: number; cac: string; color: string }[] = [];
-
-// ── Cohort table data + columns ───────────────────────────
+// ── Cohort table ──────────────────────────────────────────
 
 type CohortRow = {
   cohort: string;
@@ -35,11 +29,7 @@ type CohortRow = {
   m2: number | null;
   m3: number | null;
   m4: number | null;
-  m5: number | null;
-  m6: number | null;
 };
-
-const cohortData: CohortRow[] = [];
 
 function CohortBadge({ value }: { value: number | null }) {
   if (value === null) return <span className="text-(--color-text-muted) text-xs">—</span>;
@@ -71,8 +61,6 @@ const cohortColumns: ColumnDef<CohortRow, unknown>[] = [
   { accessorKey: "m2", header: "Month 2", cell: ({ getValue }) => <CohortBadge value={getValue() as number | null} /> },
   { accessorKey: "m3", header: "Month 3", cell: ({ getValue }) => <CohortBadge value={getValue() as number | null} /> },
   { accessorKey: "m4", header: "Month 4", cell: ({ getValue }) => <CohortBadge value={getValue() as number | null} /> },
-  { accessorKey: "m5", header: "Month 5", cell: ({ getValue }) => <CohortBadge value={getValue() as number | null} /> },
-  { accessorKey: "m6", header: "Month 6", cell: ({ getValue }) => <CohortBadge value={getValue() as number | null} /> },
 ];
 
 // ── Chart Tooltip ─────────────────────────────────────────
@@ -84,7 +72,7 @@ function ChartTooltip({ active, payload, label }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-[8.125rem]">
+    <div className="bg-white border border-(--color-border) rounded-(--radius-md) shadow-(--shadow-card) px-3 py-2 min-w-32">
       <Text variant="micro" color="muted" className="mb-1 block">{label}</Text>
       {payload.map((p) => (
         <div key={String(p.name)} className="flex items-center gap-2">
@@ -101,20 +89,80 @@ function ChartTooltip({ active, payload, label }: {
   );
 }
 
-const DATE_FILTERS = ["Last month", "Last 6 weeks", "Last 6 months", "Last 12 months", "All time"];
+const DATE_FILTERS: { label: string; period: string }[] = [
+  { label: "Last month",     period: "1m"  },
+  { label: "Last 3 months",  period: "3m"  },
+  { label: "Last 6 months",  period: "6m"  },
+  { label: "Last 12 months", period: "12m" },
+  { label: "All time",       period: "all" },
+];
 
 // ── Page ──────────────────────────────────────────────────
 
 export default function UserGrowthPage() {
   usePageTitle("User Growth Analytics", "Analyse user acquisition, retention, and growth trends");
-  const [activeDate, setActiveDate] = useState("Last 12 months");
-  const { data: dashboardStats = {} } = useDashboardStats();
-  const stats = dashboardStats as Record<string, any>;
+  const [activeFilter, setActiveFilter] = useState(DATE_FILTERS[3]);
+  const { data } = useAnalyticsUserGrowth(activeFilter.period);
 
-  const totalUsers = stats.total_users ?? stats.totalUsers ?? null;
-  const newUsers = stats.new_users ?? stats.newUsers ?? null;
-  const activeUsers = stats.active_users ?? stats.activeUsers ?? null;
-  const churnRate = stats.churn_rate ?? stats.churnRate ?? null;
+  const kpis = data?.kpis;
+  const bottomStats = data?.bottom_stats;
+
+  const growthTrendData = useMemo(
+    () => (data?.user_growth_trends ?? []).map((t) => ({
+      month: t.month,
+      totalUsers: t.total_users,
+      newUsers: t.new_users,
+      activeUsers: t.active_users,
+    })),
+    [data],
+  );
+
+  const usersByRegion = useMemo(
+    () => data?.users_by_region ?? [],
+    [data],
+  );
+  const maxRegionCount = useMemo(
+    () => Math.max(1, ...usersByRegion.map((r) => r.count)),
+    [usersByRegion],
+  );
+
+  const kycDistribution = useMemo(
+    () => (data?.kyc_level_distribution ?? []).map((k, i) => ({
+      name: k.level,
+      value: k.count,
+      share: k.percentage,
+      color: KYC_COLORS[i % KYC_COLORS.length],
+    })),
+    [data],
+  );
+
+  const weeklyActivityData = useMemo(
+    () => data?.weekly_user_activity ?? [],
+    [data],
+  );
+
+  const acquisitionChannels = useMemo(
+    () => (data?.user_acquisition_channels ?? []).map((c, i) => ({
+      name: c.channel,
+      users: c.count,
+      share: c.percentage,
+      cac: c.cac > 0 ? `₦${c.cac.toLocaleString()}` : "Free",
+      color: CHANNEL_COLORS[i % CHANNEL_COLORS.length],
+    })),
+    [data],
+  );
+
+  const cohortData = useMemo<CohortRow[]>(
+    () => (data?.cohort_retention ?? []).map((c) => ({
+      cohort: c.cohort,
+      m0: c.month_0,
+      m1: c.month_1 ?? null,
+      m2: c.month_2 ?? null,
+      m3: c.month_3 ?? null,
+      m4: c.month_4 ?? null,
+    })),
+    [data],
+  );
 
   return (
     <div className="p-6 space-y-5">
@@ -123,15 +171,15 @@ export default function UserGrowthPage() {
         <div className="flex items-center border border-(--color-border) rounded-(--radius-sm) overflow-hidden">
           {DATE_FILTERS.map((f) => (
             <button
-              key={f}
-              onClick={() => setActiveDate(f)}
+              key={f.period}
+              onClick={() => setActiveFilter(f)}
               className={`px-3 py-1.5 text-xs font-medium border-r border-(--color-border) last:border-r-0 transition-colors ${
-                activeDate === f
+                activeFilter.period === f.period
                   ? "bg-(--color-brand) text-white"
                   : "bg-white text-(--color-text-secondary) hover:bg-(--color-bg-subtle)"
               }`}
             >
-              {f}
+              {f.label}
             </button>
           ))}
         </div>
@@ -146,10 +194,33 @@ export default function UserGrowthPage() {
 
       {/* Top stats */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Total Users"  value={totalUsers != null ? String(totalUsers) : "N/A"} delta={9.5}  deltaLabel="vs last month"      status="success" />
-        <StatCard label="New Users"    value={newUsers != null ? String(newUsers) : "N/A"}  delta={13.8} deltaLabel="this month"         status="success" />
-        <StatCard label="Active Users" value={activeUsers != null ? String(activeUsers) : "N/A"}  delta={3.9}  deltaLabel="vs last 6 months"   status="info" />
-        <StatCard label="Churn Rate"   value={churnRate != null ? String(churnRate) : "N/A"}  delta={-4.4} deltaLabel="improved"           status="danger" />
+        <StatCard
+          label="Total Users"
+          value={kpis?.total_users?.toLocaleString() ?? "N/A"}
+          delta={kpis?.total_users_change}
+          deltaLabel="vs last period"
+          status="success"
+        />
+        <StatCard
+          label="New Users"
+          value={kpis?.new_users?.toLocaleString() ?? "N/A"}
+          delta={kpis?.new_users_change}
+          deltaLabel="vs last period"
+          status={kpis?.new_users_change != null && kpis.new_users_change >= 0 ? "success" : "warning"}
+        />
+        <StatCard
+          label="Active Users"
+          value={kpis?.active_users?.toLocaleString() ?? "N/A"}
+          delta={kpis?.active_users_change}
+          deltaLabel="vs last period"
+          status="info"
+        />
+        <StatCard
+          label="Churn Rate"
+          value={kpis?.churn_rate != null ? `${kpis.churn_rate}%` : "N/A"}
+          deltaLabel="of users churned"
+          status="danger"
+        />
       </Grid>
 
       {/* Growth & Activity Trends */}
@@ -186,22 +257,26 @@ export default function UserGrowthPage() {
       {/* Users by Region + KYC Distribution */}
       <Grid cols={2} gap={4}>
         <Card noPadding>
-          <Card.Header title="Users by Region" subtitle="Geographic distribution across Nigeria" />
+          <Card.Header title="Users by Region" subtitle="Geographic distribution" />
           <Card.Body padded>
             <Stack gap={3}>
+              {usersByRegion.length === 0 && (
+                <Text variant="caption" color="muted">No region data available</Text>
+              )}
               {usersByRegion.map((r) => (
                 <Stack key={r.region} gap={1}>
                   <Row justify="between" align="center">
                     <Text variant="caption" color="primary">{r.region}</Text>
                     <Row gap={3} align="center">
-                      <Text variant="caption" color="primary" weight="medium">{r.users.toLocaleString()}</Text>
-                      <span className={`text-[0.6875rem] font-medium ${r.growth > 0 ? "text-(--color-success-mid)" : "text-(--color-danger)"}`}>
-                        {r.growth > 0 ? "+" : ""}{r.growth}%
-                      </span>
+                      <Text variant="caption" color="primary" weight="medium">{r.count.toLocaleString()}</Text>
+                      <Text variant="micro" color="muted">{r.percentage}%</Text>
                     </Row>
                   </Row>
                   <div className="relative h-1.5 w-full bg-(--color-border) rounded-full overflow-hidden">
-                    <div className="absolute left-0 top-0 h-full bg-(--color-brand) rounded-full" style={{ width: `${(r.users / maxRegion) * 100}%` }} />
+                    <div
+                      className="absolute left-0 top-0 h-full bg-(--color-brand) rounded-full"
+                      style={{ width: `${(r.count / maxRegionCount) * 100}%` }}
+                    />
                   </div>
                 </Stack>
               ))}
@@ -212,28 +287,34 @@ export default function UserGrowthPage() {
         <Card noPadding>
           <Card.Header title="KYC Level Distribution" subtitle="Verified users across KYC levels" />
           <Card.Body className="p-4">
-            <ResponsiveContainer width="100%" height={160}>
-              <PieChart>
-                <Pie data={kycDistribution} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={2} dataKey="value">
-                  {kycDistribution.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
-                </Pie>
-                <Tooltip content={<ChartTooltip />} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="mt-2 space-y-1.5">
-              {kycDistribution.map((item) => (
-                <div key={item.name} className="flex items-center justify-between">
-                  <Row gap={2} align="center">
-                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: item.color }} />
-                    <Text variant="caption" color="secondary">{item.name}</Text>
-                  </Row>
-                  <Row gap={3}>
-                    <Text variant="caption" color="primary" weight="medium">{item.value.toLocaleString()}</Text>
-                    <Text variant="micro"   color="muted">{item.share}%</Text>
-                  </Row>
+            {kycDistribution.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={160}>
+                  <PieChart>
+                    <Pie data={kycDistribution} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={2} dataKey="value">
+                      {kycDistribution.map((entry) => <Cell key={entry.name} fill={entry.color} />)}
+                    </Pie>
+                    <Tooltip content={<ChartTooltip />} />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="mt-2 space-y-1.5">
+                  {kycDistribution.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between">
+                      <Row gap={2} align="center">
+                        <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: item.color }} />
+                        <Text variant="caption" color="secondary">{item.name}</Text>
+                      </Row>
+                      <Row gap={3}>
+                        <Text variant="caption" color="primary" weight="medium">{item.value.toLocaleString()}</Text>
+                        <Text variant="micro"   color="muted">{item.share}%</Text>
+                      </Row>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            ) : (
+              <Text variant="caption" color="muted">No KYC data available</Text>
+            )}
           </Card.Body>
         </Card>
       </Grid>
@@ -247,7 +328,7 @@ export default function UserGrowthPage() {
               <BarChart data={weeklyActivityData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="day" tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${(v / 1000).toFixed(0)}k`} />
+                <YAxis tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} axisLine={false} tickLine={false} />
                 <Tooltip content={<ChartTooltip />} />
                 <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="active"   name="Active"   stackId="a" fill="#4E2BCC" />
@@ -289,7 +370,7 @@ export default function UserGrowthPage() {
         </Card>
       </Grid>
 
-      {/* Retention Cohort — uses DataTable */}
+      {/* Retention Cohort */}
       <Card noPadding>
         <Card.Header title="User Retention Cohort Analysis" subtitle="Percentage of users still active after signup" />
         <DataTable
@@ -301,10 +382,27 @@ export default function UserGrowthPage() {
 
       {/* Bottom stats */}
       <Grid cols={4} gap={4}>
-        <StatCard label="Avg Lifetime Value" value="N/A" deltaLabel="Per user" />
-        <StatCard label="Avg CAC"            value="N/A" deltaLabel="Cost to acquire" />
-        <StatCard label="Mobile Users"       value="N/A" deltaLabel="Access via mobile" />
-        <StatCard label="30-Day Retention"   value="N/A" deltaLabel="Still active after 30 days" />
+        <StatCard
+          label="Avg Lifetime Value"
+          value={bottomStats?.avg_lifetime_value != null ? `₦${bottomStats.avg_lifetime_value.toLocaleString()}` : "N/A"}
+          deltaLabel="per user"
+        />
+        <StatCard
+          label="Avg CAC"
+          value={bottomStats?.avg_cac != null ? `₦${bottomStats.avg_cac.toLocaleString()}` : "N/A"}
+          deltaLabel="cost to acquire"
+        />
+        <StatCard
+          label="Mobile Users"
+          value={bottomStats?.mobile_users_pct != null ? `${bottomStats.mobile_users_pct}%` : "N/A"}
+          deltaLabel="access via mobile"
+        />
+        <StatCard
+          label="30-Day Retention"
+          value={bottomStats?.retention_30d != null ? `${bottomStats.retention_30d}%` : "N/A"}
+          deltaLabel="still active after 30 days"
+          status={bottomStats?.retention_30d != null && bottomStats.retention_30d > 0 ? "success" : "warning"}
+        />
       </Grid>
     </div>
   );

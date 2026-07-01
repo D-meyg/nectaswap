@@ -129,4 +129,12 @@ export const ENDPOINTS = {
     DETAIL: (id: string) => `/api/v1/admin/api-keys/${id}`,
     REVOKE: (id: string) => `/api/v1/admin/api-keys/${id}/revoke`,
   },
+  TEAM: {
+    ME: "/api/v1/admin/team/me",
+  },
+  ANALYTICS: {
+    OVERVIEW: "/api/v1/admin/analytics/overview",
+    REVENUE: "/api/v1/admin/analytics/revenue",
+    USER_GROWTH: "/api/v1/admin/analytics/user-growth",
+  },
 } as const;
