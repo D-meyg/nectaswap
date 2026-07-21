@@ -1503,3 +1503,389 @@ export const DUMMY_REFERRED_USERS_FULL = [
     status: "Active",
   },
 ];
+
+// ─── Card Requests (Cards → Card Requests) ────────────────────────
+
+export interface CardRequestRow {
+  id: string;
+  user_name: string;
+  user_email: string;
+  card_type: "Virtual" | "Physical";
+  currency: "NGN" | "USD" | "EUR" | "GBP";
+  requested_on: string;
+  kyc_status: "Verified" | "Not Verified";
+  approval_status: "Pending" | "Approved" | "Rejected" | "Under Review";
+  assigned_admin: string;
+}
+
+export const DUMMY_CARD_REQUESTS: CardRequestRow[] = [
+  {
+    id: "CR-3041",
+    user_name: "Chinedu Okonkwo",
+    user_email: "chinedu.o@email.com",
+    card_type: "Virtual",
+    currency: "NGN",
+    requested_on: "2024-01-15",
+    kyc_status: "Verified",
+    approval_status: "Pending",
+    assigned_admin: "Unassigned",
+  },
+  {
+    id: "CR-3042",
+    user_name: "Amara Nwosu",
+    user_email: "amara.n@email.com",
+    card_type: "Physical",
+    currency: "USD",
+    requested_on: "2024-01-15",
+    kyc_status: "Verified",
+    approval_status: "Approved",
+    assigned_admin: "Jane Adeniyi",
+  },
+  {
+    id: "CR-3043",
+    user_name: "Tunde Bakare",
+    user_email: "tunde.b@email.com",
+    card_type: "Virtual",
+    currency: "EUR",
+    requested_on: "2024-01-14",
+    kyc_status: "Not Verified",
+    approval_status: "Rejected",
+    assigned_admin: "Kola Benson",
+  },
+  {
+    id: "CR-3044",
+    user_name: "Ngozi Eze",
+    user_email: "ngozi.e@email.com",
+    card_type: "Virtual",
+    currency: "GBP",
+    requested_on: "2024-01-14",
+    kyc_status: "Verified",
+    approval_status: "Under Review",
+    assigned_admin: "Jane Adeniyi",
+  },
+  {
+    id: "CR-3045",
+    user_name: "Emeka Obi",
+    user_email: "emeka.o@email.com",
+    card_type: "Physical",
+    currency: "NGN",
+    requested_on: "2024-01-13",
+    kyc_status: "Verified",
+    approval_status: "Pending",
+    assigned_admin: "Unassigned",
+  },
+  {
+    id: "CR-3046",
+    user_name: "Fatima Aliyu",
+    user_email: "fatima.a@email.com",
+    card_type: "Virtual",
+    currency: "USD",
+    requested_on: "2024-01-13",
+    kyc_status: "Verified",
+    approval_status: "Approved",
+    assigned_admin: "Kola Benson",
+  },
+  {
+    id: "CR-3047",
+    user_name: "Oluwatobi Adeyemi",
+    user_email: "tobi.a@email.com",
+    card_type: "Physical",
+    currency: "NGN",
+    requested_on: "2024-01-12",
+    kyc_status: "Verified",
+    approval_status: "Under Review",
+    assigned_admin: "Jane Adeniyi",
+  },
+  {
+    id: "CR-3048",
+    user_name: "Blessing Ojo",
+    user_email: "blessing.o@email.com",
+    card_type: "Virtual",
+    currency: "NGN",
+    requested_on: "2024-01-12",
+    kyc_status: "Not Verified",
+    approval_status: "Pending",
+    assigned_admin: "Unassigned",
+  },
+];
+
+export const DUMMY_CARD_REQUEST_STATS = {
+  pending: 34,
+  approved: 1204,
+  rejected: 87,
+  active_cards: 9,
+};
+
+export interface CardRequestDetail extends CardRequestRow {
+  phone: string;
+  reason: string;
+  monthly_volume: number;
+  transactions_30d: number;
+}
+
+export const DUMMY_CARD_REQUEST_DETAILS: Record<string, CardRequestDetail> = {
+  "CR-3041": {
+    ...DUMMY_CARD_REQUESTS[0],
+    phone: "+234 801 234 5678",
+    reason:
+      "Business expenses and international online payments for daily transactions and subscriptions.",
+    monthly_volume: 4320000,
+    transactions_30d: 47,
+  },
+  "CR-3042": {
+    ...DUMMY_CARD_REQUESTS[1],
+    phone: "+234 802 345 6789",
+    reason:
+      "Physical card for in-store purchases and travel expenses across multiple currencies.",
+    monthly_volume: 2150000,
+    transactions_30d: 28,
+  },
+  "CR-3043": {
+    ...DUMMY_CARD_REQUESTS[2],
+    phone: "+234 803 456 7890",
+    reason: "Online subscriptions and freelance client payments in euros.",
+    monthly_volume: 860000,
+    transactions_30d: 12,
+  },
+  "CR-3044": {
+    ...DUMMY_CARD_REQUESTS[3],
+    phone: "+234 804 567 8901",
+    reason: "International tuition payments and family remittances.",
+    monthly_volume: 5480000,
+    transactions_30d: 19,
+  },
+  "CR-3045": {
+    ...DUMMY_CARD_REQUESTS[4],
+    phone: "+234 805 678 9012",
+    reason: "Everyday spending and POS payments for a small retail business.",
+    monthly_volume: 1240000,
+    transactions_30d: 63,
+  },
+  "CR-3046": {
+    ...DUMMY_CARD_REQUESTS[5],
+    phone: "+234 806 789 0123",
+    reason: "Dollar-denominated online shopping and digital services.",
+    monthly_volume: 3760000,
+    transactions_30d: 35,
+  },
+  "CR-3047": {
+    ...DUMMY_CARD_REQUESTS[6],
+    phone: "+234 807 890 1234",
+    reason: "Travel and logistics expenses with contactless payments.",
+    monthly_volume: 980000,
+    transactions_30d: 22,
+  },
+  "CR-3048": {
+    ...DUMMY_CARD_REQUESTS[7],
+    phone: "+234 808 901 2345",
+    reason: "Streaming subscriptions and online marketplace purchases.",
+    monthly_volume: 450000,
+    transactions_30d: 15,
+  },
+};
+
+// ─── Card Limits & Controls (Cards → Limits & Controls) ───────────
+
+export interface LimitsCardOption {
+  id: string;
+  last4: string;
+  label: string;
+  type: "Virtual" | "Physical";
+  status: "Active" | "Frozen";
+  currency: "NGN" | "USD";
+  network: "Mastercard" | "Visa";
+  cardholder: string;
+}
+
+export const DUMMY_LIMITS_CARDS: LimitsCardOption[] = [
+  {
+    id: "1",
+    last4: "4521",
+    label: "SHOPPING",
+    type: "Virtual",
+    status: "Active",
+    currency: "NGN",
+    network: "Mastercard",
+    cardholder: "CHINEDU OKONKWO",
+  },
+  {
+    id: "2",
+    last4: "7832",
+    label: "SUBSCRIPTIONS",
+    type: "Physical",
+    status: "Active",
+    currency: "NGN",
+    network: "Visa",
+    cardholder: "CHINEDU OKONKWO",
+  },
+  {
+    id: "3",
+    last4: "2109",
+    label: "ONLY FANS",
+    type: "Virtual",
+    status: "Frozen",
+    currency: "USD",
+    network: "Mastercard",
+    cardholder: "AMARA NWOSU",
+  },
+];
+
+export interface SpendingLimit {
+  key: string;
+  label: string;
+  value: number;
+  max: number;
+}
+
+export const DUMMY_SPENDING_LIMITS: SpendingLimit[] = [
+  { key: "daily", label: "Daily Limit", value: 500000, max: 5000000 },
+  { key: "weekly", label: "Weekly Limit", value: 2000000, max: 20000000 },
+  { key: "monthly", label: "Monthly Limit", value: 5000000, max: 50000000 },
+  {
+    key: "single",
+    label: "Single Transaction Limit",
+    value: 100000,
+    max: 500000,
+  },
+  { key: "atm", label: "ATM Limit", value: 150000, max: 500000 },
+  {
+    key: "international",
+    label: "International Spending Limit",
+    value: 250000,
+    max: 2000000,
+  },
+];
+
+export interface CardPermission {
+  key: string;
+  label: string;
+  enabled: boolean;
+}
+
+export const DUMMY_CARD_PERMISSIONS: CardPermission[] = [
+  { key: "online_payments", label: "Enable Online Payments", enabled: true },
+  { key: "contactless", label: "Enable Contactless", enabled: false },
+  {
+    key: "international",
+    label: "Enable International Transactions",
+    enabled: true,
+  },
+  { key: "atm_withdrawals", label: "Enable ATM Withdrawals", enabled: false },
+  {
+    key: "recurring_payments",
+    label: "Enable Recurring Payments",
+    enabled: true,
+  },
+  {
+    key: "merchant_restrictions",
+    label: "Merchant Restrictions",
+    enabled: false,
+  },
+  { key: "card_freeze", label: "Card Freeze", enabled: false },
+  { key: "temporary_lock", label: "Temporary Lock", enabled: false },
+];
+
+export const DUMMY_SECURITY_TOGGLES: CardPermission[] = [
+  { key: "require_otp", label: "Require OTP", enabled: true },
+  { key: "require_3ds", label: "Require 3DS", enabled: true },
+  { key: "require_cvv", label: "Require CVV", enabled: true },
+  { key: "risk_detection", label: "Enable Risk Detection", enabled: true },
+];
+
+export interface CardActivityRow {
+  merchant: string;
+  amount: number;
+  currency: "NGN" | "USD";
+  country: string;
+  status: "Approved" | "Declined" | "Flagged";
+  date: string;
+  risk: "Low" | "Medium" | "High";
+}
+
+export const DUMMY_CARD_ACTIVITY_ROWS: CardActivityRow[] = [
+  {
+    merchant: "Amazon.com",
+    amount: 45200,
+    currency: "USD",
+    country: "US",
+    status: "Approved",
+    date: "2024-01-15 14:32",
+    risk: "Low",
+  },
+  {
+    merchant: "Netflix",
+    amount: 4400,
+    currency: "USD",
+    country: "US",
+    status: "Approved",
+    date: "2024-01-15 12:00",
+    risk: "Low",
+  },
+  {
+    merchant: "Unknown Merchant",
+    amount: 180000,
+    currency: "NGN",
+    country: "NG",
+    status: "Declined",
+    date: "2024-01-14 22:15",
+    risk: "High",
+  },
+  {
+    merchant: "Spotify",
+    amount: 3200,
+    currency: "USD",
+    country: "SE",
+    status: "Approved",
+    date: "2024-01-14 08:00",
+    risk: "Low",
+  },
+  {
+    merchant: "Aliexpress",
+    amount: 62500,
+    currency: "USD",
+    country: "CN",
+    status: "Flagged",
+    date: "2024-01-13 16:45",
+    risk: "Medium",
+  },
+];
+
+export interface CardChangeEntry {
+  title: string;
+  description: string;
+  admin: string;
+  timestamp: string;
+}
+
+export const DUMMY_CARD_CHANGES: CardChangeEntry[] = [
+  {
+    title: "Daily Limit Updated",
+    description: "₦ 200,000 → ₦ 500,000",
+    admin: "Jane Adeniyi",
+    timestamp: "2024-01-15 15:30",
+  },
+  {
+    title: "International Transactions Enabled",
+    description: "Permission granted",
+    admin: "Kola Benson",
+    timestamp: "2024-01-14 15:20",
+  },
+  {
+    title: "Card Freeze Removed",
+    description: "Card reactivated",
+    admin: "Jane Adeniyi",
+    timestamp: "2024-01-12 09:05",
+  },
+  {
+    title: "Card Replacement Issued",
+    description: "New card issued",
+    admin: "Super Admin",
+    timestamp: "2024-01-10 14:02",
+  },
+  {
+    title: "Online Payments Enabled",
+    description: "Permission granted",
+    admin: "Kola Benson",
+    timestamp: "2024-01-08 11:30",
+  },
+];

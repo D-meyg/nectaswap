@@ -1,4 +1,4 @@
-﻿import { memo, useMemo, useState, type ElementType } from "react";
+import { memo, useMemo, useState, type ElementType } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -61,7 +61,15 @@ const NAV_MAIN: NavItem[] = [
       { label: "Failed Transactions", path: "/transactions/failed" },
     ],
   },
-  { label: "Card Management", icon: CreditCard, path: "/cards" },
+  {
+    label: "Cards",
+    icon: CreditCard,
+    children: [
+      { label: "Card Requests", path: "/cards/requests" },
+      { label: "Active Cards", path: "/cards" },
+      { label: "Limits & Controls", path: "/cards/limits" },
+    ],
+  },
   { label: "Wallets & Liquidity", icon: Wallet, path: "/wallets" },
   {
     label: "Compliance & Risk",

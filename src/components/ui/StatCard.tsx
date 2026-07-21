@@ -1,4 +1,4 @@
-﻿import { memo, type ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Text } from "@/components/ui/Text";
@@ -12,6 +12,8 @@ export interface StatCardProps {
   status?: "success" | "warning" | "danger" | "info";
   loading?: boolean;
   className?: string;
+  /** Extra classes for the value text (e.g. status colors). */
+  valueClassName?: string;
 }
 
 const statusColor: Record<NonNullable<StatCardProps["status"]>, string> = {
@@ -30,6 +32,7 @@ export const StatCard = memo(function StatCard({
   status,
   loading,
   className,
+  valueClassName,
 }: StatCardProps) {
   if (loading) {
     return (
@@ -79,7 +82,10 @@ export const StatCard = memo(function StatCard({
           variant="display"
           color="primary"
           weight="semibold"
-          className="text-[1.75rem] leading-[2.125rem] tracking-[-0.02em]"
+          className={cn(
+            "text-[1.75rem] leading-[2.125rem] tracking-[-0.02em]",
+            valueClassName,
+          )}
         >
           {value}
         </Text>
