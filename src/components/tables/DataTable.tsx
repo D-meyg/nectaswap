@@ -1,4 +1,4 @@
-﻿import {
+import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
@@ -35,6 +35,8 @@ interface DataTableProps<TData> {
   emptyMessage?: string;
   toolbar?: React.ReactNode;
   stickyHeader?: boolean;
+  /** Render pagination as "Previous 1 2 ... Next" with numbered page buttons. */
+  numberedPagination?: boolean;
   className?: string;
 }
 
@@ -89,6 +91,7 @@ export function DataTable<TData>({
   emptyMessage = "No records found for the current filters.",
   toolbar,
   stickyHeader,
+  numberedPagination,
   className,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -242,40 +245,80 @@ export function DataTable<TData>({
         <div className="flex items-center justify-between gap-4 border-t border-(--color-border) bg-white px-4 py-3">
           <Text variant="caption" color="tertiary" className="text-[0.6875rem]">
             {total
-              ? `Showing ${(page - 1) * pageSize + 1}–${Math.min(
+              ? `Showing ${(page - 1) * pageSize + 1}-${Math.min(
                   page * pageSize,
                   total,
                 )} of ${total}`
               : ""}
           </Text>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handlePrev}
-              disabled={page <= 1}
-              className="h-8 px-3"
-            >
-              <ChevronLeft size={14} />
-              Previous
-            </Button>
+          {numberedPagination ? (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handlePrev}
+                disabled={page <= 1}
+                className="font-geom text-[0.6875rem] font-medium text-(--color-text-muted) transition-colors hover:text-(--color-text-primary) disabled:cursor-not-allowed disabled:hover:text-(--color-text-muted) focus:outline-none"
+              >
+                Previous
+              </button>
 
-            <span className="flex h-8 min-w-8 items-center justify-center rounded-(--radius-sm) bg-(--color-brand) px-2 font-geom text-[0.8125rem] font-semibold text-white shadow-sm">
-              {page}
-            </span>
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    onClick={() => onPageChange?.(pageNumber)}
+                    className={cn(
+                      "flex h-6 min-w-6 items-center justify-center rounded-(--radius-sm) px-1.5 font-geom text-[0.6875rem] font-semibold transition-colors focus:outline-none",
+                      pageNumber === page
+                        ? "bg-(--color-brand) text-white shadow-sm"
+                        : "text-(--color-text-secondary) hover:bg-(--color-bg-subtle) hover:text-(--color-text-primary)",
+                    )}
+                  >
+                    {pageNumber}
+                  </button>
+                ),
+              )}
 
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={handleNext}
-              disabled={page >= totalPages}
-              className="h-8 px-3"
-            >
-              Next
-              <ChevronRight size={14} />
-            </Button>
-          </div>
+              <button
+                type="button"
+                onClick={handleNext}
+                disabled={page >= totalPages}
+                className="font-geom text-[0.6875rem] font-medium text-(--color-text-secondary) transition-colors hover:text-(--color-text-primary) disabled:cursor-not-allowed disabled:text-(--color-text-muted) focus:outline-none"
+              >
+                Next
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handlePrev}
+                disabled={page <= 1}
+                className="h-8 px-3"
+              >
+                <ChevronLeft size={14} />
+                Previous
+              </Button>
+
+              <span className="flex h-8 min-w-8 items-center justify-center rounded-(--radius-sm) bg-(--color-brand) px-2 font-geom text-[0.8125rem] font-semibold text-white shadow-sm">
+                {page}
+              </span>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleNext}
+                disabled={page >= totalPages}
+                className="h-8 px-3"
+              >
+                Next
+                <ChevronRight size={14} />
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -1,4 +1,4 @@
-﻿import { memo } from "react";
+import { memo } from "react";
 import { Bell, Search, ChevronDown, LogOut, User } from "lucide-react";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
@@ -14,7 +14,7 @@ import { useCurrentPageTitle } from "./AppLayout";
 export const TopBar = memo(function TopBar() {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
-  const { title, subtitle } = useCurrentPageTitle();
+  const { title, subtitle, actions } = useCurrentPageTitle();
   const displayName = user?.name?.trim() || "Admin";
   const firstName = displayName.split(" ")[0] || "Admin";
 
@@ -36,29 +36,34 @@ export const TopBar = memo(function TopBar() {
         </Text>
       </Stack>
 
-      {/* Right: search + bell + user */}
+      {/* Right: page actions (or search) + bell + user */}
       <Row gap={3} align="center">
-        {/* Search */}
-        <Row
-          gap={2}
-          align="center"
-          className={[
-            "w-[18.75rem] h-8 px-3",
-            "rounded-(--radius-sm) border border-(--color-border)",
-            "bg-(--color-bg-subtle)",
-            "transition-colors focus-within:border-(--color-brand) focus-within:bg-white",
-          ].join(" ")}
-        >
-          <Search
-            size={14}
-            className="text-(--color-text-muted) shrink-0"
-          />
-          <input
-            type="text"
-            placeholder="Search users, transactions, cards..."
-            className="flex-1 min-w-0 bg-transparent outline-none text-[0.6875rem] text-(--color-text-primary) placeholder:text-(--color-text-muted)"
-          />
-        </Row>
+        {actions ? (
+          <Row gap={2} align="center">
+            {actions}
+          </Row>
+        ) : (
+          <Row
+            gap={2}
+            align="center"
+            className={[
+              "w-[18.75rem] h-8 px-3",
+              "rounded-(--radius-sm) border border-(--color-border)",
+              "bg-(--color-bg-subtle)",
+              "transition-colors focus-within:border-(--color-brand) focus-within:bg-white",
+            ].join(" ")}
+          >
+            <Search
+              size={14}
+              className="text-(--color-text-muted) shrink-0"
+            />
+            <input
+              type="text"
+              placeholder="Search users, transactions, cards..."
+              className="flex-1 min-w-0 bg-transparent outline-none text-[0.6875rem] text-(--color-text-primary) placeholder:text-(--color-text-muted)"
+            />
+          </Row>
+        )}
 
         {/* Bell */}
         <Box className="relative">

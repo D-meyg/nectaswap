@@ -62,14 +62,20 @@ const NAV_MAIN: NavItem[] = [
     ],
   },
   { label: "Card Management", icon: CreditCard, path: "/cards" },
-  { label: "Wallets & Liquidity", icon: Wallet, path: "/wallets" },
   {
-    label: "Compliance & Risk",
+    label: "Wallets",
+    icon: Wallet,
+    children: [
+      { label: "Wallets", path: "/wallets" },
+      { label: "Liquidity Monitor", path: "/wallets/liquidity" },
+    ],
+  },
+  {
+    label: "Compliance",
     icon: ShieldCheck,
     children: [
-      { label: "Risk Overview", path: "/compliance" },
-      { label: "Flagged Users", path: "/compliance/flagged" },
       { label: "AML Reports", path: "/compliance/aml" },
+      { label: "Flagged Users", path: "/compliance/flagged" },
     ],
   },
   { label: "Rates & Fees", icon: TrendingUp, path: "/rates" },

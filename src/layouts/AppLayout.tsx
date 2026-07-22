@@ -1,4 +1,4 @@
-﻿import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 import {
   createContext,
   useCallback,
@@ -15,13 +15,17 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 interface PageTitleCtx {
   title: string;
   subtitle: string;
+  actions: ReactNode;
   setPage: (title: string, subtitle: string) => void;
+  setActions: (actions: ReactNode) => void;
 }
 
 const PageTitleContext = createContext<PageTitleCtx>({
   title: "Control Room",
   subtitle: "Real-time operational awareness and platform health",
+  actions: null,
   setPage: () => {},
+  setActions: () => {},
 });
 
 export function usePageTitle(title: string, subtitle: string) {
@@ -32,9 +36,24 @@ export function usePageTitle(title: string, subtitle: string) {
   }, [title, subtitle, setPage]);
 }
 
+/**
+ * usePageActions — call at the top of a page component to render
+ * action buttons in the TopBar (e.g. "Export Report", "Back").
+ * Pass a memoized node (useMemo) so the effect doesn't loop.
+ * Actions are cleared automatically when the page unmounts.
+ */
+export function usePageActions(actions: ReactNode) {
+  const { setActions } = useContext(PageTitleContext);
+
+  useEffect(() => {
+    setActions(actions);
+    return () => setActions(null);
+  }, [actions, setActions]);
+}
+
 export function useCurrentPageTitle() {
-  const { title, subtitle } = useContext(PageTitleContext);
-  return { title, subtitle };
+  const { title, subtitle, actions } = useContext(PageTitleContext);
+  return { title, subtitle, actions };
 }
 
 function PageTitleProvider({ children }: { children: ReactNode }) {
@@ -42,6 +61,8 @@ function PageTitleProvider({ children }: { children: ReactNode }) {
     title: "Control Room",
     subtitle: "Real-time operational awareness and platform health",
   });
+
+  const [actions, setActionsState] = useState<ReactNode>(null);
 
   const setPage = useCallback((title: string, subtitle: string) => {
     setPageTitle((current) => {
@@ -53,12 +74,18 @@ function PageTitleProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const setActions = useCallback((next: ReactNode) => {
+    setActionsState(next);
+  }, []);
+
   return (
     <PageTitleContext.Provider
       value={{
         title: pageTitle.title,
         subtitle: pageTitle.subtitle,
+        actions,
         setPage,
+        setActions,
       }}
     >
       {children}

@@ -1503,3 +1503,387 @@ export const DUMMY_REFERRED_USERS_FULL = [
     status: "Active",
   },
 ];
+
+// ═══════════════════════════════════════════════════════════
+//  WALLETS — Liquidity Monitor / Asset Detail / Wallet Detail
+// ═══════════════════════════════════════════════════════════
+
+export const DUMMY_LIQUIDITY_STATS = {
+  total_liquidity: "₦ 21.3B",
+  available_liquidity: "₦ 17.9B",
+  locked_funds: "₦ 3.4B",
+  pending_settlements: "₦ 890M",
+  reserve_ratio: "84.1%",
+  liquidity_health: "Good",
+};
+
+export interface LiquidityAsset {
+  symbol: string;
+  name: string;
+  balance: string;
+  available: string;
+  locked: string;
+  change: number;
+}
+
+export const DUMMY_LIQUIDITY_ASSETS: LiquidityAsset[] = [
+  { symbol: "BTC", name: "Bitcoin", balance: "12.45 BTC", available: "10.20 BTC", locked: "2.25 BTC", change: 2.3 },
+  { symbol: "ETH", name: "Ethereum", balance: "445.8 ETH", available: "398.2 ETH", locked: "47.6 ETH", change: 1.1 },
+  { symbol: "USDT", name: "Tether", balance: "2,450,000", available: "2,100,000", locked: "350,000", change: 0.0 },
+  { symbol: "USDC", name: "USD Coin", balance: "1,800,000", available: "1,650,000", locked: "150,000", change: 0.1 },
+  { symbol: "NGN", name: "Nigerian Naira", balance: "₦ 4,200,000,000", available: "₦ 3,800,000,000", locked: "₦ 400,000,000", change: -0.5 },
+];
+
+export interface WalletDistribution {
+  id: string;
+  name: string;
+  balance: string;
+  health: "Healthy" | "Warning" | "Critical";
+  threshold: string;
+  pct: number;
+}
+
+export const DUMMY_WALLET_DISTRIBUTION: WalletDistribution[] = [
+  { id: "hot", name: "Hot Wallet", balance: "₦ 2,400,000,000", health: "Healthy", threshold: "₦ 500,000,000", pct: 82 },
+  { id: "cold", name: "Cold Wallet", balance: "₦ 8,100,000,000", health: "Healthy", threshold: "₦ 1,000,000,000", pct: 95 },
+  { id: "settlement", name: "Settlement Wallet", balance: "₦ 890,000,000", health: "Warning", threshold: "₦ 800,000,000", pct: 52 },
+  { id: "reserve", name: "Reserve Wallet", balance: "₦ 5,200,000,000", health: "Healthy", threshold: "₦ 2,000,000,000", pct: 88 },
+];
+
+export interface SettlementQueueRow {
+  id: string;
+  user: string;
+  type: "Withdrawal" | "Deposit" | "Swap";
+  asset: string;
+  amount: string;
+  stage: "Processing" | "Confirming" | "Queued" | "Failed" | "Completed";
+  network: string;
+  created: string;
+  status: "Pending" | "Active" | "Failed" | "Completed";
+}
+
+export const DUMMY_SETTLEMENT_QUEUE: SettlementQueueRow[] = [
+  { id: "SQ-2401", user: "Chinedu Okonkwo", type: "Withdrawal", asset: "BTC", amount: "0.45 BTC", stage: "Processing", network: "Bitcoin", created: "2024-01-15 10:30", status: "Pending" },
+  { id: "SQ-2402", user: "Amara Nwosu", type: "Deposit", asset: "ETH", amount: "12.5 ETH", stage: "Confirming", network: "Ethereum", created: "2024-01-15 10:25", status: "Active" },
+  { id: "SQ-2403", user: "Tunde Bakare", type: "Swap", asset: "USDT", amount: "150,000 USDT", stage: "Queued", network: "Tron", created: "2024-01-15 10:20", status: "Pending" },
+  { id: "SQ-2404", user: "Ngozi Eze", type: "Withdrawal", asset: "NGN", amount: "₦ 5,000,000", stage: "Failed", network: "Local Bank", created: "2024-01-15 09:55", status: "Failed" },
+  { id: "SQ-2405", user: "Emeka Obi", type: "Deposit", asset: "USDC", amount: "200,000 USDC", stage: "Completed", network: "Ethereum", created: "2024-01-15 09:40", status: "Completed" },
+];
+
+export interface LiquidityAlertRow {
+  id: string;
+  title: string;
+  asset: string;
+  age: string;
+  severity: "High" | "Medium" | "Low";
+  status: "Active" | "Acknowledged" | "Resolved";
+}
+
+export const DUMMY_LIQUIDITY_ALERTS: LiquidityAlertRow[] = [
+  { id: "la1", title: "Low Settlement Wallet", asset: "NGN", age: "15 min ago", severity: "High", status: "Active" },
+  { id: "la2", title: "Reserve Threshold Warning", asset: "BTC", age: "1h ago", severity: "Medium", status: "Acknowledged" },
+  { id: "la3", title: "Large Pending Withdrawal", asset: "ETH", age: "2h ago", severity: "High", status: "Active" },
+  { id: "la4", title: "Network Congestion", asset: "ETH", age: "3h ago", severity: "Low", status: "Resolved" },
+  { id: "la5", title: "Settlement Delay Detected", asset: "USDT", age: "5h ago", severity: "Medium", status: "Active" },
+];
+
+// Liquidity Trends — relative bar heights (%), keyed by range
+export const DUMMY_LIQUIDITY_TRENDS: Record<"7D" | "30D" | "90D", number[]> = {
+  "7D": [52, 61, 58, 70, 66, 78, 96],
+  "30D": [40, 44, 47, 45, 52, 55, 53, 58, 60, 57, 63, 66, 62, 68, 70, 67, 72, 75, 71, 76, 74, 78, 80, 77, 82, 85, 81, 86, 88, 100],
+  "90D": [30, 35, 33, 38, 42, 40, 45, 48, 44, 50, 55, 52, 58, 60, 57, 63, 66, 70, 68, 74, 78, 82, 80, 86, 90, 88, 92, 95, 93, 100],
+};
+
+// ── Asset Detail (Wallets > Assets > BTC) ─────────────────
+export interface AssetDetailData {
+  symbol: string;
+  name: string;
+  decimals: number;
+  total_balance: string;
+  available: string;
+  locked: string;
+  change_24h: number;
+  total_value_ngn: string;
+  transactions: Array<{ id: string; type: "Deposit" | "Withdrawal"; amount: string; date: string; status: string }>;
+  distribution: Array<{ name: string; amount: string }>;
+}
+
+export const DUMMY_ASSET_DETAILS: Record<string, AssetDetailData> = {
+  BTC: {
+    symbol: "BTC",
+    name: "Bitcoin",
+    decimals: 8,
+    total_balance: "12.45 BTC",
+    available: "10.20 BTC",
+    locked: "2.25 BTC",
+    change_24h: 2.3,
+    total_value_ngn: "₦ 8,234,000,000",
+    transactions: [
+      { id: "TX-BTC-001", type: "Deposit", amount: "+0.45 BTC", date: "2024-01-15", status: "Completed" },
+      { id: "TX-BTC-002", type: "Withdrawal", amount: "-0.12 BTC", date: "2024-01-14", status: "Completed" },
+    ],
+    distribution: [
+      { name: "Hot Wallet", amount: "4.5 BTC" },
+      { name: "Cold Wallet", amount: "7.95 BTC" },
+    ],
+  },
+  ETH: {
+    symbol: "ETH",
+    name: "Ethereum",
+    decimals: 18,
+    total_balance: "445.8 ETH",
+    available: "398.2 ETH",
+    locked: "47.6 ETH",
+    change_24h: 1.1,
+    total_value_ngn: "₦ 3,120,000,000",
+    transactions: [
+      { id: "TX-ETH-001", type: "Deposit", amount: "+12.5 ETH", date: "2024-01-15", status: "Completed" },
+      { id: "TX-ETH-002", type: "Withdrawal", amount: "-4.0 ETH", date: "2024-01-13", status: "Completed" },
+    ],
+    distribution: [
+      { name: "Hot Wallet", amount: "120 ETH" },
+      { name: "Cold Wallet", amount: "325.8 ETH" },
+    ],
+  },
+};
+
+// ── Wallet Detail (Wallets > Hot Wallet) ──────────────────
+export interface WalletDetailData {
+  id: string;
+  name: string;
+  type: string;
+  health: "Healthy" | "Warning" | "Critical";
+  balance: string;
+  min_threshold: string;
+  address: string;
+  holdings: Array<{ symbol: string; amount: string; value: string }>;
+  settlements: Array<{ id: string; amount: string; date: string; status: "Pending" | "Confirming" | "Completed" }>;
+}
+
+export const DUMMY_WALLET_DETAILS: Record<string, WalletDetailData> = {
+  hot: {
+    id: "hot",
+    name: "Hot Wallet",
+    type: "Custodial Hot",
+    health: "Healthy",
+    balance: "₦ 2,400,000,000",
+    min_threshold: "₦ 500,000,000",
+    address: "0x1a2b3c4d5e6f7890abcdef1234567890abcdef12",
+    holdings: [
+      { symbol: "BTC", amount: "4.5 BTC", value: "₦ 2,980,000,000" },
+      { symbol: "ETH", amount: "120 ETH", value: "₦ 565,200,000" },
+      { symbol: "USDT", amount: "1,250,000", value: "₦ 2,000,000,000" },
+    ],
+    settlements: [
+      { id: "SQ-2401", amount: "-0.45 BTC", date: "2024-01-15", status: "Pending" },
+      { id: "SQ-2402", amount: "+12.5 ETH", date: "2024-01-15", status: "Confirming" },
+    ],
+  },
+  cold: {
+    id: "cold",
+    name: "Cold Wallet",
+    type: "Custodial Cold",
+    health: "Healthy",
+    balance: "₦ 8,100,000,000",
+    min_threshold: "₦ 1,000,000,000",
+    address: "0x9f8e7d6c5b4a3210fedcba0987654321fedcba09",
+    holdings: [
+      { symbol: "BTC", amount: "7.95 BTC", value: "₦ 5,254,000,000" },
+      { symbol: "ETH", amount: "325.8 ETH", value: "₦ 1,534,000,000" },
+      { symbol: "USDT", amount: "820,000", value: "₦ 1,312,000,000" },
+    ],
+    settlements: [
+      { id: "SQ-2390", amount: "+2.0 BTC", date: "2024-01-14", status: "Completed" },
+    ],
+  },
+};
+
+// ═══════════════════════════════════════════════════════════
+//  COMPLIANCE — AML Reports / AML Case / Flagged Users
+// ═══════════════════════════════════════════════════════════
+
+export interface AmlStat {
+  label: string;
+  value: string;
+  delta: string;
+  direction: "up" | "down";
+  tone: "danger" | "success" | "muted";
+}
+
+export const DUMMY_AML_STATS: AmlStat[] = [
+  { label: "Open AML Cases", value: "263", delta: "12% vs last week", direction: "up", tone: "danger" },
+  { label: "Flagged Users", value: "1,847", delta: "5.2% vs last month", direction: "up", tone: "danger" },
+  { label: "Flagged Transactions", value: "4,512", delta: "8.1% vs yesterday", direction: "up", tone: "danger" },
+  { label: "High Risk Accounts", value: "340", delta: "3.4% vs last week", direction: "down", tone: "success" },
+  { label: "Cases Closed Today", value: "27", delta: "6 more today", direction: "down", tone: "muted" },
+  { label: "Pending Reviews", value: "89", delta: "14 awaiting action", direction: "up", tone: "muted" },
+];
+
+export interface RiskDistributionRow {
+  label: string;
+  count: number;
+  pct: number;
+  color: string;
+}
+
+export const DUMMY_RISK_DISTRIBUTION: RiskDistributionRow[] = [
+  { label: "Low Risk", count: 142, pct: 35, color: "var(--color-success-mid)" },
+  { label: "Medium Risk", count: 89, pct: 22, color: "var(--color-warning)" },
+  { label: "High Risk", count: 134, pct: 33, color: "var(--color-danger)" },
+  { label: "Critical", count: 40, pct: 10, color: "var(--color-brand)" },
+];
+
+export const DUMMY_RISK_TOTAL_CASES = 405;
+
+export interface SuspiciousActivity {
+  id: string;
+  title: string;
+  user: string;
+  age: string;
+  severity: "High" | "Medium" | "Low" | "Critical";
+}
+
+export const DUMMY_SUSPICIOUS_ACTIVITY: SuspiciousActivity[] = [
+  { id: "sa1", title: "Large Deposit", user: "Chinedu Okonkwo", age: "10 min ago", severity: "High" },
+  { id: "sa2", title: "Rapid Withdrawals", user: "Emeka Obi", age: "22 min ago", severity: "High" },
+  { id: "sa3", title: "Velocity Rule Trigger", user: "Amara Nwosu", age: "45 min ago", severity: "Critical" },
+  { id: "sa4", title: "Sanction Match", user: "Ngozi Eze", age: "1h 12 min ago", severity: "Critical" },
+  { id: "sa5", title: "Structuring Detection", user: "Tunde Bakare", age: "2h ago", severity: "Medium" },
+  { id: "sa6", title: "Multiple Failed Attempts", user: "Fatima Aliyu", age: "5h ago", severity: "Low" },
+];
+
+export interface AmlAlertRow {
+  id: string;
+  user_name: string;
+  user_email: string;
+  trigger: string;
+  risk: "High" | "Critical" | "Medium" | "Low";
+  amount: string;
+  date: string;
+  status: "Open" | "Escalated" | "Under Review" | "Closed";
+  officer: string;
+}
+
+export const DUMMY_AML_ALERTS: AmlAlertRow[] = [
+  { id: "AML-001", user_name: "Chinedu Okonkwo", user_email: "chinedu.o@email.com", trigger: "Large Cash Deposit", risk: "High", amount: "₦ 4,500,000", date: "2024-01-15 10:30", status: "Open", officer: "Jane Adeniyi" },
+  { id: "AML-002", user_name: "Amara Nwosu", user_email: "amara.n@email.com", trigger: "Velocity Rule", risk: "Critical", amount: "₦ 12,000,000", date: "2024-01-15 09:15", status: "Escalated", officer: "Kola Benson" },
+  { id: "AML-003", user_name: "Tunde Bakare", user_email: "tunde.b@email.com", trigger: "Structuring", risk: "Medium", amount: "₦ 990,000", date: "2024-01-14 16:45", status: "Under Review", officer: "Jane Adeniyi" },
+  { id: "AML-004", user_name: "Ngozi Eze", user_email: "ngozi.e@email.com", trigger: "Sanction Match", risk: "Critical", amount: "₦ 2,200,000", date: "2024-01-14 14:20", status: "Escalated", officer: "Kola Benson" },
+  { id: "AML-005", user_name: "Emeka Obi", user_email: "emeka.o@email.com", trigger: "Rapid Withdrawal", risk: "High", amount: "₦ 6,750,000", date: "2024-01-14 11:05", status: "Open", officer: "Jane Adeniyi" },
+  { id: "AML-006", user_name: "Fatima Aliyu", user_email: "fatima.a@email.com", trigger: "Multiple Failed Attempts", risk: "Low", amount: "₦ 340,000", date: "2024-01-13 18:30", status: "Under Review", officer: "Unassigned" },
+  { id: "AML-007", user_name: "Oluwatobi Adeyemi", user_email: "tobi.a@email.com", trigger: "International Transfer", risk: "High", amount: "₦ 5,000,000", date: "2024-01-13 12:10", status: "Open", officer: "Kola Benson" },
+  { id: "AML-008", user_name: "Blessing Ojo", user_email: "blessing.o@email.com", trigger: "Multiple Deposits", risk: "Medium", amount: "₦ 1,450,000", date: "2024-01-12 15:40", status: "Closed", officer: "Jane Adeniyi" },
+];
+
+export interface AmlCaseDetail {
+  id: string;
+  trigger: string;
+  date: string;
+  summary: string;
+  risk: "High" | "Critical" | "Medium" | "Low";
+  status: "Open" | "Escalated" | "Under Review" | "Closed";
+  amount: string;
+  officer: string;
+  linked_user: { name: string; email: string };
+  linked_transactions: Array<{ id: string; description: string; amount: string; date: string; status: string }>;
+  audit_log: Array<{ title: string; actor: string; timestamp: string }>;
+}
+
+export const DUMMY_AML_CASES: Record<string, AmlCaseDetail> = {
+  "AML-002": {
+    id: "AML-002",
+    trigger: "Velocity Rule",
+    date: "2024-01-15 09:15",
+    summary: "Transaction velocity exceeds allowed rate. 47 transactions in 24 hours across multiple accounts.",
+    risk: "Critical",
+    status: "Escalated",
+    amount: "₦ 12,000,000",
+    officer: "Kola Benson",
+    linked_user: { name: "Amara Nwosu", email: "amara.n@email.com" },
+    linked_transactions: [
+      { id: "TX-9001", description: "Multiple Transfers", amount: "-₦ 5,000,000", date: "2024-01-15", status: "Flagged" },
+      { id: "TX-9000", description: "Cash Deposit", amount: "+₦ 12,000,000", date: "2024-01-15", status: "Flagged" },
+    ],
+    audit_log: [
+      { title: "Case created", actor: "System", timestamp: "2024-01-15 09:15" },
+      { title: "Escalated to senior review", actor: "Kola Benson", timestamp: "2024-01-15 09:30" },
+    ],
+  },
+};
+
+export interface FlaggedUserRow {
+  id: string;
+  name: string;
+  email: string;
+  risk_score: number;
+  flags: number;
+  kyc_level: 1 | 2 | 3;
+  total_volume: string;
+  last_trigger: string;
+  status: "Under Review" | "Frozen" | "Active" | "Flagged";
+  officer: string;
+}
+
+export const DUMMY_FLAGGED_USER_STATS = {
+  total: "1,847",
+  critical: "40",
+  frozen: "127",
+  pending: "89",
+};
+
+export const DUMMY_FLAGGED_USERS_V2: FlaggedUserRow[] = [
+  { id: "5023", name: "Chinedu Okonkwo", email: "chinedu.o@email.com", risk_score: 87, flags: 5, kyc_level: 2, total_volume: "₦ 24,300,000", last_trigger: "Large Cash Deposit", status: "Under Review", officer: "Jane Adeniyi" },
+  { id: "7834", name: "Amara Nwosu", email: "amara.n@email.com", risk_score: 96, flags: 8, kyc_level: 3, total_volume: "₦ 51,000,000", last_trigger: "Velocity Rule", status: "Frozen", officer: "Kola Benson" },
+  { id: "3410", name: "Tunde Bakare", email: "tunde.b@email.com", risk_score: 62, flags: 3, kyc_level: 1, total_volume: "₦ 8,900,000", last_trigger: "Structuring", status: "Active", officer: "Unassigned" },
+  { id: "9921", name: "Ngozi Eze", email: "ngozi.e@email.com", risk_score: 95, flags: 12, kyc_level: 1, total_volume: "₦ 33,200,000", last_trigger: "Sanction Match", status: "Frozen", officer: "Kola Benson" },
+  { id: "8923", name: "Emeka Obi", email: "emeka.o@email.com", risk_score: 74, flags: 4, kyc_level: 2, total_volume: "₦ 18,750,000", last_trigger: "Rapid Withdrawal", status: "Under Review", officer: "Jane Adeniyi" },
+  { id: "6120", name: "Fatima Aliyu", email: "fatima.a@email.com", risk_score: 35, flags: 2, kyc_level: 2, total_volume: "₦ 4,400,000", last_trigger: "Failed Auth", status: "Flagged", officer: "Jane Adeniyi" },
+  { id: "6612", name: "Oluwatobi Adeyemi", email: "tobi.a@email.com", risk_score: 68, flags: 4, kyc_level: 3, total_volume: "₦ 27,600,000", last_trigger: "International Transfer", status: "Under Review", officer: "Kola Benson" },
+  { id: "3301", name: "Blessing Ojo", email: "blessing.o@email.com", risk_score: 41, flags: 2, kyc_level: 1, total_volume: "₦ 6,150,000", last_trigger: "Multiple Deposits", status: "Active", officer: "Unassigned" },
+];
+
+export interface FlaggedUserTxn {
+  description: string;
+  amount: string;
+  date: string;
+  status: "Flagged" | "Completed";
+}
+
+export interface FlaggedUserAlert {
+  id: string;
+  title: string;
+  date: string;
+  severity: "High" | "Medium" | "Low";
+}
+
+export interface FlaggedUserDetail {
+  transactions: FlaggedUserTxn[];
+  alerts: FlaggedUserAlert[];
+}
+
+// Per-user drawer data; falls back to DEFAULT for users without a specific entry
+export const DUMMY_FLAGGED_USER_DETAILS: Record<string, FlaggedUserDetail> = {
+  "5023": {
+    transactions: [
+      { description: "Cash Deposit", amount: "+₦ 4,500,000", date: "2024-01-15", status: "Flagged" },
+      { description: "Transfer Out", amount: "-₦ 2,200,000", date: "2024-01-14", status: "Completed" },
+      { description: "Cash Deposit", amount: "+₦ 3,100,000", date: "2024-01-12", status: "Completed" },
+      { description: "International Transfer", amount: "-₦ 5,000,000", date: "2024-01-10", status: "Flagged" },
+    ],
+    alerts: [
+      { id: "AML-001", title: "Large Cash Deposit", date: "2024-01-15", severity: "High" },
+      { id: "AML-007", title: "International Transfer", date: "2024-01-10", severity: "High" },
+      { id: "AML-003", title: "Multiple Deposits", date: "2024-01-08", severity: "Medium" },
+    ],
+  },
+};
+
+export const DUMMY_FLAGGED_USER_DETAIL_DEFAULT: FlaggedUserDetail = {
+  transactions: [
+    { description: "Cash Deposit", amount: "+₦ 2,400,000", date: "2024-01-14", status: "Flagged" },
+    { description: "Transfer Out", amount: "-₦ 1,100,000", date: "2024-01-12", status: "Completed" },
+  ],
+  alerts: [
+    { id: "AML-010", title: "Suspicious Activity", date: "2024-01-13", severity: "Medium" },
+  ],
+};
