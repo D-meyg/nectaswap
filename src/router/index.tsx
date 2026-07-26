@@ -16,6 +16,13 @@ const TransactionDetailPage = lazy(
 
 const CardManagementPage = lazy(() => import("@/pages/CardManagementPage"));
 const CardDetailPage = lazy(() => import("@/pages/CardDetailPage"));
+const CardRequestsPage = lazy(() => import("@/pages/CardRequestsPage"));
+const CardRequestDetailPage = lazy(
+  () => import("@/pages/CardRequestDetailPage"),
+);
+const CardLimitsControlsPage = lazy(
+  () => import("@/pages/CardLimitsControlsPage"),
+);
 const WalletsPage = lazy(() => import("@/pages/WalletsPage"));
 const CompliancePage = lazy(() => import("@/pages/CompliancePage"));
 const RatesPage = lazy(() => import("@/pages/RatesPage"));
@@ -46,6 +53,12 @@ export const router = createBrowserRouter([
           { path: "/transactions/failed", element: <TransactionsPage /> },
           { path: "/transactions/:id", element: <TransactionDetailPage /> },
           { path: "/cards", element: <CardManagementPage /> },
+          { path: "/cards/requests", element: <CardRequestsPage /> },
+          {
+            path: "/cards/requests/:id",
+            element: <CardRequestDetailPage />,
+          },
+          { path: "/cards/limits", element: <CardLimitsControlsPage /> },
           { path: "/cards/:id", element: <CardDetailPage /> },
           { path: "/wallets", element: <WalletsPage /> },
           { path: "/compliance", element: <CompliancePage /> },

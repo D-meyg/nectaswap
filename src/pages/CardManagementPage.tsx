@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { usePageTitle } from "@/layouts/AppLayout";
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
@@ -79,7 +79,7 @@ function fmt(value: unknown) {
 
 export default function CardManagementPage() {
   usePageTitle(
-    "Card Management",
+    "Active Cards",
     "Virtual and physical card issuance and management",
   );
 
