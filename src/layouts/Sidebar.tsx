@@ -61,7 +61,15 @@ const NAV_MAIN: NavItem[] = [
       { label: "Failed Transactions", path: "/transactions/failed" },
     ],
   },
-  { label: "Card Management", icon: CreditCard, path: "/cards" },
+  {
+    label: "Cards",
+    icon: CreditCard,
+    children: [
+      { label: "Card Requests", path: "/cards/requests" },
+      { label: "Active Cards", path: "/cards" },
+      { label: "Limits & Controls", path: "/cards/limits" },
+    ],
+  },
   {
     label: "Wallets",
     icon: Wallet,
