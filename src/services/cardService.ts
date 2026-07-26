@@ -65,17 +65,17 @@ export const cardService = {
   },
 
   resetPin: async (id: string) => {
-    const { data } = await client.post(ENDPOINTS.CARDS.RESET_PIN(id));
+    const { data } = await client.post(ENDPOINTS.CARDS.RESET_PIN(id), { card_id: id });
     return data;
   },
 
   replaceCard: async (id: string) => {
-    const { data } = await client.post(ENDPOINTS.CARDS.REPLACE(id));
+    const { data } = await client.post(ENDPOINTS.CARDS.REPLACE(id), { card_id: id });
     return data;
   },
 
   terminateCard: async (id: string) => {
-    const { data } = await client.post(ENDPOINTS.CARDS.TERMINATE(id));
+    const { data } = await client.post(ENDPOINTS.CARDS.TERMINATE(id), { card_id: id });
     return data;
   },
 
