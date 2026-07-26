@@ -16,14 +16,76 @@ import {
 } from "@/components/compliance/CompliancePills";
 import { FlaggedUserDrawer } from "@/components/compliance/FlaggedUserDrawer";
 import { cn } from "@/lib/utils";
-import {
-  DUMMY_FLAGGED_USERS_V2,
-  DUMMY_FLAGGED_USER_STATS,
-  type FlaggedUserRow,
-} from "@/lib/dummyData";
+import { useFlaggedUsers, useAmlStats } from "@/hooks/queries/useCompliance";
 import type { ColumnDef } from "@tanstack/react-table";
 
 const PAGE_SIZE = 6;
+
+export interface FlaggedUserRow {
+  id: string;
+  name: string;
+  email: string;
+  risk_score: number;
+  flags: number;
+  kyc_level: 1 | 2 | 3;
+  total_volume: string;
+  last_trigger: string;
+  status: "Under Review" | "Frozen" | "Active" | "Flagged";
+  officer: string;
+}
+
+// ── Defensive helpers (flagged-users response shape unconfirmed) ──
+function num(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function str(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function get(obj: Record<string, unknown>, keys: string[]): unknown {
+  for (const k of keys) if (obj[k] !== undefined && obj[k] !== null) return obj[k];
+  return undefined;
+}
+
+function parseKyc(value: unknown): 1 | 2 | 3 {
+  const m = String(value ?? "").match(/[123]/);
+  const n = m ? Number(m[0]) : 1;
+  return (n === 2 ? 2 : n === 3 ? 3 : 1) as 1 | 2 | 3;
+}
+
+function normalizeStatus(value: unknown): FlaggedUserRow["status"] {
+  const v = String(value ?? "").toLowerCase();
+  if (v.includes("frozen") || v.includes("freez")) return "Frozen";
+  if (v.includes("review")) return "Under Review";
+  if (v.includes("active")) return "Active";
+  return "Flagged";
+}
+
+function formatVolume(value: unknown): string {
+  if (typeof value === "number") return `₦ ${value.toLocaleString()}`;
+  const s = str(value, "");
+  if (!s) return "—";
+  return /^[₦$]/.test(s) ? s : `₦ ${s}`;
+}
+
+function normalizeUser(raw: unknown, index: number): FlaggedUserRow {
+  const u = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const nested = u.user && typeof u.user === "object" ? (u.user as Record<string, unknown>) : {};
+  return {
+    id: str(get(u, ["id", "user_id", "flag_id"]) ?? get(nested, ["id"]), `fu-${index}`),
+    name: str(get(u, ["name", "full_name", "user_name"]) ?? get(nested, ["name", "full_name"]), "Unknown"),
+    email: str(get(u, ["email", "user_email"]) ?? get(nested, ["email"]), "—"),
+    risk_score: num(get(u, ["risk_score", "riskScore", "score"])),
+    flags: num(get(u, ["flags", "flag_count", "number_of_flags", "num_flags"])),
+    kyc_level: parseKyc(get(u, ["kyc_level", "kyc_tier", "kyc", "kyc_status"]) ?? get(nested, ["kyc_level", "kyc_tier"])),
+    total_volume: formatVolume(get(u, ["total_volume", "volume", "total_volume_ngn"])),
+    last_trigger: str(get(u, ["last_trigger", "trigger", "reason", "last_reason"]), "—"),
+    status: normalizeStatus(get(u, ["status", "flag_status", "review_status"])),
+    officer: str(get(u, ["officer", "assigned_officer", "assigned_admin"]), "Unassigned"),
+  };
+}
 
 function statusTone(status: FlaggedUserRow["status"]) {
   return status === "Under Review"
@@ -45,6 +107,9 @@ export default function FlaggedUsersPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<FlaggedUserRow | null>(null);
 
+  const { data: rawUsers = [], isLoading } = useFlaggedUsers();
+  const { data: rawStats } = useAmlStats();
+
   usePageActions(
     useMemo(
       () => (
@@ -57,14 +122,35 @@ export default function FlaggedUsersPage() {
     ),
   );
 
+  const users = useMemo(
+    () => (Array.isArray(rawUsers) ? rawUsers.map(normalizeUser) : []),
+    [rawUsers],
+  );
+
+  // Stats: global counts from aml/stats where available; Critical / Frozen
+  // derived from the loaded list (no dedicated flagged-users stats endpoint yet).
+  const stats = useMemo(() => {
+    const s = rawStats && typeof rawStats === "object" ? (rawStats as Record<string, unknown>) : {};
+    const total = num(s.flagged_users);
+    const pending = num(s.pending_reviews);
+    const critical = users.filter((u) => u.risk_score >= 90).length;
+    const frozen = users.filter((u) => u.status === "Frozen").length;
+    return {
+      total: total || users.length,
+      critical,
+      frozen,
+      pending,
+    };
+  }, [rawStats, users]);
+
   const filtered = useMemo(
     () =>
-      DUMMY_FLAGGED_USERS_V2.filter((user) => {
+      users.filter((user) => {
         if (!search) return true;
         const q = search.toLowerCase();
         return user.name.toLowerCase().includes(q) || user.email.toLowerCase().includes(q);
       }),
-    [search],
+    [users, search],
   );
 
   const pageRows = useMemo(
@@ -136,10 +222,10 @@ export default function FlaggedUsersPage() {
     <Box p={6} className="space-y-5">
       {/* 4 stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total Flagged Users" value={DUMMY_FLAGGED_USER_STATS.total} valueClassName="text-(--color-danger)" />
-        <StatCard label="Critical Users" value={DUMMY_FLAGGED_USER_STATS.critical} valueClassName="text-(--color-brand)" />
-        <StatCard label="Accounts Frozen" value={DUMMY_FLAGGED_USER_STATS.frozen} valueClassName="text-(--color-danger)" />
-        <StatCard label="Pending Reviews" value={DUMMY_FLAGGED_USER_STATS.pending} valueClassName="text-(--color-warning-text)" />
+        <StatCard label="Total Flagged Users" value={stats.total.toLocaleString()} valueClassName="text-(--color-danger)" />
+        <StatCard label="Critical Users" value={stats.critical.toLocaleString()} valueClassName="text-(--color-brand)" />
+        <StatCard label="Accounts Frozen" value={stats.frozen.toLocaleString()} valueClassName="text-(--color-danger)" />
+        <StatCard label="Pending Reviews" value={stats.pending.toLocaleString()} valueClassName="text-(--color-warning-text)" />
       </div>
 
       {/* Table */}
@@ -168,8 +254,9 @@ export default function FlaggedUsersPage() {
           onPageChange={setPage}
           numberedPagination
           selectable
+          loading={isLoading}
           emptyTitle="No flagged users"
-          emptyMessage="Try adjusting your search"
+          emptyMessage="No users are currently flagged."
         />
       </Card>
 

@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   FolderOpen,
   Users,
@@ -9,7 +8,9 @@ import {
   Clock,
   Upload,
   Calendar,
+  ShieldAlert,
 } from "lucide-react";
+import type { ReactNode } from "react";
 
 import { usePageActions, usePageTitle } from "@/layouts/AppLayout";
 import { Card } from "@/components/ui/Card";
@@ -20,54 +21,116 @@ import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
 import { FilterButton } from "@/components/ui/FilterButton";
 import { SearchInput } from "@/components/forms/SearchInput";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { DataTable } from "@/components/tables/DataTable";
-import { RiskPill, CaseStatusPill } from "@/components/compliance/CompliancePills";
-import { cn } from "@/lib/utils";
-import {
-  DUMMY_AML_STATS,
-  DUMMY_RISK_DISTRIBUTION,
-  DUMMY_RISK_TOTAL_CASES,
-  DUMMY_SUSPICIOUS_ACTIVITY,
-  DUMMY_AML_ALERTS,
-  type AmlAlertRow,
-  type AmlStat,
-  type SuspiciousActivity,
-} from "@/lib/dummyData";
+import { RiskPill, CaseStatusPill, type RiskLevel } from "@/components/compliance/CompliancePills";
+import { useAmlStats, useAmlRecentActivity } from "@/hooks/queries/useCompliance";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { ReactNode } from "react";
 
-const STAT_ICONS: ReactNode[] = [
-  <FolderOpen size={15} key="a" />,
-  <Users size={15} key="b" />,
-  <Receipt size={15} key="c" />,
-  <AlertCircle size={15} key="d" />,
-  <CheckCircle2 size={15} key="e" />,
-  <Clock size={15} key="f" />,
-];
+// ── Helpers ───────────────────────────────────────────────
+function num(value: unknown): number {
+  const n = typeof value === "number" ? value : Number(value ?? 0);
+  return Number.isFinite(n) ? n : 0;
+}
 
-function AmlStatCard({ stat, icon }: { stat: AmlStat; icon: ReactNode }) {
-  const deltaColor =
-    stat.tone === "danger"
-      ? "text-(--color-danger)"
-      : stat.tone === "success"
-        ? "text-(--color-success-mid)"
-        : "text-(--color-text-muted)";
+function str(value: unknown, fallback = ""): string {
+  return typeof value === "string" && value.trim() ? value : fallback;
+}
+
+function normSeverity(value: unknown): RiskLevel {
+  const v = String(value ?? "").toLowerCase();
+  if (v.includes("crit")) return "Critical";
+  if (v.includes("high")) return "High";
+  if (v.includes("med")) return "Medium";
+  return "Low";
+}
+
+// ── Stats shape (from /compliance/aml/stats) ──────────────
+interface AmlStats {
+  open_cases: number;
+  flagged_users: number;
+  flagged_transactions: number;
+  high_risk_accounts: number;
+  cases_closed_today: number;
+  pending_reviews: number;
+  risk_distribution: { low: number; medium: number; high: number; critical: number; total: number };
+}
+
+function normalizeStats(raw: unknown): AmlStats {
+  const s = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const rd = s.risk_distribution && typeof s.risk_distribution === "object"
+    ? (s.risk_distribution as Record<string, unknown>)
+    : {};
+  return {
+    open_cases: num(s.open_cases),
+    flagged_users: num(s.flagged_users),
+    flagged_transactions: num(s.flagged_transactions),
+    high_risk_accounts: num(s.high_risk_accounts),
+    cases_closed_today: num(s.cases_closed_today),
+    pending_reviews: num(s.pending_reviews),
+    risk_distribution: {
+      low: num(rd.low),
+      medium: num(rd.medium),
+      high: num(rd.high),
+      critical: num(rd.critical),
+      total: num(rd.total),
+    },
+  };
+}
+
+// ── Recent activity (shape unconfirmed — defensive) ───────
+interface SuspiciousItem {
+  id: string;
+  title: string;
+  user: string;
+  age: string;
+  severity: RiskLevel;
+}
+
+function normalizeActivity(raw: unknown, index: number): SuspiciousItem {
+  const a = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const user = a.user && typeof a.user === "object"
+    ? str((a.user as Record<string, unknown>).name ?? (a.user as Record<string, unknown>).full_name)
+    : str(a.user ?? a.user_name ?? a.username);
+  return {
+    id: str(a.id ?? a.activity_id, `act-${index}`),
+    title: str(a.title ?? a.type ?? a.activity_type ?? a.trigger ?? a.name, "Suspicious Activity"),
+    user: user || "—",
+    age: str(a.age ?? a.time_ago ?? a.created_at ?? a.timestamp ?? a.date, ""),
+    severity: normSeverity(a.severity ?? a.risk ?? a.risk_level),
+  };
+}
+
+// ── Stat card (no fabricated deltas — API doesn't return them) ──
+function AmlStatCard({
+  label,
+  value,
+  icon,
+  loading,
+}: {
+  label: string;
+  value: number;
+  icon: ReactNode;
+  loading: boolean;
+}) {
   return (
     <Box className="rounded-lg border border-(--color-border) bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.03)]">
       <Row justify="between" align="center" className="mb-2.5">
-        <Text variant="caption" color="secondary" weight="medium" className="text-[0.75rem]">{stat.label}</Text>
+        <Text variant="caption" color="secondary" weight="medium" className="text-[0.75rem]">{label}</Text>
         <span className="flex h-7 w-7 items-center justify-center rounded-md bg-(--color-bg-subtle) text-(--color-text-secondary)">{icon}</span>
       </Row>
-      <Text variant="display" color="primary" weight="semibold" as="p" className="text-[1.625rem] leading-8">{stat.value}</Text>
-      <Row gap={1} align="center" className="mt-1.5">
-        <span className={cn("text-[0.625rem]", deltaColor)}>{stat.direction === "up" ? "▲" : "▼"}</span>
-        <Text variant="micro" weight="semibold" className={cn("text-[0.625rem]", deltaColor)}>{stat.delta}</Text>
-      </Row>
+      {loading ? (
+        <div className="h-8 w-16 animate-pulse rounded bg-(--color-border)" />
+      ) : (
+        <Text variant="display" color="primary" weight="semibold" as="p" className="text-[1.625rem] leading-8">
+          {value.toLocaleString()}
+        </Text>
+      )}
     </Box>
   );
 }
 
-function SuspiciousCard({ item }: { item: SuspiciousActivity }) {
+function SuspiciousCard({ item }: { item: SuspiciousItem }) {
   return (
     <Box className="rounded-lg border border-(--color-border) px-4 py-3">
       <Row justify="between" align="start" className="mb-1">
@@ -85,14 +148,28 @@ function SuspiciousCard({ item }: { item: SuspiciousActivity }) {
   );
 }
 
+// Recent AML Alerts table row (no confirmed endpoint yet — renders empty)
+interface AmlAlertRow {
+  id: string;
+  user_name: string;
+  user_email: string;
+  trigger: string;
+  risk: RiskLevel;
+  amount: string;
+  date: string;
+  status: "Open" | "Escalated" | "Under Review" | "Closed";
+  officer: string;
+}
+
 export default function AMLReportsPage() {
   usePageTitle(
     "AML Reports",
     "Monitor suspicious activities, AML investigations, and regulatory compliance",
   );
 
-  const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const { data: rawStats, isLoading: statsLoading } = useAmlStats();
+  const { data: rawActivity = [], isLoading: activityLoading } = useAmlRecentActivity(4);
 
   usePageActions(
     useMemo(
@@ -106,21 +183,37 @@ export default function AMLReportsPage() {
     ),
   );
 
-  const filtered = useMemo(
-    () =>
-      DUMMY_AML_ALERTS.filter((alert) => {
-        if (!search) return true;
-        const q = search.toLowerCase();
-        return (
-          alert.id.toLowerCase().includes(q) ||
-          alert.user_name.toLowerCase().includes(q) ||
-          alert.user_email.toLowerCase().includes(q)
-        );
-      }),
-    [search],
+  const stats = useMemo(() => normalizeStats(rawStats), [rawStats]);
+
+  const statCards = useMemo(
+    () => [
+      { label: "Open AML Cases", value: stats.open_cases, icon: <FolderOpen size={15} /> },
+      { label: "Flagged Users", value: stats.flagged_users, icon: <Users size={15} /> },
+      { label: "Flagged Transactions", value: stats.flagged_transactions, icon: <Receipt size={15} /> },
+      { label: "High Risk Accounts", value: stats.high_risk_accounts, icon: <AlertCircle size={15} /> },
+      { label: "Cases Closed Today", value: stats.cases_closed_today, icon: <CheckCircle2 size={15} /> },
+      { label: "Pending Reviews", value: stats.pending_reviews, icon: <Clock size={15} /> },
+    ],
+    [stats],
   );
 
-  const columns = useMemo<ColumnDef<AmlAlertRow, unknown>[]>(
+  const rd = stats.risk_distribution;
+  const riskRows = useMemo(
+    () => [
+      { label: "Low Risk", count: rd.low, color: "var(--color-success-mid)" },
+      { label: "Medium Risk", count: rd.medium, color: "var(--color-warning)" },
+      { label: "High Risk", count: rd.high, color: "var(--color-danger)" },
+      { label: "Critical", count: rd.critical, color: "var(--color-brand)" },
+    ],
+    [rd],
+  );
+
+  const activity = useMemo(
+    () => (Array.isArray(rawActivity) ? rawActivity.map(normalizeActivity) : []),
+    [rawActivity],
+  );
+
+  const alertColumns = useMemo<ColumnDef<AmlAlertRow, unknown>[]>(
     () => [
       { accessorKey: "id", header: "Alert ID", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="primary" weight="semibold">{getValue<string>()}</Text>) },
       {
@@ -135,40 +228,23 @@ export default function AMLReportsPage() {
         ),
       },
       { accessorKey: "trigger", header: "Trigger", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
-      { accessorKey: "risk", header: "Risk Level", enableSorting: false, cell: ({ getValue }) => (<RiskPill level={getValue<AmlAlertRow["risk"]>()} />) },
+      { accessorKey: "risk", header: "Risk Level", enableSorting: false, cell: ({ getValue }) => (<RiskPill level={getValue<RiskLevel>()} />) },
       { accessorKey: "amount", header: "Transaction Amount", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="primary" weight="semibold">{getValue<string>()}</Text>) },
       { accessorKey: "date", header: "Date", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
       { accessorKey: "status", header: "Status", enableSorting: false, cell: ({ getValue }) => (<CaseStatusPill status={getValue<AmlAlertRow["status"]>()} />) },
-      {
-        accessorKey: "officer",
-        header: "Assigned Officer",
-        enableSorting: false,
-        cell: ({ getValue }) => {
-          const officer = getValue<string>();
-          return (<Text variant="caption" color={officer === "Unassigned" ? "muted" : "secondary"}>{officer}</Text>);
-        },
-      },
-      {
-        id: "actions",
-        header: "Actions",
-        enableSorting: false,
-        cell: ({ row }) => (
-          <Row gap={3} align="center">
-            <button type="button" onClick={() => navigate(`/compliance/aml/${row.original.id}`)} className="font-geom text-xs font-medium text-(--color-brand) transition-opacity hover:opacity-75 focus:outline-none">View</button>
-            <button type="button" className="font-geom text-xs font-medium text-(--color-text-secondary) transition-opacity hover:opacity-75 focus:outline-none">Assign</button>
-          </Row>
-        ),
-      },
+      { accessorKey: "officer", header: "Assigned Officer", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
     ],
-    [navigate],
+    [],
   );
+
+  const alertRows: AmlAlertRow[] = [];
 
   return (
     <Box p={6} className="space-y-5">
       {/* 6 stat cards */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-        {DUMMY_AML_STATS.map((stat, index) => (
-          <AmlStatCard key={stat.label} stat={stat} icon={STAT_ICONS[index]} />
+        {statCards.map((s) => (
+          <AmlStatCard key={s.label} label={s.label} value={s.value} icon={s.icon} loading={statsLoading} />
         ))}
       </div>
 
@@ -178,27 +254,30 @@ export default function AMLReportsPage() {
           <Card.Header title="Risk Distribution" className="border-b-0 px-5 pb-1 pt-4 [&_h4]:text-[0.8125rem] [&_h4]:leading-5" />
           <Card.Body className="px-5 pb-5 pt-2">
             <Stack gap={4}>
-              {DUMMY_RISK_DISTRIBUTION.map((row) => (
-                <Box key={row.label}>
-                  <Row justify="between" align="center" className="mb-1.5">
-                    <Row gap={2} align="center">
-                      <span className="h-2 w-2 rounded-full" style={{ background: row.color }} />
-                      <Text variant="caption" color="secondary" className="text-[0.75rem]">{row.label}</Text>
+              {riskRows.map((row) => {
+                const pct = rd.total > 0 ? Math.round((row.count / rd.total) * 100) : 0;
+                return (
+                  <Box key={row.label}>
+                    <Row justify="between" align="center" className="mb-1.5">
+                      <Row gap={2} align="center">
+                        <span className="h-2 w-2 rounded-full" style={{ background: row.color }} />
+                        <Text variant="caption" color="secondary" className="text-[0.75rem]">{row.label}</Text>
+                      </Row>
+                      <Row gap={2} align="center">
+                        <Text variant="caption" color="primary" weight="semibold" className="text-[0.75rem]">{row.count.toLocaleString()}</Text>
+                        <Text variant="micro" color="muted" className="text-[0.625rem]">{pct}%</Text>
+                      </Row>
                     </Row>
-                    <Row gap={2} align="center">
-                      <Text variant="caption" color="primary" weight="semibold" className="text-[0.75rem]">{row.count}</Text>
-                      <Text variant="micro" color="muted" className="text-[0.625rem]">{row.pct}%</Text>
-                    </Row>
-                  </Row>
-                  <div className="h-1 w-full overflow-hidden rounded-full bg-(--color-border)">
-                    <div className="h-full rounded-full" style={{ width: `${row.pct}%`, background: row.color }} />
-                  </div>
-                </Box>
-              ))}
+                    <div className="h-1 w-full overflow-hidden rounded-full bg-(--color-border)">
+                      <div className="h-full rounded-full" style={{ width: `${pct}%`, background: row.color }} />
+                    </div>
+                  </Box>
+                );
+              })}
             </Stack>
             <Row justify="between" align="center" className="mt-5 border-t border-(--color-border) pt-4">
               <Text variant="caption" color="secondary" weight="medium">Total Cases</Text>
-              <Text variant="subtitle" color="primary" weight="semibold">{DUMMY_RISK_TOTAL_CASES}</Text>
+              <Text variant="subtitle" color="primary" weight="semibold">{rd.total.toLocaleString()}</Text>
             </Row>
           </Card.Body>
         </Card>
@@ -206,20 +285,30 @@ export default function AMLReportsPage() {
         <Card className="lg:col-span-2 self-start">
           <Card.Header title="Recent Suspicious Activity" className="border-b-0 px-5 pb-1 pt-4 [&_h4]:text-[0.8125rem] [&_h4]:leading-5" />
           <Card.Body className="px-5 pb-5 pt-2">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {DUMMY_SUSPICIOUS_ACTIVITY.map((item) => (
-                <SuspiciousCard key={item.id} item={item} />
-              ))}
-            </div>
+            {activityLoading ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-20 animate-pulse rounded-lg bg-(--color-border)" />
+                ))}
+              </div>
+            ) : activity.length === 0 ? (
+              <EmptyState icon={ShieldAlert} title="No recent activity" description="Suspicious activity will appear here as it is detected." />
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {activity.map((item) => (
+                  <SuspiciousCard key={item.id} item={item} />
+                ))}
+              </div>
+            )}
           </Card.Body>
         </Card>
       </div>
 
-      {/* Recent AML Alerts */}
+      {/* Recent AML Alerts (endpoint pending — empty state) */}
       <Card noPadding>
         <Box px={5} py={4} className="border-b border-(--color-border)">
           <Text variant="subtitle" color="primary" weight="semibold" as="p">Recent AML Alerts</Text>
-          <Text variant="micro" color="muted" as="p">{DUMMY_AML_ALERTS.length} alerts found</Text>
+          <Text variant="micro" color="muted" as="p">{alertRows.length} alerts found</Text>
         </Box>
         <Box px={5} py={3} className="border-b border-(--color-border)">
           <Row justify="between" align="center" gap={3}>
@@ -234,10 +323,10 @@ export default function AMLReportsPage() {
           </Row>
         </Box>
         <DataTable
-          data={filtered}
-          columns={columns}
-          emptyTitle="No alerts found"
-          emptyMessage="Try adjusting your search"
+          data={alertRows}
+          columns={alertColumns}
+          emptyTitle="No AML alerts"
+          emptyMessage="Alerts will appear here once the alerts endpoint is available."
         />
       </Card>
     </Box>

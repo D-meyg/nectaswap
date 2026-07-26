@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Inbox, ShieldAlert } from "lucide-react";
 
 import { Drawer } from "@/components/ui/Drawer";
 import { Text } from "@/components/ui/Text";
@@ -7,14 +8,11 @@ import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { TabsRoot, TabsList, Tab, TabPanel } from "@/components/ui/Tabs";
 import { KycLevelPill, RiskPill } from "@/components/compliance/CompliancePills";
 import { cn } from "@/lib/utils";
-import {
-  DUMMY_FLAGGED_USER_DETAILS,
-  DUMMY_FLAGGED_USER_DETAIL_DEFAULT,
-  type FlaggedUserRow,
-} from "@/lib/dummyData";
+import type { FlaggedUserRow } from "@/pages/FlaggedUsersPage";
 
 type DrawerTab = "info" | "transactions" | "notes" | "alerts";
 
@@ -42,10 +40,6 @@ export function FlaggedUserDrawer({
 }) {
   const [tab, setTab] = useState<DrawerTab>("info");
   const [note, setNote] = useState("");
-
-  const detail = user
-    ? DUMMY_FLAGGED_USER_DETAILS[user.id] ?? DUMMY_FLAGGED_USER_DETAIL_DEFAULT
-    : DUMMY_FLAGGED_USER_DETAIL_DEFAULT;
 
   return (
     <Drawer open={Boolean(user)} onClose={onClose} size="md">
@@ -102,20 +96,7 @@ export function FlaggedUserDrawer({
                 </TabPanel>
 
                 <TabPanel value="transactions" className="pt-1">
-                  <Stack gap={0}>
-                    {detail.transactions.map((tx, index) => (
-                      <Row key={index} justify="between" align="start" className="border-b border-(--color-border) py-3 last:border-b-0">
-                        <Stack gap={0}>
-                          <Text variant="caption" color="primary" weight="semibold" className="text-[0.75rem]" as="p">{tx.description}</Text>
-                          <Text variant="micro" color="muted" className="text-[0.625rem]" as="p">{tx.date}</Text>
-                        </Stack>
-                        <Stack gap={0} className="items-end text-right">
-                          <Text variant="caption" weight="semibold" className={cn("text-[0.75rem]", tx.amount.startsWith("-") ? "text-(--color-danger)" : "text-(--color-success-mid)")} as="p">{tx.amount}</Text>
-                          <Text variant="micro" className={cn("text-[0.625rem]", tx.status === "Flagged" ? "text-(--color-danger)" : "text-(--color-text-muted)")} as="p">{tx.status}</Text>
-                        </Stack>
-                      </Row>
-                    ))}
-                  </Stack>
+                  <EmptyState icon={Inbox} title="No transactions" description="Flagged transactions for this user will appear here." />
                 </TabPanel>
 
                 <TabPanel value="notes" className="pt-1">
@@ -126,22 +107,11 @@ export function FlaggedUserDrawer({
                     rows={4}
                     className="w-full resize-none rounded-(--radius-sm) border border-(--color-border) bg-white px-3 py-2.5 font-geom text-[0.75rem] text-(--color-text-primary) outline-none transition-colors placeholder:text-(--color-text-muted) focus:border-(--color-brand)"
                   />
-                  <Button size="sm" className="mt-3 h-8 px-4 text-[0.6875rem]">Save Note</Button>
+                  <Button size="sm" className="mt-3 h-8 px-4 text-[0.6875rem]" disabled={!note.trim()}>Save Note</Button>
                 </TabPanel>
 
                 <TabPanel value="alerts" className="pt-1">
-                  <Stack gap={0}>
-                    {detail.alerts.map((alert) => (
-                      <Row key={alert.id} justify="between" align="start" className="border-b border-(--color-border) py-3 last:border-b-0">
-                        <Stack gap={0}>
-                          <Text variant="caption" color="primary" weight="semibold" className="text-[0.75rem]" as="p">{alert.id}</Text>
-                          <Text variant="micro" color="secondary" className="text-[0.6875rem]" as="p">{alert.title}</Text>
-                          <Text variant="micro" color="muted" className="text-[0.625rem]" as="p">{alert.date}</Text>
-                        </Stack>
-                        <RiskPill level={alert.severity} />
-                      </Row>
-                    ))}
-                  </Stack>
+                  <EmptyState icon={ShieldAlert} title="No alerts" description="AML alerts linked to this user will appear here." />
                 </TabPanel>
               </Box>
             </TabsRoot>
