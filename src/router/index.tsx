@@ -38,6 +38,7 @@ const AdminUsersPage = lazy(() => import("@/pages/AdminUsersPage"));
 const APIKeysPage = lazy(() => import("@/pages/APIKeysPage"));
 const AuditLogsPage = lazy(() => import("@/pages/AuditLogsPage"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
+const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
 const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage"));
 
 const RevenueAnalyticsPage = lazy(() => import("@/pages/RevenueAnalyticsPage"));
@@ -92,7 +93,10 @@ export const router = createBrowserRouter([
   },
   {
     element: <GuestGuard />,
-    children: [{ path: "/login", element: <LoginPage /> }],
+    children: [
+      { path: "/login", element: <LoginPage /> },
+      { path: "/forgot-password", element: <ForgotPasswordPage /> },
+    ],
   },
   { path: "*", element: <Navigate to="/" replace /> },
 ]);

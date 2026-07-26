@@ -21,6 +21,20 @@ export const authService = {
     return data;
   },
 
+  forgotPassword: async (payload: { email: string }) => {
+    const { data } = await client.post(ENDPOINTS.AUTH.PASSWORD_FORGOT, payload);
+    return data;
+  },
+
+  resetPassword: async (payload: {
+    v_id: string;
+    otp: string;
+    new_password: string;
+  }) => {
+    const { data } = await client.post(ENDPOINTS.AUTH.PASSWORD_RESET, payload);
+    return data;
+  },
+
   refresh: async (refreshToken: string) => {
     const { data } = await client.post(
       ENDPOINTS.AUTH.REFRESH,

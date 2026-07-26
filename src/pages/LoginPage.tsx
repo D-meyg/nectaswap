@@ -114,6 +114,7 @@ interface LoginStepProps {
 }
 
 function LoginStep({ onSuccess }: LoginStepProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
@@ -233,7 +234,11 @@ function LoginStep({ onSuccess }: LoginStepProps) {
                 Remember me
               </Text>
             </label>
-            <button className="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-brand) rounded">
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-(--color-brand) rounded"
+            >
               <Text variant="caption" color="brand" weight="medium" as="span">
                 Forgot password?
               </Text>

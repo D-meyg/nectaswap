@@ -4,6 +4,8 @@ export const ENDPOINTS = {
     VERIFY_OTP: "/api/v1/admin/auth/verify-otp",
     ACCEPT_INVITATION: "/api/v1/admin/auth/accept-invitation",
     REFRESH: "/api/v1/admin/auth/refresh",
+    PASSWORD_FORGOT: "/api/v1/admin/auth/password/forgot",
+    PASSWORD_RESET: "/api/v1/admin/auth/password/reset",
   },
   DASHBOARD: {
     STATS: "/api/v1/admin/control-room/stats",
