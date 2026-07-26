@@ -1,4 +1,4 @@
-import type { CardRequestRow } from "@/lib/dummyData";
+import type { CardRequestRow } from "@/services/cardRequestService";
 
 // Card type pill — "Virtual" blue, "Physical" brand purple
 export function CardTypePill({ type }: { type: CardRequestRow["card_type"] }) {
