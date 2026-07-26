@@ -89,6 +89,15 @@ export const ENDPOINTS = {
     UNFREEZE: (id: string) => `/api/v1/admin/cards/${id}/unfreeze`,
     ISSUE: "/api/v1/admin/cards/issue",
   },
+  CARD_REQUESTS: {
+    STATS: "/api/v1/admin/card-requests/stats",
+    LIST: "/api/v1/admin/card-requests",
+    DETAIL: (id: string) => `/api/v1/admin/card-requests/${id}`,
+    APPROVE: (id: string) => `/api/v1/admin/card-requests/${id}/approve`,
+    REJECT: (id: string) => `/api/v1/admin/card-requests/${id}/reject`,
+    ASSIGN: (id: string) => `/api/v1/admin/card-requests/${id}/assign`,
+    REQUEST_INFO: (id: string) => `/api/v1/admin/card-requests/${id}/request-info`,
+  },
   COMPLIANCE: {
     STATS: "/api/v1/admin/compliance/stats",
     FLAGGED_USERS: "/api/v1/admin/compliance/flagged-users",
