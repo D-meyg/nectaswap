@@ -79,3 +79,50 @@ export function useUpdateCardLimits() {
     },
   });
 }
+
+export function useResetCardPin() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  return useMutation({
+    mutationFn: cardService.resetPin,
+    onSuccess: (_, cardId) => {
+      queryClient.invalidateQueries({ queryKey: ["cards", cardId] });
+      toast.show({ type: "success", title: "PIN Reset", message: "A card PIN reset has been initiated." });
+    },
+    onError: (error: Error) => {
+      toast.show({ type: "error", title: "Reset Failed", message: error.message || "Could not reset the card PIN." });
+    },
+  });
+}
+
+export function useReplaceCard() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  return useMutation({
+    mutationFn: cardService.replaceCard,
+    onSuccess: (_, cardId) => {
+      queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["cards", cardId] });
+      toast.show({ type: "success", title: "Replacement Issued", message: "A replacement card has been issued." });
+    },
+    onError: (error: Error) => {
+      toast.show({ type: "error", title: "Replace Failed", message: error.message || "Could not issue a replacement card." });
+    },
+  });
+}
+
+export function useTerminateCard() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+  return useMutation({
+    mutationFn: cardService.terminateCard,
+    onSuccess: (_, cardId) => {
+      queryClient.invalidateQueries({ queryKey: ["cards"] });
+      queryClient.invalidateQueries({ queryKey: ["cards", cardId] });
+      toast.show({ type: "success", title: "Card Terminated", message: "The card has been permanently terminated." });
+    },
+    onError: (error: Error) => {
+      toast.show({ type: "error", title: "Terminate Failed", message: error.message || "Could not terminate the card." });
+    },
+  });
+}

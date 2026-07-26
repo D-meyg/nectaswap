@@ -14,9 +14,15 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { DataTable } from "@/components/tables/DataTable";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/date";
 import { useCards, useCardDetail, useCardActivity } from "@/hooks/queries/useCards";
 import { useTeamActivityLogs } from "@/hooks/queries/useTeam";
-import { useUpdateCardLimits } from "@/hooks/mutations/useCardMutations";
+import {
+  useUpdateCardLimits,
+  useResetCardPin,
+  useReplaceCard,
+  useTerminateCard,
+} from "@/hooks/mutations/useCardMutations";
 import type { CardLimitsUpdate } from "@/services/cardService";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -172,31 +178,30 @@ function ToggleRow({ label, checked, onChange, disabled }: { label: string; chec
   );
 }
 
-function SecurityActionRow({ label, description, action, danger }: { label: string; description: string; action: string; danger?: boolean }) {
+function SecurityActionRow({ label, description, action, danger, onClick, disabled }: { label: string; description: string; action: string; danger?: boolean; onClick?: () => void; disabled?: boolean }) {
   return (
     <Row justify="between" align="center" className="border-b border-(--color-border) py-3 first:pt-1">
       <Stack gap={0} className="min-w-0">
         <Text variant="caption" color="primary" weight="medium" className="text-[0.75rem]" as="p">{label}</Text>
         <Text variant="micro" color="muted" className="text-[0.625rem]" as="p">{description}</Text>
       </Stack>
-      <button type="button" className={cn("shrink-0 font-geom text-[0.6875rem] font-medium transition-opacity hover:opacity-75 focus:outline-none", danger ? "text-(--color-danger)" : "text-(--color-brand)")}>{action}</button>
+      <button type="button" onClick={onClick} disabled={disabled} className={cn("shrink-0 font-geom text-[0.6875rem] font-medium transition-opacity hover:opacity-75 disabled:opacity-50 focus:outline-none", danger ? "text-(--color-danger)" : "text-(--color-brand)")}>{action}</button>
     </Row>
   );
 }
 
-interface ActivityRow { merchant: string; amount: number; currency: string; country: string; status: string; date: string; risk: string }
+interface ActivityRow { type: string; description: string; ip: string; location: string; date: string }
 interface ChangeRow { title: string; description: string; admin: string; timestamp: string }
 
 function normalizeActivity(raw: unknown): ActivityRow {
   const a = obj(raw);
+  const details = obj(a.activity_details);
   return {
-    merchant: str(get(a, ["merchant", "merchant_name", "description", "title", "activity_type"]), "—"),
-    amount: num(get(a, ["amount", "value"])),
-    currency: str(get(a, ["currency", "card_currency"]), "—"),
-    country: str(get(a, ["country", "location", "country_code"]), "—"),
-    status: str(get(a, ["status", "state"]), "—"),
-    date: str(get(a, ["date", "created_at", "activity_timestamp", "timestamp"]), "—"),
-    risk: str(get(a, ["risk", "risk_level"]), "—"),
+    type: str(get(a, ["activity_type", "action", "title", "type"]), "Activity"),
+    description: str(get(a, ["activity_description", "description", "message"]), "—"),
+    ip: str(get(a, ["request_ip", "ip", "ip_address"]), "—"),
+    location: str(get(a, ["location"]) ?? get(details, ["location"]), "—"),
+    date: str(get(a, ["activity_timestamp", "created_at", "timestamp", "date"]), ""),
   };
 }
 
@@ -234,6 +239,10 @@ export default function CardLimitsControlsPage() {
   });
 
   const updateLimits = useUpdateCardLimits();
+  const resetPin = useResetCardPin();
+  const replaceCard = useReplaceCard();
+  const terminateCard = useTerminateCard();
+  const securityBusy = resetPin.isPending || replaceCard.isPending || terminateCard.isPending;
 
   // Server values (derived) + local edit overlay (avoids setState-in-effect)
   const serverLimits = useMemo(() => {
@@ -298,27 +307,11 @@ export default function CardLimitsControlsPage() {
 
   const activityColumns = useMemo<ColumnDef<ActivityRow, unknown>[]>(
     () => [
-      { accessorKey: "merchant", header: "Merchant", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="primary" weight="medium">{getValue<string>()}</Text>) },
-      { accessorKey: "amount", header: "Amount", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="primary" weight="semibold">{fmtNaira(getValue<number>())}</Text>) },
-      { accessorKey: "currency", header: "Currency", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
-      { accessorKey: "country", header: "Country", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
-      {
-        accessorKey: "status", header: "Status", enableSorting: false,
-        cell: ({ getValue }) => {
-          const s = getValue<string>().toLowerCase();
-          const color = s.includes("approv") ? "text-(--color-success-mid)" : s.includes("declin") || s.includes("fail") ? "text-(--color-danger)" : "text-(--color-warning-text)";
-          return (<span className={cn("font-geom text-xs font-medium", color)}>{getValue<string>()}</span>);
-        },
-      },
-      { accessorKey: "date", header: "Date", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
-      {
-        accessorKey: "risk", header: "Risk", enableSorting: false,
-        cell: ({ getValue }) => {
-          const r = getValue<string>().toLowerCase();
-          const color = r.includes("low") ? "text-(--color-success-mid)" : r.includes("med") ? "text-(--color-warning-text)" : r.includes("high") ? "text-(--color-danger)" : "text-(--color-text-muted)";
-          return (<span className={cn("font-geom text-xs font-semibold", color)}>{getValue<string>()}</span>);
-        },
-      },
+      { accessorKey: "type", header: "Activity", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="primary" weight="medium">{getValue<string>()}</Text>) },
+      { accessorKey: "description", header: "Description", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
+      { accessorKey: "ip", header: "IP Address", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary" className="font-mono text-[0.6875rem]">{getValue<string>()}</Text>) },
+      { accessorKey: "location", header: "Location", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
+      { accessorKey: "date", header: "Date", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{formatDate(getValue<string>())}</Text>) },
     ],
     [],
   );
@@ -429,9 +422,9 @@ export default function CardLimitsControlsPage() {
             <Card.Header title="Security Controls" className="border-b-0 px-5 pb-1 pt-4 [&_h4]:text-[0.8125rem] [&_h4]:leading-5" />
             <Card.Body className="px-5 pb-4 pt-1">
               <Stack gap={0} className="mb-2">
-                <SecurityActionRow label="PIN Reset" description="Reset card PIN" action="Reset" />
-                <SecurityActionRow label="Replace Card" description="Issue a replacement card" action="Replace" />
-                <SecurityActionRow label="Terminate Card" description="Permanently terminate this card" action="Terminate" danger />
+                <SecurityActionRow label="PIN Reset" description="Reset card PIN" action="Reset" disabled={securityBusy} onClick={() => resetPin.mutate(selectedId)} />
+                <SecurityActionRow label="Replace Card" description="Issue a replacement card" action="Replace" disabled={securityBusy} onClick={() => replaceCard.mutate(selectedId)} />
+                <SecurityActionRow label="Terminate Card" description="Permanently terminate this card" action="Terminate" danger disabled={securityBusy} onClick={() => { if (window.confirm("Permanently terminate this card? This action cannot be undone.")) terminateCard.mutate(selectedId); }} />
               </Stack>
               <Stack gap={0}>
                 {SECURITY_TOGGLES.map((t) => (
@@ -476,7 +469,7 @@ export default function CardLimitsControlsPage() {
                   </Row>
                   <Stack gap={0} className="shrink-0 items-end text-right">
                     <Text variant="micro" color="secondary" weight="medium" className="text-[0.6875rem]" as="p">{change.admin}</Text>
-                    <Text variant="micro" color="muted" className="text-[0.625rem]" as="p">{change.timestamp}</Text>
+                    <Text variant="micro" color="muted" className="text-[0.625rem]" as="p">{formatDate(change.timestamp)}</Text>
                   </Stack>
                 </Row>
               ))}

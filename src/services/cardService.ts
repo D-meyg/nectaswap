@@ -64,6 +64,21 @@ export const cardService = {
     return data;
   },
 
+  resetPin: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.RESET_PIN(id));
+    return data;
+  },
+
+  replaceCard: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.REPLACE(id));
+    return data;
+  },
+
+  terminateCard: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.TERMINATE(id));
+    return data;
+  },
+
   updateLimits: async (payload: CardLimitsUpdate) => {
     const { data } = await client.patch(ENDPOINTS.CARDS.LIMITS, payload);
     return data;

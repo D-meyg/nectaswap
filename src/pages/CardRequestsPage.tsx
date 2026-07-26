@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { formatDate } from "@/lib/date";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Plus } from "lucide-react";
 
@@ -158,7 +159,7 @@ export default function CardRequestsPage() {
       },
       { accessorKey: "card_type", header: "Card Type", enableSorting: false, cell: ({ getValue }) => (<CardTypePill type={getValue<CardRequestRow["card_type"]>()} />) },
       { accessorKey: "currency", header: "Currency", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="primary" weight="medium">{getValue<string>()}</Text>) },
-      { accessorKey: "requested_on", header: "Requested On", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{getValue<string>()}</Text>) },
+      { accessorKey: "requested_on", header: "Requested On", enableSorting: false, cell: ({ getValue }) => (<Text variant="caption" color="secondary">{formatDate(getValue<string>())}</Text>) },
       { accessorKey: "kyc_status", header: "KYC Status", enableSorting: false, cell: ({ getValue }) => (<KYCStatusPill status={getValue<CardRequestRow["kyc_status"]>()} />) },
       { accessorKey: "approval_status", header: "Approval Status", enableSorting: false, cell: ({ getValue }) => (<ApprovalStatusPill status={getValue<CardRequestRow["approval_status"]>()} />) },
       {

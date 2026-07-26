@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { formatDate } from "@/lib/date";
 import { Mail, Phone, Shield, Clock, CalendarDays, BadgeCheck, KeyRound } from "lucide-react";
 
 import { usePageTitle } from "@/layouts/AppLayout";
@@ -129,8 +130,8 @@ export default function ProfilePage() {
               <InfoRow icon={<Shield size={13} />} label="Role" value={me.role} />
               <InfoRow icon={<BadgeCheck size={13} />} label="Status" value={me.status} />
               <InfoRow icon={<KeyRound size={13} />} label="Admin ID" value={<Text variant="caption" color="primary" weight="semibold" className="font-mono text-[0.75rem]">{me.id}</Text>} />
-              <InfoRow icon={<CalendarDays size={13} />} label="Joined" value={me.joined} />
-              <InfoRow icon={<Clock size={13} />} label="Last Active" value={me.last_active} />
+              <InfoRow icon={<CalendarDays size={13} />} label="Joined" value={formatDate(me.joined)} />
+              <InfoRow icon={<Clock size={13} />} label="Last Active" value={formatDate(me.last_active)} />
             </Stack>
           </Card.Body>
         </Card>
