@@ -38,7 +38,7 @@ export function usePageTitle(title: string, subtitle: string) {
 
 /**
  * usePageActions — call at the top of a page component to render
- * action buttons in the TopBar (e.g. "Create Card", "Approve").
+ * action buttons in the TopBar (e.g. "Export Report", "Back").
  * Pass a memoized node (useMemo) so the effect doesn't loop.
  * Actions are cleared automatically when the page unmounts.
  */

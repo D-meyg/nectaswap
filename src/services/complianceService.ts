@@ -74,6 +74,18 @@ export const complianceService = {
     return data;
   },
 
+  getAmlStats: async () => {
+    const { data } = await client.get(ENDPOINTS.COMPLIANCE.AML_STATS);
+    return data;
+  },
+
+  getAmlRecentActivity: async (limit = 4) => {
+    const { data } = await client.get(ENDPOINTS.COMPLIANCE.AML_RECENT_ACTIVITY, {
+      params: { limit },
+    });
+    return data;
+  },
+
   updateRiskRule: async (
     id: string,
     payload: {
@@ -90,4 +102,4 @@ export const complianceService = {
     );
     return data;
   },
-};
+};

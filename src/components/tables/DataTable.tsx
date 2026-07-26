@@ -35,7 +35,7 @@ interface DataTableProps<TData> {
   emptyMessage?: string;
   toolbar?: React.ReactNode;
   stickyHeader?: boolean;
-  /** Render pagination as "Previous 1 2 … Next" with numbered page buttons. */
+  /** Render pagination as "Previous 1 2 ... Next" with numbered page buttons. */
   numberedPagination?: boolean;
   className?: string;
 }
@@ -245,7 +245,7 @@ export function DataTable<TData>({
         <div className="flex items-center justify-between gap-4 border-t border-(--color-border) bg-white px-4 py-3">
           <Text variant="caption" color="tertiary" className="text-[0.6875rem]">
             {total
-              ? `Showing ${(page - 1) * pageSize + 1}–${Math.min(
+              ? `Showing ${(page - 1) * pageSize + 1}-${Math.min(
                   page * pageSize,
                   total,
                 )} of ${total}`

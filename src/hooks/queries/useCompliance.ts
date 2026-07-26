@@ -44,3 +44,25 @@ export function useRiskRules() {
     staleTime: 5 * 60_000,
   });
 }
+
+export function useAmlStats() {
+  return useQuery<unknown>({
+    queryKey: ["compliance", "aml", "stats"],
+    queryFn: async () => {
+      const res = await complianceService.getAmlStats();
+      return res.data;
+    },
+    staleTime: 60_000,
+  });
+}
+
+export function useAmlRecentActivity(limit = 4) {
+  return useQuery<unknown[]>({
+    queryKey: ["compliance", "aml", "recent-activity", limit],
+    queryFn: async () => {
+      const res = await complianceService.getAmlRecentActivity(limit);
+      return res.data;
+    },
+    staleTime: 30_000,
+  });
+}

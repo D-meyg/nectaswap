@@ -24,7 +24,12 @@ const CardLimitsControlsPage = lazy(
   () => import("@/pages/CardLimitsControlsPage"),
 );
 const WalletsPage = lazy(() => import("@/pages/WalletsPage"));
-const CompliancePage = lazy(() => import("@/pages/CompliancePage"));
+const LiquidityMonitorPage = lazy(() => import("@/pages/LiquidityMonitorPage"));
+const AssetDetailPage = lazy(() => import("@/pages/AssetDetailPage"));
+const WalletDetailPage = lazy(() => import("@/pages/WalletDetailPage"));
+const AMLReportsPage = lazy(() => import("@/pages/AMLReportsPage"));
+const AMLCaseDetailPage = lazy(() => import("@/pages/AMLCaseDetailPage"));
+const FlaggedUsersPage = lazy(() => import("@/pages/FlaggedUsersPage"));
 const RatesPage = lazy(() => import("@/pages/RatesPage"));
 const ReferralProgramPage = lazy(() => import("@/pages/ReferralProgramPage"));
 const NotificationsPage = lazy(() => import("@/pages/NotificationsPage"));
@@ -61,9 +66,13 @@ export const router = createBrowserRouter([
           { path: "/cards/limits", element: <CardLimitsControlsPage /> },
           { path: "/cards/:id", element: <CardDetailPage /> },
           { path: "/wallets", element: <WalletsPage /> },
-          { path: "/compliance", element: <CompliancePage /> },
-          { path: "/compliance/flagged", element: <CompliancePage /> },
-          { path: "/compliance/aml", element: <CompliancePage /> },
+          { path: "/wallets/liquidity", element: <LiquidityMonitorPage /> },
+          { path: "/wallets/assets/:symbol", element: <AssetDetailPage /> },
+          { path: "/wallets/wallet/:id", element: <WalletDetailPage /> },
+          { path: "/compliance", element: <Navigate to="/compliance/aml" replace /> },
+          { path: "/compliance/aml", element: <AMLReportsPage /> },
+          { path: "/compliance/aml/:id", element: <AMLCaseDetailPage /> },
+          { path: "/compliance/flagged", element: <FlaggedUsersPage /> },
           { path: "/rates", element: <RatesPage /> },
           { path: "/referrals", element: <ReferralProgramPage /> },
           { path: "/referrals/payouts", element: <ReferralProgramPage /> },

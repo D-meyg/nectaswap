@@ -106,6 +106,8 @@ export const ENDPOINTS = {
     FLAGGED_TXNS_STATUS: "/api/v1/admin/compliance/flagged-transactions/status",
     RISK_RULES: "/api/v1/admin/compliance/risk-rules",
     UPDATE_RULE: (id: string) => `/api/v1/admin/compliance/risk-rules/${id}`,
+    AML_STATS: "/api/v1/admin/compliance/aml/stats",
+    AML_RECENT_ACTIVITY: "/api/v1/admin/compliance/aml/recent-activity",
   },
   RATES: {
     EXCHANGE: "/api/v1/admin/rates/exchange-rates",
