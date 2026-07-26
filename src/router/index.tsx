@@ -39,6 +39,7 @@ const APIKeysPage = lazy(() => import("@/pages/APIKeysPage"));
 const AuditLogsPage = lazy(() => import("@/pages/AuditLogsPage"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 
 const RevenueAnalyticsPage = lazy(() => import("@/pages/RevenueAnalyticsPage"));
 const UserGrowthPage = lazy(() => import("@/pages/UserGrowthPage"));
@@ -77,6 +78,7 @@ export const router = createBrowserRouter([
           { path: "/referrals", element: <ReferralProgramPage /> },
           { path: "/referrals/payouts", element: <ReferralProgramPage /> },
           { path: "/notifications", element: <NotificationsPage /> },
+          { path: "/profile", element: <ProfilePage /> },
           { path: "/settings", element: <SettingsPage /> },
           { path: "/settings/admins", element: <AdminUsersPage /> },
           { path: "/settings/api-keys", element: <APIKeysPage /> },

@@ -142,6 +142,7 @@ export const ENDPOINTS = {
   },
   TEAM: {
     ME: "/api/v1/admin/team/me",
+    ACTIVITY_LOGS: "/api/v1/admin/team/activity-logs",
   },
   ANALYTICS: {
     OVERVIEW: "/api/v1/admin/analytics/overview",
