@@ -58,10 +58,20 @@ export default function ReferralProgramPage() {
 
   const [tab, setTab] = useState<TabValue>("referrers");
   const [search, setSearch] = useState("");
+  const [refPage, setRefPage] = useState(1);
+  const [refdPage, setRefdPage] = useState(1);
   const debounced = useDebounce(search, 400);
   const { data: stats = {} } = useReferralStats();
-  const { data: apiReferrers = [], isLoading: loadingReferrers } = useReferrers();
-  const { data: apiReferred = [], isLoading: loadingReferred } = useReferredUsers();
+  const {
+    data: referrersData = { rows: [], total: 0, page: 1, pages: 1 },
+    isLoading: loadingReferrers,
+  } = useReferrers(refPage);
+  const {
+    data: referredData = { rows: [], total: 0, page: 1, pages: 1 },
+    isLoading: loadingReferred,
+  } = useReferredUsers(refdPage);
+  const apiReferrers = referrersData.rows;
+  const apiReferred = referredData.rows;
   const referrers = useMemo(
     () =>
       (Array.isArray(apiReferrers) ? apiReferrers : []).map((item) => {
@@ -286,10 +296,10 @@ export default function ReferralProgramPage() {
     <Box p={6} className="space-y-5">
       {/* 6 stat cards */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
-        <StatCard label="Total Referrers" value={(stats as any).total_referrers ?? referrers.length} />
+        <StatCard label="Total Referrers" value={(stats as any).total_referrers ?? referrersData.total} />
         <StatCard
           label="Referred Users"
-          value={(stats as any).referred_users ?? referredUsers.length}
+          value={(stats as any).referred_users ?? referredData.total}
         />
         <StatCard
           label="Earnings Paid"
@@ -312,8 +322,8 @@ export default function ReferralProgramPage() {
             {(["referrers", "referred"] as TabValue[]).map((t) => {
               const label =
                 t === "referrers"
-                  ? `Referrers (${referrers.length})`
-                  : `Referred Users (${referredUsers.length})`;
+                  ? `Referrers (${referrersData.total})`
+                  : `Referred Users (${referredData.total})`;
               return (
                 <button
                   key={t}
@@ -367,7 +377,11 @@ export default function ReferralProgramPage() {
           <DataTable
             data={filteredReferrers}
             columns={referrerCols}
-            total={filteredReferrers.length}
+            total={referrersData.total}
+            page={refPage}
+            pageSize={20}
+            onPageChange={setRefPage}
+            numberedPagination
             loading={loadingReferrers}
             emptyTitle="No referrers found"
             emptyMessage="Try adjusting your search"
@@ -376,7 +390,11 @@ export default function ReferralProgramPage() {
           <DataTable
             data={filteredReferred}
             columns={referredCols}
-            total={filteredReferred.length}
+            total={referredData.total}
+            page={refdPage}
+            pageSize={20}
+            onPageChange={setRefdPage}
+            numberedPagination
             loading={loadingReferred}
             emptyTitle="No referred users found"
             emptyMessage="Try adjusting your search"

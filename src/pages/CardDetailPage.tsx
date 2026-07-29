@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Download, Lock, MapPin } from "lucide-react";
 import { useMemo } from "react";
 
@@ -376,6 +376,7 @@ function TransactionsTab({ cardId }: { cardId: string }) {
 
 // ── Limits tab ────────────────────────────────────────────
 function LimitsTab({ card }: { card: NormalizedCard }) {
+  const navigate = useNavigate();
   return (
     <Card>
       <Card.Header title="Transaction Limits" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
@@ -392,7 +393,7 @@ function LimitsTab({ card }: { card: NormalizedCard }) {
             </Row>
           ))}
         </Stack>
-        <Button className="h-8 w-full justify-center text-[0.6875rem]">Update Limits</Button>
+        <Button onClick={() => navigate(`/cards/limits?card=${card.card_id || card.id}`)} className="h-8 w-full justify-center text-[0.6875rem]">Update Limits</Button>
       </Card.Body>
     </Card>
   );

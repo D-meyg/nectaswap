@@ -222,7 +222,6 @@ export default function SettingsPage() {
                   General settings are loaded from the settings endpoint. Update endpoint support for general settings can be added when the backend provides it.
                 </Text>
               </Box>
-              <TabFooter onCancel={clearDraft} onSave={() => {}} />
             </Stack>
           )}
 

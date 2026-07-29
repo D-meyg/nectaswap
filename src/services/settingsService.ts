@@ -13,7 +13,7 @@ export const settingsService = {
     max_transaction_fee: number;
     default_gas_limit: number;
   }) => {
-    const { data } = await client.patch(
+    const { data } = await client.post(
       ENDPOINTS.SETTINGS.FEES_LIMITS,
       payload,
     );
@@ -25,7 +25,7 @@ export const settingsService = {
     require_kyc: boolean;
     auto_suspend_suspicious: boolean;
   }) => {
-    const { data } = await client.patch(ENDPOINTS.SETTINGS.SECURITY, payload);
+    const { data } = await client.post(ENDPOINTS.SETTINGS.SECURITY, payload);
     return data;
   },
 
@@ -33,7 +33,7 @@ export const settingsService = {
     push_notifications_enabled: boolean;
     email_alerts_enabled: boolean;
   }) => {
-    const { data } = await client.patch(
+    const { data } = await client.post(
       ENDPOINTS.SETTINGS.NOTIFICATIONS,
       payload,
     );
@@ -41,7 +41,7 @@ export const settingsService = {
   },
 
   updateAdvanced: async (payload: { maintenance_mode: boolean }) => {
-    const { data } = await client.patch(ENDPOINTS.SETTINGS.ADVANCED, payload);
+    const { data } = await client.post(ENDPOINTS.SETTINGS.ADVANCED, payload);
     return data;
   },
 };

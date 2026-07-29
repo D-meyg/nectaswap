@@ -217,19 +217,19 @@ export default function RatesPage() {
         {[
           {
             label: "Total Fee Revenue (24h)",
-            value: (feeRevenue as any).total_fee_revenue_24h || "₦ 0",
+            value: `₦ ${Number((feeRevenue as any).revenue_24h ?? 0).toLocaleString()}`,
             delta: "",
             pos: true,
           },
           {
             label: "Avg Fee per Transaction",
-            value: (feeRevenue as any).avg_fee_per_transaction || "₦ 0",
+            value: `₦ ${Number((feeRevenue as any).avg_fee_per_transaction ?? 0).toLocaleString()}`,
             delta: "",
             pos: false,
           },
           {
             label: "Fee Revenue (MTD)",
-            value: (feeRevenue as any).fee_revenue_mtd || "₦ 0",
+            value: `₦ ${Number((feeRevenue as any).revenue_mtd ?? 0).toLocaleString()}`,
             delta: "",
             pos: true,
           },
