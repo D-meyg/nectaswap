@@ -90,6 +90,9 @@ export const ENDPOINTS = {
     FREEZE: (id: string) => `/api/v1/admin/cards/${id}/freeze`,
     UNFREEZE: (id: string) => `/api/v1/admin/cards/${id}/unfreeze`,
     ISSUE: "/api/v1/admin/cards/issue",
+    RESET_PIN: (id: string) => `/api/v1/admin/cards/${id}/reset-pin`,
+    REPLACE: (id: string) => `/api/v1/admin/cards/${id}/replace`,
+    TERMINATE: (id: string) => `/api/v1/admin/cards/${id}/terminate`,
   },
   CARD_REQUESTS: {
     STATS: "/api/v1/admin/card-requests/stats",
@@ -144,6 +147,7 @@ export const ENDPOINTS = {
   },
   TEAM: {
     ME: "/api/v1/admin/team/me",
+    ACTIVITY_LOGS: "/api/v1/admin/team/activity-logs",
   },
   ANALYTICS: {
     OVERVIEW: "/api/v1/admin/analytics/overview",

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { formatDate } from "@/lib/date";
 import {
   FolderOpen,
   Users,
@@ -139,7 +140,7 @@ function SuspiciousCard({ item }: { item: SuspiciousItem }) {
       </Row>
       <Text variant="micro" color="secondary" className="text-[0.6875rem]" as="p">{item.user}</Text>
       <Row justify="between" align="center" className="mt-2">
-        <Text variant="micro" color="muted" className="text-[0.625rem]">{item.age}</Text>
+        <Text variant="micro" color="muted" className="text-[0.625rem]">{formatDate(item.age)}</Text>
         <button type="button" className="font-geom text-[0.6875rem] font-semibold text-(--color-brand) transition-opacity hover:opacity-75 focus:outline-none">
           View Investigation
         </button>

@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, Search, ChevronDown, LogOut, User } from "lucide-react";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
@@ -14,6 +15,7 @@ import { useCurrentPageTitle } from "./AppLayout";
 export const TopBar = memo(function TopBar() {
   const user = useAuthStore((s) => s.user);
   const clearAuth = useAuthStore((s) => s.clearAuth);
+  const navigate = useNavigate();
   const { title, subtitle, actions } = useCurrentPageTitle();
   const displayName = user?.name?.trim() || "Admin";
   const firstName = displayName.split(" ")[0] || "Admin";
@@ -118,7 +120,7 @@ export const TopBar = memo(function TopBar() {
                   </Text>
                 </Stack>
               </Box>
-              <Dropdown.Item icon={<User size={13} />}>Profile</Dropdown.Item>
+              <Dropdown.Item icon={<User size={13} />} onSelect={() => navigate("/profile")}>Profile</Dropdown.Item>
               <Dropdown.Separator />
               <Dropdown.Item
                 icon={<LogOut size={13} />}

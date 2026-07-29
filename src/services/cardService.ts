@@ -1,6 +1,28 @@
 import { client } from "@/api/client";
 import { ENDPOINTS } from "@/api/endpoints";
 
+export interface CardLimitsUpdate {
+  card_id: string;
+  daily_limit?: number;
+  weekly_limit?: number;
+  monthly_limit?: number;
+  per_transaction_limit?: number;
+  atm_limit?: number;
+  international_limit?: number;
+  enable_online_payments?: boolean;
+  enable_contactless?: boolean;
+  enable_international?: boolean;
+  enable_atm_withdrawals?: boolean;
+  enable_recurring_payments?: boolean;
+  merchant_restrictions?: boolean;
+  restricted_categories?: Record<string, unknown>;
+  temporary_lock?: boolean;
+  require_otp?: boolean;
+  require_3ds?: boolean;
+  require_cvv?: boolean;
+  enable_risk_detection?: boolean;
+}
+
 export const cardService = {
   getStats: async () => {
     const { data } = await client.get(ENDPOINTS.CARDS.STATS);
@@ -42,12 +64,22 @@ export const cardService = {
     return data;
   },
 
-  updateLimits: async (payload: {
-    card_id: string;
-    daily_limit: number;
-    monthly_limit: number;
-    per_transaction_limit: number;
-  }) => {
+  resetPin: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.RESET_PIN(id), { card_id: id });
+    return data;
+  },
+
+  replaceCard: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.REPLACE(id), { card_id: id });
+    return data;
+  },
+
+  terminateCard: async (id: string) => {
+    const { data } = await client.post(ENDPOINTS.CARDS.TERMINATE(id), { card_id: id });
+    return data;
+  },
+
+  updateLimits: async (payload: CardLimitsUpdate) => {
     const { data } = await client.patch(ENDPOINTS.CARDS.LIMITS, payload);
     return data;
   },

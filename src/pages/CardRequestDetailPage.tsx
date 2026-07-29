@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from "react";
+import { formatDate } from "@/lib/date";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ChevronRight, CreditCard } from "lucide-react";
 
@@ -109,7 +110,7 @@ function ApplicantDetailsCard({ request }: { request: CardRequestDetail }) {
           <InfoPair label="Phone" value={request.phone} />
           <InfoPair label="Card Type" value={<CardTypePill type={request.card_type} />} />
           <InfoPair label="Currency" value={request.currency} />
-          <InfoPair label="Requested On" value={request.requested_on} />
+          <InfoPair label="Requested On" value={formatDate(request.requested_on)} />
           <InfoPair label="KYC Status" value={<KYCStatusPill status={request.kyc_status} />} />
           <InfoPair label="Current Status" value={<ApprovalStatusPill status={request.approval_status} />} />
           <InfoPair label="Assigned Admin" value={request.assigned_admin} />
