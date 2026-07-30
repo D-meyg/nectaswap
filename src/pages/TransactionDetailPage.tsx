@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Copy, ExternalLink, CheckCircle } from "lucide-react";
 
 import { usePageTitle } from "@/layouts/AppLayout";
@@ -16,7 +16,7 @@ import { useClipboard } from "@/hooks/ui/useClipboard";
 import { DataTable } from "@/components/tables/DataTable";
 import type { ColumnDef } from "@tanstack/react-table";
 import { useTransactionDetail } from "@/hooks/queries/useTransactions";
-import { DUMMY_TX_DETAIL, type TransactionDetail } from "@/lib/dummyData";
+import type { TransactionDetail } from "@/lib/dummyData";
 
 type TabValue = "overview" | "technical" | "ledger" | "timeline";
 type TransactionStatus = TransactionDetail["status"];
@@ -92,7 +92,6 @@ function normalizeTransactionDetail(value: unknown, id: string): TransactionDeta
     : status === "completed" ? "Transaction Completed" : "Transaction";
 
   return {
-    ...DUMMY_TX_DETAIL,
     id: text(item.transaction_id ?? receipt.reference ?? item.reference ?? String(raw.id ?? id), id),
     title: titleStr,
     status,
@@ -211,6 +210,8 @@ function TxStatusPill({ status }: { status: string }) {
 
 // ── Right sidebar panels (shared across all tabs) ─────────
 function RightSidebar({ tx }: { tx: TransactionDetail }) {
+  const navigate = useNavigate();
+  const hasUser = Boolean(tx.user_id) && tx.user_id !== "N/A";
   return (
     <Stack gap={5}>
       <Card className="rounded-[6px]">
@@ -220,6 +221,9 @@ function RightSidebar({ tx }: { tx: TransactionDetail }) {
             <Button
               variant="primary"
               size="md"
+              disabled={!hasUser}
+              title={hasUser ? undefined : "No linked user"}
+              onClick={() => hasUser && navigate(`/users/${tx.user_id}`)}
               className="h-8 w-full justify-center text-[0.6875rem]"
             >
               View User Profile

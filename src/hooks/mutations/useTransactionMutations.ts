@@ -75,3 +75,23 @@ export function useResolveFailedTransaction() {
     },
   });
 }
+
+export function useRefundFailedTransaction() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: transactionService.refundFailed,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions", "failed"] });
+      toast.show({
+        type: "success",
+        title: "Refund Issued",
+        message: "A refund has been initiated for this transaction.",
+      });
+    },
+    onError: (error: Error) => {
+      toast.show({ type: "error", title: "Refund Failed", message: error.message || "Could not issue the refund." });
+    },
+  });
+}
