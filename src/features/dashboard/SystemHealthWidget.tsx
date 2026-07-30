@@ -7,8 +7,11 @@ import { Stack } from "@/components/ui/Stack";
 
 const statusDot: Record<string, string> = {
   operational: "var(--color-success-mid)",
+  healthy: "var(--color-success-mid)",
   degraded: "var(--color-warning)",
   down: "var(--color-danger)",
+  unhealthy: "var(--color-danger)",
+  unknown: "var(--color-text-muted)",
 };
 
 export function SystemHealthWidget({ items }: { items: any[] }) {
@@ -28,7 +31,7 @@ export function SystemHealthWidget({ items }: { items: any[] }) {
 
       <Stack gap={3} className="p-5">
         {safeItems.map((item, index) => {
-          const status = String(item.status || "operational").toLowerCase();
+          const status = String(item.status || "unknown").toLowerCase();
           const dotColor = statusDot[status] ?? "var(--color-text-muted)";
 
           return (
@@ -49,8 +52,9 @@ export function SystemHealthWidget({ items }: { items: any[] }) {
                   color="primary"
                   weight="semibold"
                   truncate
+                  className="capitalize"
                 >
-                  {item.service}
+                  {String(item.service || "").replace(/_/g, " ")}
                 </Text>
               </Row>
 
@@ -59,7 +63,7 @@ export function SystemHealthWidget({ items }: { items: any[] }) {
                 color="secondary"
                 className="shrink-0 font-medium"
               >
-                {item.uptime}%
+                {item.uptime ?? "—"}
               </Text>
             </Row>
           );

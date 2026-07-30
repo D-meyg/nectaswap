@@ -41,11 +41,20 @@ export function RecentActivity({ entries, loading }: RecentActivityProps) {
         ),
       },
       {
-        accessorKey: "target",
-        header: "Target",
+        accessorKey: "description",
+        header: "Description",
         cell: ({ getValue }) => (
-          <Text variant="caption" color="muted">
+          <Text variant="caption" color="muted" className="max-w-[20rem] truncate block">
             {getValue<string>()}
+          </Text>
+        ),
+      },
+      {
+        accessorKey: "ip",
+        header: "IP",
+        cell: ({ getValue }) => (
+          <Text variant="caption" color="muted" className="font-mono text-[0.6875rem]">
+            {getValue<string>() || "—"}
           </Text>
         ),
       },

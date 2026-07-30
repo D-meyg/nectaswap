@@ -9,6 +9,9 @@ import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
 import { useCreateNotification, useNotifications } from "@/hooks/queries/useNotifications";
+import { useUsersPaged } from "@/hooks/queries/useUsers";
+import { useKYCStats } from "@/hooks/queries/useKYC";
+import { formatDate } from "@/lib/date";
 
 type Segment = "all" | "kyc-completed" | "kyc-pending";
 type Priority = "info" | "warning" | "urgent";
@@ -110,9 +113,17 @@ export default function NotificationsPage() {
   const [priority, setPriority] = useState<Priority>("info");
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   const { data: apiNotifications = [] } = useNotifications();
+  const { data: usersData = { rows: [], total: 0, page: 1, pages: 1 } } = useUsersPaged(1, 1);
+  const { data: kycStats = {} } = useKYCStats();
   const createNotification = useCreateNotification();
+
+  const totalUsers = Number((usersData as { total?: number }).total ?? 0);
+  const pendingReview = Number((kycStats as Record<string, unknown>).pending_review ?? 0);
+  const segmentCount = (seg: Segment) =>
+    seg === "all" ? totalUsers : seg === "kyc-pending" ? pendingReview : Math.max(0, totalUsers - pendingReview);
 
   const notifications = useMemo<NotificationItem[]>(
     () => (Array.isArray(apiNotifications) ? apiNotifications : []).map(normalizeNotification),
@@ -120,15 +131,18 @@ export default function NotificationsPage() {
   );
 
   const selectedData = SEGMENT_DATA[segment];
+  const selectedCount = segmentCount(segment);
 
   const handleSend = () => {
-    createNotification.mutate({
-      title,
-      message,
-      priority,
-      segment,
-      target_segment: segment,
-    });
+    if (!title.trim()) return setError("Notification title is required.");
+    if (!message.trim()) return setError("Message content is required.");
+    setError("");
+    const audience =
+      segment === "all" ? "all" : segment === "kyc-completed" ? "kyc_completed" : "kyc_pending";
+    createNotification.mutate(
+      { audience, n_type: "push", title: title.trim(), body: message.trim() },
+      { onSuccess: () => { setTitle(""); setMessage(""); } },
+    );
   };
 
   return (
@@ -195,7 +209,7 @@ export default function NotificationsPage() {
                         as="p"
                         className="text-xl leading-tight"
                       >
-                        {formatCount(data.count)}
+                        {formatCount(segmentCount(key))}
                       </Text>
                       <Text variant="micro" color="muted">
                         {data.desc}
@@ -286,6 +300,12 @@ export default function NotificationsPage() {
                   </Row>
                 </Box>
 
+                {error && (
+                  <Box className="rounded-(--radius-sm) border border-(--color-danger-muted) bg-(--color-danger-subtle) px-3 py-2">
+                    <Text variant="micro" color="danger">{error}</Text>
+                  </Box>
+                )}
+
                 {/* Delivery Schedule */}
                 <Box>
                   <Text
@@ -312,7 +332,7 @@ export default function NotificationsPage() {
                 {/* Send to N Users button */}
                 <Button className="w-full justify-center" onClick={handleSend} disabled={createNotification.isPending}>
                   <Send size={13} />
-                  {createNotification.isPending ? "Sending..." : `Send to ${formatCount(selectedData.count)} Users`}
+                  {createNotification.isPending ? "Sending..." : `Send to ${formatCount(selectedCount)} Users`}
                 </Button>
               </Stack>
             </Card.Body>
@@ -394,7 +414,7 @@ export default function NotificationsPage() {
                       </td>
                       <td className="px-5 py-3.5">
                         <Text variant="caption" color="secondary">
-                          {n.sent_at}
+                          {formatDate(n.sent_at)}
                         </Text>
                       </td>
                       <td className="px-5 py-3.5">
@@ -454,7 +474,7 @@ export default function NotificationsPage() {
                     as="p"
                     className="text-xl"
                   >
-                    {formatCount(selectedData.count)}
+                    {formatCount(selectedCount)}
                   </Text>
                   <Text variant="micro" color="muted">
                     Recipients
