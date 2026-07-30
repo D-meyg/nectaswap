@@ -13,7 +13,7 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { useDebounce } from "@/hooks/ui/useDebounce";
-import { useAdmins } from "@/hooks/queries/useAdmins";
+import { useUsersPaged } from "@/hooks/queries/useUsers";
 import type { ColumnDef } from "@tanstack/react-table";
 
 interface AdminUser {
@@ -48,7 +48,7 @@ function normalizeAdmin(value: unknown): AdminUser {
       ? "text-(--color-brand)"
       : "text-(--color-text-secondary)",
     permissions: text(item.permissions, "View"),
-    status: text(item.status, "Active") === "Suspended" ? "Suspended" : "Active",
+    status: text(item.status, "Active").toLowerCase() === "suspended" ? "Suspended" : "Active",
     last_login: text(item.last_login ?? item.lastLogin, "N/A"),
   };
 }
@@ -109,11 +109,15 @@ export default function AdminUsersPage() {
   const [search, setSearch] = useState("");
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
   const [selectedAdmin, setSelectedAdmin] = useState<AdminUser | null>(null);
+  const [page, setPage] = useState(1);
   const debounced = useDebounce(search, 300);
-  const { data: apiAdmins = [], isLoading } = useAdmins();
+  const {
+    data: usersData = { rows: [], total: 0, page: 1, pages: 1 },
+    isLoading,
+  } = useUsersPaged(page, 20, debounced || undefined);
   const admins = useMemo(
-    () => (Array.isArray(apiAdmins) ? apiAdmins.map(normalizeAdmin) : []),
-    [apiAdmins],
+    () => (Array.isArray(usersData.rows) ? usersData.rows.map(normalizeAdmin) : []),
+    [usersData.rows],
   );
 
   const filtered = useMemo(
@@ -261,6 +265,11 @@ export default function AdminUsersPage() {
         <DataTable
           data={filtered}
           columns={columns}
+          total={usersData.total}
+          page={page}
+          pageSize={20}
+          onPageChange={setPage}
+          numberedPagination
           loading={isLoading}
           emptyTitle="No admin users"
           emptyMessage="No admin users found"
