@@ -1,5 +1,5 @@
 ﻿import { useState, useCallback } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   User,
   ShieldCheck,
@@ -35,6 +35,7 @@ import { useUserDetail, useUserCards } from "@/hooks/queries/useUserDetail";
 import {
   useFreezeAccount,
   useUnfreezeAccount,
+  useFreezeAllCards,
 } from "@/hooks/mutations/useUserMutations";
 import { DUMMY_USER_DETAIL } from "@/lib/dummyData";
 import type { UserDetail } from "@/api/types";
@@ -70,6 +71,9 @@ export default function UserDetailPage() {
   const user = (apiUser ?? DUMMY_USER_DETAIL) as UserDetail;
   const cards = Array.isArray(apiCards) ? apiCards : [];
 
+  const navigate = useNavigate();
+  const freezeCardsMutation = useFreezeAllCards();
+  const hasCard = Number((apiUser as Record<string, unknown> | undefined)?.total_cards ?? 0) > 0;
   const freezeMutation = useFreezeAccount();
   const unfreezeMutation = useUnfreezeAccount();
 
@@ -202,7 +206,11 @@ export default function UserDetailPage() {
           </Box>
 
           <Stack gap={4} className="hidden lg:flex">
-            <QuickActionsPanel />
+            <QuickActionsPanel
+              disabled={!hasCard}
+              onAdjustLimits={() => navigate("/cards/limits")}
+              onFreezeCards={() => freezeCardsMutation.mutate(userId)}
+            />
             <RiskIndicatorsPanel
               velocityCheck={user?.velocity_check}
               amlScreening={user?.aml_screening}
