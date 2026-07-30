@@ -223,7 +223,7 @@ function RightSidebar({ tx }: { tx: TransactionDetail }) {
               size="md"
               disabled={!hasUser}
               title={hasUser ? undefined : "No linked user"}
-              onClick={() => hasUser && navigate(`/users/${tx.user_id}`)}
+              onClick={() => hasUser && navigate(`/profile/${tx.user_id}?type=user`)}
               className="h-8 w-full justify-center text-[0.6875rem]"
             >
               View User Profile

@@ -15,6 +15,7 @@ export interface CardRequestRow {
 }
 
 export interface CardRequestDetail extends CardRequestRow {
+  user_id: string;
   phone: string;
   reason: string;
   monthly_volume: number;

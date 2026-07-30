@@ -141,7 +141,7 @@ function CardSidebar({ card }: { card: NormalizedCard }) {
         <Card.Header title="Quick Actions" className="border-b-0 px-4 pb-2 pt-3 [&_h4]:text-xs [&_h4]:leading-4" />
         <Card.Body className="px-4 pb-4 pt-0">
           <Stack gap={2}>
-            <Button variant="primary" size="sm" disabled={!card.user_id} onClick={() => card.user_id && navigate(`/users/${card.user_id}`)} className="h-8 w-full justify-center text-[0.6875rem]">View User Profile</Button>
+            <Button variant="primary" size="sm" disabled={!card.user_id} onClick={() => card.user_id && navigate(`/profile/${card.user_id}?type=user`)} className="h-8 w-full justify-center text-[0.6875rem]">View User Profile</Button>
             <Button variant="secondary" size="sm" disabled title="Top-up endpoint not available yet" className="h-8 w-full justify-center text-[0.6875rem] disabled:opacity-50">Top Up Balance</Button>
             <Button variant="secondary" size="sm" disabled={resetPin.isPending} onClick={() => resetPin.mutate(card.card_id)} className="h-8 w-full justify-center text-[0.6875rem]">{resetPin.isPending ? "Resetting..." : "Reset PIN"}</Button>
           </Stack>
