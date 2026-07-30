@@ -220,6 +220,8 @@ export interface RecentActivityEntry {
   admin: string;
   action: string;
   target: string;
+  description?: string;
+  ip?: string;
   status?: string;
 }
 

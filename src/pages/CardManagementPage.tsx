@@ -28,6 +28,7 @@ type CardRow = {
   type: "Virtual" | "Physical";
   balance: number;
   spend_30d: number;
+  currency: string;
   status: "Active" | "Frozen" | "Pending" | "Blocked";
 };
 
@@ -70,11 +71,21 @@ function toNumber(value: unknown) {
   return Number.isFinite(numberValue) ? numberValue : 0;
 }
 
-function fmt(value: unknown) {
+function symbolFor(currency?: string) {
+  const c = String(currency ?? "NGN").toUpperCase();
+  if (c === "USD") return "$";
+  if (c === "EUR") return "€";
+  if (c === "GBP") return "£";
+  if (c === "NGN") return "₦";
+  return `${c} `;
+}
+
+function fmt(value: unknown, currency?: string) {
   const n = toNumber(value);
-  if (n === 0) return "₦ 0";
-  if (n >= 1_000_000) return `₦ ${(n / 1_000_000).toFixed(1)}M`;
-  return `₦ ${n.toLocaleString()}`;
+  const sym = symbolFor(currency);
+  if (n === 0) return `${sym} 0`;
+  if (n >= 1_000_000) return `${sym} ${(n / 1_000_000).toFixed(1)}M`;
+  return `${sym} ${n.toLocaleString()}`;
 }
 
 export default function CardManagementPage() {
@@ -116,6 +127,7 @@ export default function CardManagementPage() {
           type: rawType === "PHYSICAL" ? "Physical" : "Virtual",
           balance: Number(other.balance ?? card.balance ?? 0),
           spend_30d: Number(card.spend_30d ?? card.total_debit ?? 0),
+          currency: String(card.currency ?? other.currency ?? "NGN"),
           status: statusMap[rawStatus] ?? "Pending",
         };
       }),
@@ -196,9 +208,9 @@ export default function CardManagementPage() {
         // BALANCE
         accessorKey: "balance",
         header: "Balance",
-        cell: ({ getValue }) => (
+        cell: ({ row }) => (
           <Text variant="caption" color="primary" weight="medium">
-            {fmt(getValue<number>())}
+            {fmt(row.original.balance, row.original.currency)}
           </Text>
         ),
       },
@@ -206,9 +218,9 @@ export default function CardManagementPage() {
         // SPEND (30D)
         accessorKey: "spend_30d",
         header: "Spend (30D)",
-        cell: ({ getValue }) => (
+        cell: ({ row }) => (
           <Text variant="caption" color="secondary">
-            {fmt(getValue<number>())}
+            {fmt(row.original.spend_30d, row.original.currency)}
           </Text>
         ),
       },

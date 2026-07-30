@@ -23,10 +23,15 @@ import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
 import { Modal } from "@/components/ui/Modal";
 import {
-  useTransactions,
+  useTransactionsPaged,
   usePendingTransactionApprovals,
   useFailedTransactions,
 } from "@/hooks/queries/useTransactions";
+import {
+  useRetryFailedTransaction,
+  useResolveFailedTransaction,
+  useRefundFailedTransaction,
+} from "@/hooks/mutations/useTransactionMutations";
 
 type PageMode = "all" | "pending" | "failed";
 
@@ -281,7 +286,12 @@ function FailedDetailsModal({
   tx: FailedTx | null;
   onClose: () => void;
 }) {
+  const retry = useRetryFailedTransaction();
+  const resolve = useResolveFailedTransaction();
+  const refund = useRefundFailedTransaction();
+  const busy = retry.isPending || resolve.isPending || refund.isPending;
   if (!tx) return null;
+  const txId = tx.id;
 
   return (
     <Modal open={Boolean(tx)} onClose={onClose} size="lg" className="rounded-lg bg-white shadow-xl">
@@ -325,16 +335,16 @@ function FailedDetailsModal({
         <Button variant="secondary" size="sm" className="h-8 px-4 text-[0.6875rem]" onClick={onClose}>
           Close
         </Button>
-        <Button size="sm" className="h-8 px-4 text-[0.6875rem]">
+        <Button size="sm" disabled={busy} onClick={() => retry.mutate(txId, { onSuccess: onClose })} className="h-8 px-4 text-[0.6875rem]">
           <RotateCcw size={13} />
-          Retry Transaction
+          {retry.isPending ? "Retrying..." : "Retry Transaction"}
         </Button>
-        <Button variant="secondary" size="sm" className="h-8 px-4 text-[0.6875rem]">
+        <Button variant="secondary" size="sm" disabled={busy} onClick={() => resolve.mutate(txId, { onSuccess: onClose })} className="h-8 px-4 text-[0.6875rem]">
           <AlertTriangle size={13} />
-          Manual Resolve
+          {resolve.isPending ? "Resolving..." : "Manual Resolve"}
         </Button>
-        <Button size="sm" className="h-8 bg-[#F97316] px-4 text-[0.6875rem] text-white hover:bg-[#EA580C]">
-          Issue Refund
+        <Button size="sm" disabled={busy} onClick={() => refund.mutate(txId, { onSuccess: onClose })} className="h-8 bg-[#F97316] px-4 text-[0.6875rem] text-white hover:bg-[#EA580C]">
+          {refund.isPending ? "Refunding..." : "Issue Refund"}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -367,7 +377,9 @@ export default function TransactionsPage() {
   const navigate = useNavigate();
   const mode = getMode(pathname);
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [selectedFailed, setSelectedFailed] = useState<FailedTx | null>(null);
+  const PAGE_SIZE = 20;
 
   const title =
     mode === "pending"
@@ -384,13 +396,16 @@ export default function TransactionsPage() {
 
   usePageTitle(title, subtitle);
 
-  const { data: apiAll = [] } = useTransactions({ search: search || undefined });
+  const {
+    data: allPage = { rows: [], total: 0, page: 1, pages: 1 },
+    isLoading: allLoading,
+  } = useTransactionsPaged(page, PAGE_SIZE, { search: search || undefined });
   const { data: apiPending = [] } = usePendingTransactionApprovals();
   const { data: apiFailed = [] } = useFailedTransactions();
 
   const allRows = useMemo(
-    () => (Array.isArray(apiAll) ? apiAll.map(normalizeTransaction) : []),
-    [apiAll],
+    () => (Array.isArray(allPage.rows) ? allPage.rows.map(normalizeTransaction) : []),
+    [allPage.rows],
   );
   const pendingTransactions = useMemo(
     () => (Array.isArray(apiPending) ? apiPending.map(normalizePending) : []),
@@ -615,7 +630,7 @@ export default function TransactionsPage() {
         </div>
       )}
 
-      {mode !== "pending" && <FilterBar search={search} setSearch={setSearch} />}
+      {mode !== "pending" && <FilterBar search={search} setSearch={(v) => { setSearch(v); setPage(1); }} />}
 
       <Card noPadding className="rounded-[8px]">
         <Box px={5} py={4} className="border-b border-(--color-border)">
@@ -627,7 +642,7 @@ export default function TransactionsPage() {
               ? "Transactions requiring manual review and approval"
               : mode === "failed"
                 ? `${failedTransactions.length} failed transactions requiring attention`
-                : `${allRows.length} transactions found`}
+                : `${allPage.total} transactions found`}
           </Text>
         </Box>
         {mode === "pending" ? (
@@ -636,7 +651,16 @@ export default function TransactionsPage() {
           <DataTable data={failedTransactions} columns={failedCols} />
         ) : (
           <>
-            <DataTable data={allRows} columns={allCols} />
+            <DataTable
+              data={allRows}
+              columns={allCols}
+              total={allPage.total}
+              page={page}
+              pageSize={PAGE_SIZE}
+              onPageChange={setPage}
+              numberedPagination
+              loading={allLoading}
+            />
           </>
         )}
       </Card>

@@ -80,7 +80,7 @@ export const cardService = {
   },
 
   updateLimits: async (payload: CardLimitsUpdate) => {
-    const { data } = await client.patch(ENDPOINTS.CARDS.LIMITS, payload);
+    const { data } = await client.post(ENDPOINTS.CARDS.LIMITS, payload);
     return data;
   },
 };

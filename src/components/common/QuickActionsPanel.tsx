@@ -7,6 +7,7 @@ interface QuickActionsPanelProps {
   onFreezeCards?: () => void;
   primaryLabel?: string;
   dangerLabel?: string;
+  disabled?: boolean;
 }
 
 export function QuickActionsPanel({
@@ -14,6 +15,7 @@ export function QuickActionsPanel({
   onFreezeCards,
   primaryLabel = "Adjust Limits",
   dangerLabel = "Freeze All Cards",
+  disabled = false,
 }: QuickActionsPanelProps) {
   return (
     <Card className="rounded-lg shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
@@ -28,7 +30,9 @@ export function QuickActionsPanel({
             variant="secondary"
             size="md"
             onClick={onAdjustLimits}
-            className="h-8 w-full justify-center text-[0.6875rem]"
+            disabled={disabled}
+            title={disabled ? "This user has no card" : undefined}
+            className="h-8 w-full justify-center text-[0.6875rem] disabled:opacity-50"
           >
             {primaryLabel}
           </Button>
@@ -37,7 +41,9 @@ export function QuickActionsPanel({
             variant="danger"
             size="md"
             onClick={onFreezeCards}
-            className="h-8 w-full justify-center text-[0.6875rem]"
+            disabled={disabled}
+            title={disabled ? "This user has no card" : undefined}
+            className="h-8 w-full justify-center text-[0.6875rem] disabled:opacity-50"
           >
             {dangerLabel}
           </Button>

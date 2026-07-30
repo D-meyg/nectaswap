@@ -148,6 +148,10 @@ export const ENDPOINTS = {
   TEAM: {
     ME: "/api/v1/admin/team/me",
     ACTIVITY_LOGS: "/api/v1/admin/team/activity-logs",
+    LIST: "/api/v1/admin/team",
+    INVITE: "/api/v1/admin/team/invite",
+    ROLE: "/api/v1/admin/team/role",
+    DELETE: (id: string) => `/api/v1/admin/team/${id}`,
   },
   ANALYTICS: {
     OVERVIEW: "/api/v1/admin/analytics/overview",

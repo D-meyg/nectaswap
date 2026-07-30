@@ -67,3 +67,20 @@ export function useExecuteWalletAction() {
     },
   });
 }
+
+export function useFreezeAllCards() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (userId: string) => userService.freezeAllCards(userId),
+    onSuccess: (_, userId) => {
+      queryClient.invalidateQueries({ queryKey: ["users", userId] });
+      queryClient.invalidateQueries({ queryKey: ["cards"] });
+      toast.show({ type: "success", title: "Cards Frozen", message: "All of the user's cards have been frozen." });
+    },
+    onError: (error: any) => {
+      toast.show({ type: "error", title: "Action Failed", message: error.response?.data?.message || "Failed to freeze the user's cards." });
+    },
+  });
+}

@@ -80,6 +80,7 @@ export const router = createBrowserRouter([
           { path: "/referrals/payouts", element: <ReferralProgramPage /> },
           { path: "/notifications", element: <NotificationsPage /> },
           { path: "/profile", element: <ProfilePage /> },
+          { path: "/profile/:id", element: <ProfilePage /> },
           { path: "/settings", element: <SettingsPage /> },
           { path: "/settings/admins", element: <AdminUsersPage /> },
           { path: "/settings/api-keys", element: <APIKeysPage /> },

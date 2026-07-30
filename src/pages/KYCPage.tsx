@@ -16,7 +16,7 @@ import {
   KYC_REVIEW_MODAL_ID,
 } from "@/components/modals/KYCReviewModal";
 
-import { useKYCQueue } from "@/hooks/queries/useKYC";
+import { useKYCQueue, useKYCStats } from "@/hooks/queries/useKYC";
 import { useModal } from "@/hooks/ui/useModal";
 import type { ColumnDef } from "@tanstack/react-table";
 import type { KYCSubmission } from "@/api/types";
@@ -71,7 +71,13 @@ function normalizeKyc(value: unknown): KYCSubmission {
   return {
     id: String(item.id ?? ""),
     user_id: String(item.user_id ?? user.user_id ?? user.id ?? "N/A"),
-    user_name: String(item.user_name ?? user.full_name ?? user.name ?? "Unknown User"),
+    user_name: String(
+      item.user_name ??
+        (typeof item.user === "string" ? item.user : user.full_name ?? user.name) ??
+        item.username ??
+        ([item.first_name, item.last_name].filter(Boolean).join(" ").trim() || undefined) ??
+        "Unknown User",
+    ),
     user_email: String(item.user_email ?? user.email ?? "N/A"),
     tier: typeof tier === "number" ? `Tier ${tier}` : String(tier ?? "N/A"),
     submitted_at: String(item.submitted_at ?? item.submitted ?? "N/A"),
@@ -99,9 +105,12 @@ export default function KYCPage() {
     [queue, filter],
   );
 
-  const pending = queue.filter((k) => k.status === "pending").length;
-  const approved = queue.filter((k) => k.status === "approved").length;
-  const rejected = queue.filter((k) => k.status === "rejected").length;
+  const { data: kycStatsRaw = {} } = useKYCStats();
+  const kycStats = kycStatsRaw as Record<string, unknown>;
+  const pending = Number(kycStats.pending_review ?? queue.filter((k) => k.status === "pending").length);
+  const approved = Number(kycStats.approved_today ?? queue.filter((k) => k.status === "approved").length);
+  const rejected = Number(kycStats.rejected_today ?? queue.filter((k) => k.status === "rejected").length);
+  const avgReview = kycStats.avg_review_time_minutes != null ? `${Number(kycStats.avg_review_time_minutes)}m` : "N/A";
 
   const columns = useMemo<ColumnDef<KYCSubmission, unknown>[]>(
     () => [
@@ -257,7 +266,7 @@ export default function KYCPage() {
         />
         <StatCard
           label="Avg Review Time"
-          value="24m"
+          value={avgReview}
           icon={
             <FileText size={16} className="text-(--color-text-muted)" />
           }

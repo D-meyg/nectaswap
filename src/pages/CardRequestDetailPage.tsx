@@ -68,6 +68,7 @@ function normalizeDetail(raw: unknown, fallbackId: string): CardRequestDetail | 
   const activity = r.activity && typeof r.activity === "object" ? (r.activity as Record<string, unknown>) : {};
   return {
     id: str(get(r, ["id", "request_id", "reference"]), fallbackId),
+    user_id: str(get(r, ["user_id"]) ?? get(nested, ["user_id", "id"]), ""),
     user_name: str(get(r, ["user_name", "name", "full_name"]) ?? get(nested, ["name", "full_name"]), "Unknown"),
     user_email: str(get(r, ["user_email", "email"]) ?? get(nested, ["email"]), "—"),
     card_type: normalizeType(get(r, ["card_type", "type"])),
@@ -120,18 +121,24 @@ function ApplicantDetailsCard({ request }: { request: CardRequestDetail }) {
   );
 }
 
-function QuickLinksCard() {
+function QuickLinksCard({ userId }: { userId?: string }) {
   return (
     <Card>
       <Card.Header title="QUICK LINKS" className="border-b-0 px-4 pb-1 pt-3 [&_h4]:text-[0.625rem] [&_h4]:uppercase [&_h4]:tracking-[0.06em] [&_h4]:text-(--color-text-tertiary)" />
       <Card.Body className="px-4 pb-2 pt-0">
         <Stack gap={0}>
-          {QUICK_LINKS.map((link) => (
-            <Link key={link.label} to={link.to} className="group flex items-center justify-between border-b border-(--color-border) py-2.5 transition-colors last:border-b-0 hover:bg-(--color-bg-subtle)">
+          {QUICK_LINKS.map((link) => {
+            const to =
+              link.label === "View User Profile" && userId
+                ? `/profile/${userId}?type=user`
+                : link.to;
+            return (
+            <Link key={link.label} to={to} className="group flex items-center justify-between border-b border-(--color-border) py-2.5 transition-colors last:border-b-0 hover:bg-(--color-bg-subtle)">
               <Text variant="caption" color={link.brand ? "brand" : "primary"} weight={link.brand ? "semibold" : "medium"} className="text-[0.75rem]">{link.label}</Text>
               <ChevronRight size={13} className="shrink-0 text-(--color-text-muted) transition-transform group-hover:translate-x-0.5" />
             </Link>
-          ))}
+            );
+          })}
         </Stack>
       </Card.Body>
     </Card>
@@ -270,7 +277,7 @@ export default function CardRequestDetailPage() {
         </Stack>
 
         <Stack gap={5}>
-          <QuickLinksCard />
+          <QuickLinksCard userId={request.user_id} />
           <ReviewActionsCard onApprove={handleApprove} onReject={handleReject} onRequestInfo={handleRequestInfo} busy={busy} />
         </Stack>
       </div>

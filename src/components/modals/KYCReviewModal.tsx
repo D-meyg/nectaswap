@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { formatDate } from "@/lib/date";
 import {
   User,
   FileText,
@@ -108,7 +109,7 @@ export function KYCReviewModal() {
     date_of_birth: "N/A",
     occupation: "N/A",
     tier_requested: application?.tier ?? "N/A",
-    submitted_date: application?.submitted_at ?? "N/A",
+    submitted_date: formatDate(application?.submitted_at),
     priority: application?.priority ?? "normal",
     id_type: "National ID",
     id_number: "N/A",

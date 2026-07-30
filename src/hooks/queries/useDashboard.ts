@@ -81,7 +81,18 @@ export function useSystemHealth() {
     queryKey: ["dashboard", "system-health"],
     queryFn: async () => {
       const res = await dashboardService.getSystemHealth();
-      return res.data;
+      const data = res.data;
+      if (Array.isArray(data)) return data as SystemHealth[];
+      if (data && typeof data === "object") {
+        return Object.entries(data as Record<string, Record<string, unknown>>).map(
+          ([service, v]) => ({
+            service,
+            status: String(v?.status ?? "unknown"),
+            uptime: (v?.uptime ?? null) as unknown as number,
+          }),
+        );
+      }
+      return [];
     },
     staleTime: 60_000,
   });

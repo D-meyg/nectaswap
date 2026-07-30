@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowRight, Wifi, CreditCard } from "lucide-react";
 
 import { usePageActions, usePageTitle } from "@/layouts/AppLayout";
@@ -226,8 +226,10 @@ export default function CardLimitsControlsPage() {
   const cards = useMemo(() => (Array.isArray(rawCards) ? rawCards.map(normalizeChip) : []), [rawCards]);
 
   // Selection (no init effect — fall back to first card in render)
+  const [searchParams] = useSearchParams();
+  const cardParam = searchParams.get("card") ?? "";
   const [selectedIdState, setSelectedIdState] = useState("");
-  const selectedId = selectedIdState || cards[0]?.id || "";
+  const selectedId = selectedIdState || cardParam || cards[0]?.id || "";
   const selectedChip = cards.find((c) => c.id === selectedId) ?? cards[0];
 
   const { data: rawDetail, isLoading: detailLoading } = useCardDetail(selectedId);
