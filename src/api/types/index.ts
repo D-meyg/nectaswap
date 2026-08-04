@@ -123,8 +123,8 @@ export interface KYCDocument {
   id: string;
   type: string;
   status: "approved" | "pending" | "rejected";
-  reviewed_by: string;
-  reviewed_at: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
   url?: string;
 }
 

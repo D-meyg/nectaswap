@@ -47,6 +47,14 @@ export function useUnfreezeAccount() {
         message: "The user's restrictions have been lifted.",
       });
     },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Action Failed",
+        message:
+          error.response?.data?.message || "Failed to unfreeze account.",
+      });
+    },
   });
 }
 

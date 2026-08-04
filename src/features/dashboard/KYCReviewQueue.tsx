@@ -7,6 +7,7 @@ import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
 import { useModal } from "@/hooks/ui/useModal";
 import { KYC_REVIEW_MODAL_ID } from "@/components/modals/KYCReviewModal";
+import { formatDate } from "@/lib/date";
 
 export function KYCReviewQueue({ items }: { items: any[] }) {
   const reviewModal = useModal(KYC_REVIEW_MODAL_ID);
@@ -41,17 +42,20 @@ export function KYCReviewQueue({ items }: { items: any[] }) {
                 truncate
                 as="p"
               >
-                {item.user_name}
+                {item.user ?? item.user_name}
               </Text>
 
               <Text variant="micro" color="secondary" as="p">
-                {item.tier} • Submitted {item.submitted_at}
+                {item.type ?? item.tier} • Submitted{" "}
+                {formatDate(item.submitted_at)}
               </Text>
             </Stack>
 
             <Button
               size="sm"
-              onClick={() => reviewModal.open({ kycId: item.id })}
+              onClick={() =>
+                reviewModal.open({ kycId: item.id, application: item })
+              }
               className="h-7 shrink-0 rounded-sm px-3 text-[0.6875rem]"
             >
               Review

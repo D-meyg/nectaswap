@@ -61,15 +61,43 @@ function normalizeAdmin(raw: unknown): AdminProfile | null {
   const m = raw as Record<string, unknown>;
   const roleObj = obj(m.role);
   const perms = get(m, ["permissions", "scopes"]);
+  // The API returns permissions as { resource, action } pairs; also accept
+  // plain strings or { name } / { code } objects from other shapes.
   const permList = Array.isArray(perms)
-    ? perms.map((p) => (typeof p === "string" ? p : str((obj(p)).name ?? (obj(p)).code))).filter(Boolean)
+    ? perms
+        .map((p) => {
+          if (typeof p === "string") return p;
+          const o = obj(p);
+          const resource = str(o.resource);
+          const action = str(o.action);
+          if (resource) {
+            const label = resource.replace(/_/g, " ");
+            return action ? `${label}: ${action}` : label;
+          }
+          return str(o.name ?? o.code);
+        })
+        .filter(Boolean)
     : [];
+  const fullName = [str(m.first_name), str(m.last_name)]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   return {
-    name: str(get(m, ["name", "full_name", "admin_name"]), "Admin"),
+    name: fullName || str(get(m, ["name", "full_name", "admin_name", "username"]), "Admin"),
     email: str(get(m, ["email"]), "—"),
     phone: str(get(m, ["phone", "phone_number"]), "—"),
-    role: str(get(m, ["role_name", "role"]) ?? get(roleObj, ["name"]), "—"),
-    status: str(get(m, ["status", "account_status"]), "Active"),
+    role: str(
+      get(roleObj, ["role_name", "name"]) ?? get(m, ["role_name", "role"]),
+      "—",
+    ),
+    status: str(
+      get(m, ["status", "account_status"]),
+      m.is_restricted === true
+        ? "Restricted"
+        : m.is_active === false
+          ? "Inactive"
+          : "Active",
+    ),
     id: str(get(m, ["id", "admin_id", "user_id"]), "—"),
     joined: str(get(m, ["created_at", "joined", "date_joined"]), "—"),
     last_active: str(get(m, ["last_login", "last_active", "last_seen"]), "—"),

@@ -1,6 +1,7 @@
 ﻿import { usePageTitle } from "@/layouts/AppLayout";
 import { useMemo, useState } from "react";
-import { Users, ShieldCheck, Clock, Send, CalendarClock } from "lucide-react";
+// CalendarClock is only used by the hidden "Schedule Later" button.
+import { Users, ShieldCheck, Clock, Send } from "lucide-react";
 
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
@@ -306,7 +307,8 @@ export default function NotificationsPage() {
                   </Box>
                 )}
 
-                {/* Delivery Schedule */}
+                {/* Delivery Schedule — "Send Now" duplicates the button below
+                    and "Schedule Later" has no behaviour, so both are hidden.
                 <Box>
                   <Text
                     variant="micro"
@@ -328,6 +330,7 @@ export default function NotificationsPage() {
                     </Button>
                   </Row>
                 </Box>
+                */}
 
                 {/* Send to N Users button */}
                 <Button className="w-full justify-center" onClick={handleSend} disabled={createNotification.isPending}>

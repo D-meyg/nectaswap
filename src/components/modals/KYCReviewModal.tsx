@@ -3,11 +3,8 @@ import { formatDate } from "@/lib/date";
 import {
   User,
   FileText,
-  CreditCard as CardIcon,
-  MapPin,
-  ExternalLink,
-  Mail,
-  Phone,
+  // Icons for the hidden Identity Documents / Address sections:
+  // CreditCard as CardIcon, MapPin, ExternalLink, Mail, Phone,
 } from "lucide-react";
 import type { ElementType, ReactNode } from "react";
 import { Modal } from "@/components/ui/Modal";
@@ -59,6 +56,9 @@ function Section({
   );
 }
 
+/* Used only by the hidden Identity Documents section — restore alongside it
+   once the API returns document URLs.
+
 function DocButton({ label, submitted = true }: { label: string; submitted?: boolean }) {
   return (
     <div
@@ -94,6 +94,7 @@ function iconValue(icon: React.ReactNode, value: string) {
     </span>
   );
 }
+*/
 
 export function KYCReviewModal() {
   const { isOpen, close, props } = useModal(KYC_REVIEW_MODAL_ID);
@@ -101,22 +102,21 @@ export function KYCReviewModal() {
   const [showReject, setShowReject] = useState(false);
   const application = props?.application as KYCSubmission | undefined;
 
+  // The queue endpoint returns { id, user, type, submitted_at } — anything
+  // outside that set is not available yet, so those rows stay commented out
+  // below rather than rendering a wall of "N/A".
+  const raw = (application ?? {}) as Record<string, unknown>;
   const kycData = {
-    full_name: application?.user_name ?? "Unknown User",
-    user_id: application?.user_id ?? String(props?.kycId ?? "N/A"),
-    email: application?.user_email ?? "N/A",
-    phone: "N/A",
-    date_of_birth: "N/A",
-    occupation: "N/A",
-    tier_requested: application?.tier ?? "N/A",
+    full_name:
+      (raw.user as string) ?? application?.user_name ?? "Unknown User",
+    user_id: String(raw.id ?? application?.user_id ?? props?.kycId ?? "—"),
+    tier_requested:
+      (raw.type as string) ?? application?.tier ?? "—",
     submitted_date: formatDate(application?.submitted_at),
     priority: application?.priority ?? "normal",
-    id_type: "National ID",
-    id_number: "N/A",
-    residential_address: "N/A",
-    proof_type: "N/A",
-    documents: application?.documents ?? 0,
-    total_docs: application?.total_docs ?? 0,
+    // Not returned by the API yet:
+    // email, phone, date_of_birth, occupation,
+    // id_type, id_number, residential_address, proof_type
   };
 
   return (
@@ -133,21 +133,20 @@ export function KYCReviewModal() {
           <Section icon={User} title="User Information">
             <div className="grid grid-cols-2 gap-x-12 gap-y-4">
               <InfoRow label="Full Name" value={kycData.full_name} />
-              <InfoRow label="User ID" value={`#${kycData.user_id}`} />
+              <InfoRow label="Application ID" value={`#${kycData.user_id}`} />
+              {/* Not provided by the KYC queue response yet:
               <InfoRow label="Email" value={iconValue(<Mail size={12} />, kycData.email)} />
               <InfoRow label="Phone" value={iconValue(<Phone size={12} />, kycData.phone)} />
-              <InfoRow
-                label="Date of Birth"
-                value={kycData.date_of_birth}
-              />
+              <InfoRow label="Date of Birth" value={kycData.date_of_birth} />
               <InfoRow label="Occupation" value={kycData.occupation} />
+              */}
             </div>
           </Section>
 
           <Section icon={FileText} title="Application Details">
             <div className="grid grid-cols-3 gap-x-6 gap-y-4">
               <InfoRow
-                label="Tier Requested"
+                label="Application Type"
                 value={kycData.tier_requested}
               />
               <InfoRow
@@ -174,6 +173,9 @@ export function KYCReviewModal() {
             </div>
           </Section>
 
+          {/* Identity Documents + Address Information are hidden until the
+              API returns document URLs and address fields — the View buttons
+              had nothing to open and every row rendered "N/A".
           <Section icon={CardIcon} title="Identity Documents">
             <div className="grid grid-cols-2 gap-x-8 gap-y-5 mb-6">
               <InfoRow label="ID Type" value={kycData.id_type} />
@@ -195,6 +197,7 @@ export function KYCReviewModal() {
               <InfoRow label="Proof Type" value={kycData.proof_type} />
             </div>
           </Section>
+          */}
 
           {showReject && (
             <div className="rounded-xl border border-(--color-danger-muted) bg-(--color-danger-subtle) p-5 mt-6 transition-all shadow-sm">

@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Bell, Search, ChevronDown, LogOut, User } from "lucide-react";
+import { Search, ChevronDown, LogOut, User } from "lucide-react";
 import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
@@ -67,7 +67,7 @@ export const TopBar = memo(function TopBar() {
           </Row>
         )}
 
-        {/* Bell */}
+        {/* Bell — hidden until it has a behaviour attached.
         <Box className="relative">
           <Button
             variant="ghost"
@@ -79,6 +79,7 @@ export const TopBar = memo(function TopBar() {
           </Button>
           <span className="absolute top-[0.4375rem] right-[0.4375rem] h-[0.4375rem] w-[0.4375rem] rounded-full bg-(--color-danger) ring-[1.5px] ring-white pointer-events-none" />
         </Box>
+        */}
 
         {/* User dropdown */}
         {user && (

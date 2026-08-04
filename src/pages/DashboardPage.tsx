@@ -14,6 +14,7 @@ import { SystemHealthWidget } from "@/features/dashboard/SystemHealthWidget";
 import { Box } from "@/components/ui/Box";
 import { Stack } from "@/components/ui/Stack";
 import { Grid } from "@/components/ui/Grid";
+import { formatNGN } from "@/lib/utils";
 import {
   useDashboardStats,
   useDashboardLiquidity,
@@ -23,6 +24,14 @@ import {
   useDashboardKYCQueue,
   useSystemHealth,
 } from "@/hooks/queries/useDashboard";
+
+/** Prefix the naira unit on volume figures (numbers or numeric strings). */
+function formatVolume(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "—";
+  const raw = typeof value === "number" ? value : Number(String(value).replace(/[^\d.-]/g, ""));
+  if (!Number.isFinite(raw)) return String(value);
+  return formatNGN(raw);
+}
 
 export default function DashboardPage() {
   usePageTitle(
@@ -48,11 +57,9 @@ export default function DashboardPage() {
         <Grid cols={1} sm={2} lg={4} gap={6}>
           <StatCard
             label="24h Volume"
-            value={
-              (stats as any).volume_24h ??
-              (stats as any).total_volume_24h ??
-              "—"
-            }
+            value={formatVolume(
+              (stats as any).volume_24h ?? (stats as any).total_volume_24h,
+            )}
             delta={(stats as any).volume_change}
             deltaLabel="vs yesterday"
             icon={<TrendingUp size={20} />}

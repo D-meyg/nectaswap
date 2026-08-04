@@ -77,6 +77,16 @@ export function useUpdateCardLimits() {
         message: "Card spending limits have been adjusted.",
       });
     },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Update Failed",
+        message:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Could not update the card limits.",
+      });
+    },
   });
 }
 

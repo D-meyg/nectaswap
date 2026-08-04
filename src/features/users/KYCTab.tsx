@@ -1,4 +1,5 @@
-﻿import { CheckCircle, FileText, Clock } from "lucide-react";
+﻿import { CheckCircle, FileText, Clock, ExternalLink } from "lucide-react";
+import { formatDate } from "@/lib/date";
 import { Card } from "@/components/ui/Card";
 import { Text } from "@/components/ui/Text";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -13,6 +14,7 @@ import type { KYCDocument } from "@/api/types";
 // ── Document row ──────────────────────────────────────────
 function DocRow({ doc }: { doc: KYCDocument }) {
   const isApproved = doc.status === "approved";
+  const reviewedAt = doc.reviewed_at ? formatDate(doc.reviewed_at) : "";
 
   return (
     <Row
@@ -34,25 +36,62 @@ function DocRow({ doc }: { doc: KYCDocument }) {
             {doc.type}
           </Text>
           <Text variant="micro" color="tertiary" className="text-[0.6875rem] leading-4">
-            Reviewed by{" "}
-            <span className="font-medium text-(--color-text-secondary)">
-              {doc.reviewed_by}
-            </span>{" "}
-            on {doc.reviewed_at}
+            {doc.reviewed_by ? (
+              <>
+                Reviewed by{" "}
+                <span className="font-medium text-(--color-text-secondary)">
+                  {doc.reviewed_by}
+                </span>
+                {reviewedAt ? ` on ${reviewedAt}` : ""}
+              </>
+            ) : reviewedAt ? (
+              `Reviewed on ${reviewedAt}`
+            ) : (
+              "Awaiting review"
+            )}
           </Text>
         </Stack>
       </Row>
-      <span
-        className={cn(
-        "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[0.6875rem] font-semibold leading-none",
-          isApproved
-            ? "bg-(--color-success-bg) text-(--color-success-dark)"
-            : "bg-(--color-danger-subtle) text-(--color-danger)",
+      <Row align="center" gap={2}>
+        {doc.url && (
+          <a
+            href={doc.url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1 rounded-sm px-2 py-1 font-geom text-[0.6875rem] font-semibold text-(--color-brand) hover:bg-(--color-bg-subtle)"
+          >
+            <ExternalLink size={12} />
+            View
+          </a>
         )}
-      >
-        {isApproved ? "Approved" : "Rejected"}
-      </span>
+        <span
+          className={cn(
+          "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[0.6875rem] font-semibold capitalize leading-none",
+            isApproved
+              ? "bg-(--color-success-bg) text-(--color-success-dark)"
+              : "bg-(--color-danger-subtle) text-(--color-danger)",
+          )}
+        >
+          {doc.status || "pending"}
+        </span>
+      </Row>
     </Row>
+  );
+}
+
+// ── KYC status summary ────────────────────────────────────
+function StatusPill({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-sm px-2.5 py-1 font-geom text-[0.6875rem] font-semibold leading-none",
+        ok
+          ? "bg-(--color-success-bg) text-(--color-success-dark)"
+          : "bg-(--color-bg-card) text-(--color-text-secondary)",
+      )}
+    >
+      {label}: {ok ? "Verified" : "Not verified"}
+    </span>
   );
 }
 
@@ -119,14 +158,68 @@ interface KYCTabProps {
 export function KYCTab({ userId }: KYCTabProps) {
   const { data: rawKyc, isLoading } = useKYCHistory(userId);
   const kycData = rawKyc as any;
-  const docs: KYCDocument[] = kycData?.documents ?? [];
-  const historyEvents: Array<{ id: string; event: string; date: string; by: string; description: string }> =
-    Array.isArray(kycData?.history) ? kycData.history :
-    Array.isArray(kycData?.events) ? kycData.events :
-    Array.isArray(kycData) ? kycData : [];
+
+  // API shape: { kyc_level, kyc_verified, bvn_verified, nin_verified,
+  //              submitted_documents[], verification_history[] }
+  const docs: KYCDocument[] = (
+    kycData?.submitted_documents ??
+    kycData?.documents ??
+    []
+  ).map((doc: any, i: number) => ({
+    ...doc,
+    id: doc?.id ?? `${doc?.type ?? "doc"}-${i}`,
+  }));
+
+  const rawHistory: any[] = Array.isArray(kycData?.verification_history)
+    ? kycData.verification_history
+    : Array.isArray(kycData?.history)
+      ? kycData.history
+      : Array.isArray(kycData?.events)
+        ? kycData.events
+        : Array.isArray(kycData)
+          ? kycData
+          : [];
+
+  const historyEvents = rawHistory.map((item, i) => ({
+    id: String(item?.id ?? `kyc-event-${i}`),
+    event:
+      item?.event ??
+      [item?.document_type, item?.tier != null ? `Tier ${item.tier}` : null]
+        .filter(Boolean)
+        .join(" • ") ??
+      "Verification",
+    date: formatDate(item?.reviewed_at ?? item?.submitted_at ?? item?.date),
+    by: item?.by ?? item?.reviewed_by ?? "System",
+    description: item?.description ?? `Status: ${item?.status ?? "pending"}`,
+  }));
+
+  const hasStatus =
+    kycData &&
+    typeof kycData === "object" &&
+    !Array.isArray(kycData) &&
+    (kycData.kyc_level != null || kycData.kyc_verified != null);
 
   return (
     <Stack gap={4}>
+      {hasStatus && (
+        <Card className="rounded-lg shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+          <Card.Header
+            title="Verification Status"
+            className="border-b-0 px-4 pb-2 pt-4 [&_h4]:text-[0.8125rem] [&_h4]:leading-4"
+          />
+          <Card.Body className="px-4 pb-4 pt-0">
+            <Row align="center" gap={2} className="flex-wrap">
+              <span className="inline-flex items-center rounded-sm bg-(--color-bg-card) px-2.5 py-1 font-geom text-[0.6875rem] font-semibold text-(--color-text-primary)">
+                KYC Level: {kycData.kyc_level ?? "—"}
+              </span>
+              <StatusPill label="KYC" ok={Boolean(kycData.kyc_verified)} />
+              <StatusPill label="BVN" ok={Boolean(kycData.bvn_verified)} />
+              <StatusPill label="NIN" ok={Boolean(kycData.nin_verified)} />
+            </Row>
+          </Card.Body>
+        </Card>
+      )}
+
       <Card className="rounded-lg shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
         <Card.Header
           title="Submitted Documents"

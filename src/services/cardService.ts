@@ -80,7 +80,9 @@ export const cardService = {
   },
 
   updateLimits: async (payload: CardLimitsUpdate) => {
-    const { data } = await client.post(ENDPOINTS.CARDS.LIMITS, payload);
+    // Limits are edited, not created — the API only accepts PATCH here
+    // (POST returned 405 Method Not Allowed).
+    const { data } = await client.patch(ENDPOINTS.CARDS.LIMITS, payload);
     return data;
   },
 };

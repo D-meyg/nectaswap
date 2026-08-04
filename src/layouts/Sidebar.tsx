@@ -92,7 +92,8 @@ const NAV_MAIN: NavItem[] = [
     icon: Gift,
     children: [
       { label: "All Referrals", path: "/referrals" },
-      { label: "Payouts", path: "/referrals/payouts" },
+      // Payouts hidden — the route does not lead anywhere yet.
+      // { label: "Payouts", path: "/referrals/payouts" },
     ],
   },
   {
@@ -113,7 +114,8 @@ const NAV_SYSTEM: NavItem[] = [
     children: [
       { label: "General Settings", path: "/settings" },
       { label: "Admin Users", path: "/settings/admins" },
-      { label: "API Keys", path: "/settings/api-keys" },
+      // API Keys page hidden from navigation.
+      // { label: "API Keys", path: "/settings/api-keys" },
       { label: "Audit Logs", path: "/settings/audit-logs" },
     ],
   },

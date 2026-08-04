@@ -4,6 +4,7 @@ import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/date";
 
 interface UserLike {
   id?: string | number;
@@ -17,12 +18,16 @@ interface UserLike {
   status?: string;
   last_active?: string;
   lastActive?: string;
+  last_login?: string;
+  is_restricted?: boolean;
+  is_active?: boolean;
 }
 
 interface UserHeaderProps {
   user: UserLike;
   onFreeze?: () => void;
   freezeLoading?: boolean;
+  onSendMessage?: () => void;
   className?: string;
 }
 
@@ -49,6 +54,7 @@ export function UserHeader({
   user,
   onFreeze,
   freezeLoading,
+  onSendMessage,
   className,
 }: UserHeaderProps) {
   const firstName = user.first_name?.trim() ?? "";
@@ -56,9 +62,17 @@ export function UserHeader({
   const joined = [firstName, lastName].filter(Boolean).join(" ");
   const name = joined || user.name || user.full_name || user.username || "Unknown User";
   const email = user.email || "unknown@email.com";
-  const id = user.id || user.user_id || "1";
-  const lastActive = user.last_active || user.lastActive || "N/A";
-  const isFrozen = user.status?.toLowerCase() === "frozen";
+  const id = user.user_id || user.id || "—";
+  const lastActive = formatDateTime(
+    user.last_login || user.last_active || user.lastActive,
+  );
+  // The API reports restriction via `is_restricted`; `status` is only used by
+  // legacy/dummy shapes.
+  const isFrozen =
+    user.is_restricted === true || user.status?.toLowerCase() === "frozen";
+  const status = isFrozen
+    ? "Frozen"
+    : user.status ?? (user.is_active === false ? "Inactive" : "Active");
 
   return (
     <section className={cn("mb-3", className)}>
@@ -81,7 +95,7 @@ export function UserHeader({
               {name}
             </Text>
 
-            <UserStatus status={user.status} />
+            <UserStatus status={status} />
 
             <Text
               variant="caption"
@@ -111,6 +125,7 @@ export function UserHeader({
           <Button
             variant="secondary"
             size="md"
+            onClick={onSendMessage}
             className="h-8 w-full px-3 text-[0.6875rem] sm:w-auto"
           >
             <Mail size={14} />

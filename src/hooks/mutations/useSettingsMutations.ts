@@ -5,6 +5,20 @@ import { client } from "@/api/client";
 import { ENDPOINTS } from "@/api/endpoints";
 import { useToast } from "@/hooks/ui/useToast";
 
+/**
+ * Pull the API's own message out of a failed request so permission errors
+ * ("Permission denied. Required: settings - update") surface to the admin
+ * instead of failing silently.
+ */
+function errorMessage(error: any, fallback: string): string {
+  return (
+    error?.response?.data?.message ||
+    error?.response?.data?.detail ||
+    error?.message ||
+    fallback
+  );
+}
+
 export function useUpdateFeesAndLimits() {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -17,6 +31,13 @@ export function useUpdateFeesAndLimits() {
         type: "success",
         title: "Settings Saved",
         message: "Global fees and limits updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Save Failed",
+        message: errorMessage(error, "Could not update fees and limits."),
       });
     },
   });
@@ -39,6 +60,13 @@ export function useCreateApiKey() {
         message: "New API key generated successfully.",
       });
     },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Creation Failed",
+        message: errorMessage(error, "Could not create the API key."),
+      });
+    },
   });
 }
 
@@ -59,6 +87,13 @@ export function useRevokeApiKey() {
         message: "API access revoked for this key.",
       });
     },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Revoke Failed",
+        message: errorMessage(error, "Could not revoke this API key."),
+      });
+    },
   });
 }
 
@@ -74,6 +109,13 @@ export function useUpdateSecuritySettings() {
         type: "success",
         title: "Security Saved",
         message: "Security settings updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Save Failed",
+        message: errorMessage(error, "Could not update security settings."),
       });
     },
   });
@@ -93,6 +135,13 @@ export function useUpdateNotificationSettings() {
         message: "Notification settings updated.",
       });
     },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Save Failed",
+        message: errorMessage(error, "Could not update notification settings."),
+      });
+    },
   });
 }
 
@@ -108,6 +157,13 @@ export function useUpdateAdvancedSettings() {
         type: "success",
         title: "Advanced Saved",
         message: "Advanced settings updated.",
+      });
+    },
+    onError: (error: any) => {
+      toast.show({
+        type: "error",
+        title: "Save Failed",
+        message: errorMessage(error, "Could not update advanced settings."),
       });
     },
   });

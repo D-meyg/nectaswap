@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { formatDate } from "@/lib/date";
 import { useNavigate } from "react-router-dom";
-import { Calendar, Plus } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 import { usePageActions, usePageTitle } from "@/layouts/AppLayout";
 import { StatCard } from "@/components/ui/StatCard";
@@ -10,7 +10,7 @@ import { Text } from "@/components/ui/Text";
 import { Row } from "@/components/ui/Row";
 import { Stack } from "@/components/ui/Stack";
 import { Box } from "@/components/ui/Box";
-import { Button } from "@/components/ui/Button";
+// Button was only used by the removed "Create Card" header action.
 import { FilterButton } from "@/components/ui/FilterButton";
 import { DataTable } from "@/components/tables/DataTable";
 import { SearchInput } from "@/components/forms/SearchInput";
@@ -109,15 +109,8 @@ export default function CardRequestsPage() {
   const reject = useRejectCardRequest();
 
   usePageActions(
-    useMemo(
-      () => (
-        <Button size="sm">
-          <Plus size={13} />
-          Create Card
-        </Button>
-      ),
-      [],
-    ),
+    // "Create Card" removed from the page header actions.
+    useMemo(() => null, []),
   );
 
   const stats = useMemo(() => {

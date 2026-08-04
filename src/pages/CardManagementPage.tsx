@@ -2,7 +2,8 @@
 import { usePageTitle } from "@/layouts/AppLayout";
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Eye, Lock, SlidersHorizontal } from "lucide-react";
+// Plus is only used by the hidden "New Card" button.
+import { Eye, Lock, SlidersHorizontal } from "lucide-react";
 
 import { StatCard } from "@/components/ui/StatCard";
 import { Card } from "@/components/ui/Card";
@@ -295,10 +296,12 @@ export default function CardManagementPage() {
                 label="More Filters"
                 icon={<SlidersHorizontal size={13} />}
               />
+              {/* New Card hidden — issuance is handled from card requests.
               <Button size="sm">
                 <Plus size={13} />
                 New Card
               </Button>
+              */}
             </Row>
           </Row>
         </Box>

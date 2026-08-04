@@ -38,6 +38,11 @@ import {
   useFreezeAllCards,
 } from "@/hooks/mutations/useUserMutations";
 import { DUMMY_USER_DETAIL } from "@/lib/dummyData";
+import { useModal } from "@/hooks/ui/useModal";
+import {
+  SendMessageModal,
+  SEND_MESSAGE_MODAL_ID,
+} from "@/components/modals/SendMessageModal";
 import type { UserDetail } from "@/api/types";
 
 type TabValue =
@@ -77,15 +82,30 @@ export default function UserDetailPage() {
   const freezeMutation = useFreezeAccount();
   const unfreezeMutation = useUnfreezeAccount();
 
-  const handleFreezeToggle = useCallback(() => {
-    if (!user) return;
+  // The API exposes restriction state as `is_restricted`; fall back to the
+  // legacy `status` field for dummy data.
+  const isRestricted =
+    rawApiUser?.is_restricted === true ||
+    (user as { status?: string })?.status === "frozen";
 
-    if (user.status === "frozen") {
+  const handleFreezeToggle = useCallback(() => {
+    if (!userId) return;
+
+    if (isRestricted) {
       unfreezeMutation.mutate(userId);
     } else {
       freezeMutation.mutate(userId);
     }
-  }, [user, userId, freezeMutation, unfreezeMutation]);
+  }, [isRestricted, userId, freezeMutation, unfreezeMutation]);
+
+  const sendMessageModal = useModal(SEND_MESSAGE_MODAL_ID);
+  const recipientName =
+    [rawApiUser?.first_name, rawApiUser?.last_name]
+      .filter(Boolean)
+      .join(" ")
+      .trim() ||
+    String(rawApiUser?.username ?? "") ||
+    "this user";
 
   const freezeLoading = freezeMutation.isPending || unfreezeMutation.isPending;
 
@@ -100,11 +120,16 @@ export default function UserDetailPage() {
         </Stack>
       ) : (
         <UserHeader
-          user={user}
+          user={{ ...(rawApiUser as object), ...user }}
           onFreeze={handleFreezeToggle}
           freezeLoading={freezeLoading}
+          onSendMessage={() =>
+            sendMessageModal.open({ userId, userName: recipientName })
+          }
         />
       )}
+
+      <SendMessageModal />
 
       <TabsRoot
         value={activeTab}

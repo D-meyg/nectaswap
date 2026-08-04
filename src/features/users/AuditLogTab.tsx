@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ClipboardList } from "lucide-react";
 import { useUserAuditLog } from "@/hooks/queries/useUserDetail";
+import { formatDateTime } from "@/lib/date";
 
 export interface AuditEntry {
   id: string;
@@ -42,7 +43,13 @@ function normalizeAuditEntry(value: unknown, index: number): AuditEntry {
       "No details provided",
     ),
     ip: text(item.request_ip ?? item.ip ?? item.ip_address, "N/A"),
-    created_at: text(item.time ?? item.activity_timestamp ?? item.created_at ?? item.timestamp ?? item.date, "N/A"),
+    created_at: formatDateTime(
+      item.time ??
+        item.activity_timestamp ??
+        item.created_at ??
+        item.timestamp ??
+        item.date,
+    ),
   };
 }
 
