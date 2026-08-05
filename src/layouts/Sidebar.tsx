@@ -75,7 +75,8 @@ const NAV_MAIN: NavItem[] = [
     icon: Wallet,
     children: [
       { label: "Wallets", path: "/wallets" },
-      { label: "Liquidity Monitor", path: "/wallets/liquidity" },
+      // Liquidity Monitor hidden from navigation.
+      // { label: "Liquidity Monitor", path: "/wallets/liquidity" },
     ],
   },
   {

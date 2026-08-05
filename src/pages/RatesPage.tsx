@@ -11,10 +11,35 @@ import { Box } from "@/components/ui/Box";
 import { Button } from "@/components/ui/Button";
 import { DataTable } from "@/components/tables/DataTable";
 import { useExchangeRates, useFeeConfig, useFeeRevenue } from "@/hooks/queries/useRates";
+import { formatDateTime } from "@/lib/date";
 import type { ColumnDef } from "@tanstack/react-table";
 
 type RateRow = Record<string, any>;
 type FeeRow = Record<string, any>;
+
+/** Rates come back as plain numbers (e.g. 1401.87523512) — show them in NGN. */
+function rateValue(value: unknown): string {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return `₦${n.toLocaleString("en-NG", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+/** Fees are numeric percentages; 0 is a valid value and must still render. */
+function feeValue(value: unknown): string {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return `${n}%`;
+}
+
+function spreadValue(value: unknown): string {
+  if (typeof value === "string" && value.trim()) return value;
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "—";
+  return `${n}%`;
+}
 
 function LinkButton({ label }: { label: string }) {
   return (
@@ -40,42 +65,56 @@ export default function RatesPage() {
   const rateCols = useMemo<ColumnDef<RateRow, unknown>[]>(
     () => [
       {
-        accessorKey: "pair",
+        accessorKey: "trading_pair",
         header: "Trading Pair",
-        cell: ({ getValue }) => (
-          <Text variant="caption" color="primary" weight="semibold">
-            {getValue<string>()}
-          </Text>
-        ),
-      },
-      {
-        accessorKey: "rate",
-        header: "Current Rate",
-        cell: ({ getValue }) => (
-          <Text variant="caption" color="primary" weight="semibold">
-            {getValue<string>()}
-          </Text>
-        ),
-      },
-      {
-        accessorKey: "change",
-        header: "24H Change",
         cell: ({ row }) => (
-          <Text
-            variant="caption"
-            weight="medium"
-            color={row.original.positive ? "success" : "danger"}
-          >
-            {row.original.positive ? "↑" : "↓"} {row.original.change}
+          <Stack gap={0}>
+            <Text variant="caption" color="primary" weight="semibold">
+              {row.original.trading_pair ?? row.original.pair ?? "—"}
+            </Text>
+            {row.original.coin_name && (
+              <Text variant="micro" color="muted" className="text-[0.625rem] leading-4">
+                {row.original.coin_name}
+              </Text>
+            )}
+          </Stack>
+        ),
+      },
+      {
+        accessorKey: "buying_rate",
+        header: "Buying Rate",
+        cell: ({ row }) => (
+          <Text variant="caption" color="primary" weight="semibold">
+            {rateValue(row.original.buying_rate ?? row.original.rate)}
           </Text>
         ),
       },
       {
-        accessorKey: "spread",
-        header: "Spread",
-        cell: ({ getValue }) => (
+        accessorKey: "selling_rate",
+        header: "Selling Rate",
+        cell: ({ row }) => (
+          <Text variant="caption" color="primary" weight="semibold">
+            {rateValue(row.original.selling_rate)}
+          </Text>
+        ),
+      },
+      {
+        accessorKey: "fees",
+        header: "Fees (Buy / Sell)",
+        cell: ({ row }) => (
           <Text variant="caption" color="secondary">
-            {getValue<string>()}
+            {feeValue(row.original.buying_fee)} / {feeValue(row.original.selling_fee)}
+          </Text>
+        ),
+      },
+      {
+        /* 24H Change removed — the exchange-rates endpoint does not return a
+           change figure, so the column was always blank. */
+        accessorKey: "spread_pct",
+        header: "Spread",
+        cell: ({ row }) => (
+          <Text variant="caption" color="secondary">
+            {spreadValue(row.original.spread_pct ?? row.original.spread)}
           </Text>
         ),
       },
@@ -84,7 +123,7 @@ export default function RatesPage() {
         header: "Source",
         cell: ({ getValue }) => (
           <Text variant="caption" color="brand" weight="medium">
-            {getValue<string>()}
+            {getValue<string>() || "—"}
           </Text>
         ),
       },
@@ -93,7 +132,7 @@ export default function RatesPage() {
         header: "Last Update",
         cell: ({ getValue }) => (
           <Text variant="caption" color="muted">
-            {getValue<string>()}
+            {formatDateTime(getValue<string>())}
           </Text>
         ),
       },
