@@ -161,6 +161,15 @@ export function KYCReviewModal() {
 
   const busy = review.isPending || requestResubmission.isPending;
 
+  // Applications opened from the Approved tab (or already approved in the
+  // detail response) can't be approved again.
+  const status = (
+    str(d.status) ??
+    str(queueItem.status) ??
+    ""
+  ).toLowerCase();
+  const isApproved = status === "approved";
+
   const handleApprove = () => {
     if (!applicationId) return;
     review.mutate(
@@ -365,10 +374,15 @@ export function KYCReviewModal() {
         <Button
           size="sm"
           onClick={handleApprove}
-          disabled={busy || !applicationId}
+          disabled={busy || !applicationId || isApproved}
+          title={isApproved ? "This application is already approved" : undefined}
         >
           <CheckCircle2 size={13} />
-          {review.isPending ? "Submitting…" : "Approve Application"}
+          {isApproved
+            ? "Already Approved"
+            : review.isPending
+              ? "Submitting…"
+              : "Approve Application"}
         </Button>
       </Modal.Footer>
     </Modal>

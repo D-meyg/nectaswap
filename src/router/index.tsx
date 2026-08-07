@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { AppLayout } from "@/layouts/AppLayout";
-import { AuthGuard, GuestGuard } from "@/components/common/Guards";
+import { AuthGuard, GuestGuard, PageLoader } from "@/components/common/Guards";
 
 const DashboardPage = lazy(() => import("@/pages/DashboardPage"));
 const UsersPage = lazy(() => import("@/pages/UsersPage"));
@@ -39,6 +39,7 @@ const APIKeysPage = lazy(() => import("@/pages/APIKeysPage"));
 const AuditLogsPage = lazy(() => import("@/pages/AuditLogsPage"));
 const LoginPage = lazy(() => import("@/pages/LoginPage"));
 const ForgotPasswordPage = lazy(() => import("@/pages/ForgotPasswordPage"));
+const InvitationPage = lazy(() => import("@/pages/InvitationPage"));
 const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 
@@ -100,6 +101,24 @@ export const router = createBrowserRouter([
       { path: "/login", element: <LoginPage /> },
       { path: "/forgot-password", element: <ForgotPasswordPage /> },
     ],
+  },
+  // Public — an invite link must open for anyone, signed in or not, so this
+  // route sits outside both guards.
+  {
+    path: "/invitation/:token",
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <InvitationPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "/invitation",
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <InvitationPage />
+      </Suspense>
+    ),
   },
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
