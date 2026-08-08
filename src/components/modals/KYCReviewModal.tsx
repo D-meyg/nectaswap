@@ -11,7 +11,6 @@ import {
   Phone,
   CalendarDays,
   Briefcase,
-  RotateCcw,
   XCircle,
   CheckCircle2,
 } from "lucide-react";
@@ -23,10 +22,9 @@ import { Text } from "@/components/ui/Text";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useModal } from "@/hooks/ui/useModal";
 import { useKYCDetail } from "@/hooks/queries/useKYC";
-import {
-  useReviewKYCApplication,
-  useRequestResubmission,
-} from "@/hooks/mutations/useKYCMutations";
+// useRequestResubmission is unused since the Request Resubmission button
+// was removed — the hook itself remains available in useKYCMutations.
+import { useReviewKYCApplication } from "@/hooks/mutations/useKYCMutations";
 
 export const KYC_REVIEW_MODAL_ID = "kyc-review";
 
@@ -142,7 +140,7 @@ export function KYCReviewModal() {
 
   const { data: detail, isLoading } = useKYCDetail(isOpen ? applicationId : "");
   const review = useReviewKYCApplication();
-  const requestResubmission = useRequestResubmission();
+  // const requestResubmission = useRequestResubmission();
 
   useEffect(() => {
     if (isOpen) {
@@ -164,7 +162,7 @@ export function KYCReviewModal() {
     appDetails.submitted_date ?? queueItem.submitted_at ?? undefined;
   const priority = str(appDetails.priority) ?? "normal";
 
-  const busy = review.isPending || requestResubmission.isPending;
+  const busy = review.isPending;
 
   // Applications opened from the Approved tab (or already approved in the
   // detail response) can't be approved again.
@@ -205,6 +203,7 @@ export function KYCReviewModal() {
     );
   };
 
+  /* Used by the removed Request Resubmission button.
   const handleResubmission = () => {
     if (!applicationId) return;
     requestResubmission.mutate(
@@ -212,6 +211,7 @@ export function KYCReviewModal() {
       { onSuccess: () => close() },
     );
   };
+  */
 
   return (
     <Modal open={isOpen} onClose={close} size="xl" className="max-w-[46rem] rounded-[6px]">
@@ -388,6 +388,7 @@ export function KYCReviewModal() {
           Cancel
         </Button>
 
+        {/* Request Resubmission removed.
         <Button
           variant="secondary"
           size="sm"
@@ -397,6 +398,7 @@ export function KYCReviewModal() {
           <RotateCcw size={13} />
           {requestResubmission.isPending ? "Requesting…" : "Request Resubmission"}
         </Button>
+        */}
 
         {/* Deliberately clickable without a reason — clicking surfaces the
             requirement instead of looking broken. */}
