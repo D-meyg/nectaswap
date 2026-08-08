@@ -32,7 +32,7 @@ interface AdminUser {
   role: string;
   role_id: string;
   role_color: string;
-  status: "Active" | "Suspended";
+  status: "Active" | "Suspended" | "Pending";
   last_login: string;
 }
 
@@ -59,8 +59,16 @@ function normalizeAdmin(value: unknown): AdminUser {
     text(item.username) ||
     `${first} ${last}`.trim() ||
     text(item.name ?? item.full_name, "Admin User");
+  // The admin endpoints key off `admin_id` — sending the record's `id`
+  // fails, so `admin_id` must win here.
+  const invitePending = item.invitation_accepted === false;
+  const suspended =
+    item.is_restricted === true ||
+    text(item.status).toLowerCase() === "suspended" ||
+    (item.is_active === false && !invitePending);
+
   return {
-    id: text(item.id ?? item.admin_id ?? item.pkid),
+    id: text(item.admin_id ?? item.id ?? item.pkid),
     first_name: first,
     last_name: last,
     name,
@@ -71,7 +79,7 @@ function normalizeAdmin(value: unknown): AdminUser {
     role_color: roleName.toLowerCase().includes("super")
       ? "text-(--color-brand)"
       : "text-(--color-text-secondary)",
-    status: text(item.status, "Active").toLowerCase() === "suspended" ? "Suspended" : "Active",
+    status: suspended ? "Suspended" : invitePending ? "Pending" : "Active",
     last_login: text(item.last_login ?? item.last_seen, ""),
   };
 }

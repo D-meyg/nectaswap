@@ -1,6 +1,6 @@
 ﻿/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Mail,
   Lock,
@@ -11,6 +11,7 @@ import {
   RefreshCw,
   ArrowLeft,
   Smartphone,
+  CheckCircle2,
 } from "lucide-react";
 
 import { Text } from "@/components/ui/Text";
@@ -48,6 +49,21 @@ function ErrorBanner({ message }: { message: string }) {
         />
       </svg>
       <Text variant="caption" color="danger" className="leading-snug">
+        {message}
+      </Text>
+    </div>
+  );
+}
+
+// ── Success banner (e.g. after accepting an invitation) ───
+function SuccessBanner({ message }: { message: string }) {
+  return (
+    <div className="flex items-start gap-3 rounded-(--radius-md) border border-(--color-success-muted) bg-(--color-success-bg) p-3 mb-6">
+      <CheckCircle2
+        size={16}
+        className="shrink-0 mt-0.5 text-(--color-success-mid)"
+      />
+      <Text variant="caption" color="success" className="leading-snug">
         {message}
       </Text>
     </div>
@@ -115,7 +131,12 @@ interface LoginStepProps {
 
 function LoginStep({ onSuccess }: LoginStepProps) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  // Set by the invitation page after a successful activation.
+  const location = useLocation();
+  const notice = (location.state as any)?.notice as string | undefined;
+  const invitedEmail = (location.state as any)?.email as string | undefined;
+
+  const [email, setEmail] = useState(invitedEmail ?? "");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -166,6 +187,7 @@ function LoginStep({ onSuccess }: LoginStepProps) {
 
       <Card className="shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-(--color-border)">
         <Card.Body className="p-6 sm:p-8">
+          {notice && !error && <SuccessBanner message={notice} />}
           {error && <ErrorBanner message={error} />}
 
           <div className="space-y-5">

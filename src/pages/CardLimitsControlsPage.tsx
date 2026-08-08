@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowRight, Wifi, CreditCard } from "lucide-react";
+import { ArrowRight, Wifi, CreditCard, ChevronDown, Search } from "lucide-react";
 
 import { usePageActions, usePageTitle } from "@/layouts/AppLayout";
 import { Card } from "@/components/ui/Card";
@@ -16,6 +16,7 @@ import { DataTable } from "@/components/tables/DataTable";
 import { cn } from "@/lib/utils";
 import { formatDate } from "@/lib/date";
 import { useCards, useCardDetail, useCardActivity } from "@/hooks/queries/useCards";
+import { useDebounce } from "@/hooks/ui/useDebounce";
 import { useTeamActivityLogs } from "@/hooks/queries/useTeam";
 import {
   useUpdateCardLimits,
@@ -27,6 +28,9 @@ import type { CardLimitsUpdate } from "@/services/cardService";
 import type { ColumnDef } from "@tanstack/react-table";
 
 // ── Config ────────────────────────────────────────────────
+/** Cards requested per page — the picker searches instead of listing all. */
+const CARD_PAGE_SIZE = 25;
+
 const LIMIT_TIERS = [
   { key: "daily_limit", label: "Daily Limit" },
   { key: "weekly_limit", label: "Weekly Limit" },
@@ -118,6 +122,9 @@ function normalizeChip(raw: unknown, index: number): CardChip {
   };
 }
 
+/* Replaced by CardPicker — kept for reference should a small-list layout be
+   wanted again.
+
 function ChipButton({ card, selected, onSelect }: { card: CardChip; selected: boolean; onSelect: () => void }) {
   const isVirtual = card.type === "Virtual";
   return (
@@ -142,6 +149,237 @@ function ChipButton({ card, selected, onSelect }: { card: CardChip; selected: bo
         </Row>
       </Stack>
     </button>
+  );
+}
+*/
+
+/**
+ * Card selector.
+ *
+ * Rendering every card as a chip does not survive a large portfolio (10k+
+ * cards would mean a huge payload and thousands of DOM nodes), so the picker
+ * shows only the selected card and searches the server on demand — the list
+ * request stays capped at CARD_PAGE_SIZE regardless of how many cards exist.
+ */
+function CardPicker({
+  cards,
+  selected,
+  loading,
+  search,
+  onSearchChange,
+  onSelect,
+  hasMore,
+}: {
+  cards: CardChip[];
+  selected?: CardChip;
+  loading: boolean;
+  search: string;
+  onSearchChange: (value: string) => void;
+  onSelect: (id: string) => void;
+  hasMore: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClickOutside = (event: MouseEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", onClickOutside);
+    document.addEventListener("keydown", onEscape);
+    return () => {
+      document.removeEventListener("mousedown", onClickOutside);
+      document.removeEventListener("keydown", onEscape);
+    };
+  }, [open]);
+
+  return (
+    <div ref={containerRef} className="relative max-w-[26rem]">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={cn(
+          "flex w-full items-center gap-3 rounded-lg border px-3.5 py-3 text-left transition-colors focus:outline-none",
+          open
+            ? "border-(--color-brand) shadow-[0_2px_8px_rgba(78,43,204,0.08)]"
+            : "border-(--color-border) hover:border-(--color-text-muted)",
+          "bg-white",
+        )}
+      >
+        {selected ? (
+          <>
+            <span
+              className={cn(
+                "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[0.6875rem] font-bold",
+                selected.type === "Virtual"
+                  ? "bg-[rgba(78,43,204,0.08)] text-(--color-brand)"
+                  : "bg-[rgba(10,133,209,0.08)] text-[#0A85D1]",
+              )}
+            >
+              {selected.type === "Virtual" ? "V" : "P"}
+            </span>
+            <Stack gap={0} className="min-w-0 flex-1">
+              <Text
+                variant="caption"
+                color="primary"
+                weight="semibold"
+                className="font-mono text-[0.75rem] leading-4"
+                as="p"
+              >
+                **** **** **** {last4(selected.masked)}
+              </Text>
+              <Row gap={2} align="center" className="mt-0.5 min-w-0">
+                <Text
+                  variant="micro"
+                  color="muted"
+                  truncate
+                  className="text-[0.625rem] uppercase tracking-[0.04em] leading-4"
+                  as="p"
+                >
+                  {selected.label}
+                </Text>
+                <span
+                  className={cn(
+                    "inline-flex shrink-0 rounded px-1.5 py-px text-[0.5625rem] font-semibold leading-4",
+                    selected.status === "Active"
+                      ? "bg-(--color-success-subtle) text-(--color-success-mid)"
+                      : "bg-(--color-danger-subtle) text-(--color-danger)",
+                  )}
+                >
+                  {selected.status}
+                </span>
+                {selected.currency && (
+                  <Text variant="micro" color="muted" className="shrink-0 text-[0.5625rem]">
+                    {selected.currency}
+                  </Text>
+                )}
+              </Row>
+            </Stack>
+          </>
+        ) : (
+          <Text variant="caption" color="muted" className="flex-1 text-[0.75rem]">
+            Select a card
+          </Text>
+        )}
+        <ChevronDown
+          size={14}
+          className={cn(
+            "shrink-0 text-(--color-text-muted) transition-transform",
+            open && "rotate-180",
+          )}
+        />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 right-0 top-[calc(100%+0.375rem)] z-30 overflow-hidden rounded-lg border border-(--color-border) bg-white shadow-[0_0.75rem_2rem_rgba(15,23,42,0.12)]">
+          <div className="flex items-center gap-2 border-b border-(--color-border) px-3 py-2.5">
+            <Search size={14} className="shrink-0 text-(--color-text-muted)" />
+            <input
+              autoFocus
+              value={search}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search card number or cardholder…"
+              className="w-full bg-transparent text-[0.75rem] text-(--color-text-primary) outline-none placeholder:text-(--color-text-muted)"
+            />
+          </div>
+
+          <div className="max-h-[18rem] overflow-y-auto p-1.5">
+            {loading ? (
+              <Stack gap={2} className="p-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-11 w-full rounded-md" />
+                ))}
+              </Stack>
+            ) : cards.length === 0 ? (
+              <Box className="px-3 py-6 text-center">
+                <Text variant="caption" color="muted" className="text-[0.75rem]">
+                  No cards match “{search}”.
+                </Text>
+              </Box>
+            ) : (
+              cards.map((card) => (
+                <button
+                  key={card.id}
+                  type="button"
+                  onClick={() => {
+                    onSelect(card.id);
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left transition-colors focus:outline-none",
+                    card.id === selected?.id
+                      ? "bg-[rgba(78,43,204,0.06)]"
+                      : "hover:bg-(--color-bg-subtle)",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[0.625rem] font-bold",
+                      card.type === "Virtual"
+                        ? "bg-[rgba(78,43,204,0.08)] text-(--color-brand)"
+                        : "bg-[rgba(10,133,209,0.08)] text-[#0A85D1]",
+                    )}
+                  >
+                    {card.type === "Virtual" ? "V" : "P"}
+                  </span>
+                  <Stack gap={0} className="min-w-0 flex-1">
+                    <Text
+                      variant="caption"
+                      color="primary"
+                      weight="semibold"
+                      className="font-mono text-[0.75rem] leading-4"
+                      as="p"
+                    >
+                      **** {last4(card.masked)}
+                    </Text>
+                    <Text
+                      variant="micro"
+                      color="muted"
+                      truncate
+                      className="text-[0.625rem] uppercase leading-4"
+                      as="p"
+                    >
+                      {card.label}
+                    </Text>
+                  </Stack>
+                  <Row gap={2} align="center" className="shrink-0">
+                    <span
+                      className={cn(
+                        "inline-flex rounded px-1.5 py-px text-[0.5625rem] font-semibold leading-4",
+                        card.status === "Active"
+                          ? "bg-(--color-success-subtle) text-(--color-success-mid)"
+                          : "bg-(--color-danger-subtle) text-(--color-danger)",
+                      )}
+                    >
+                      {card.status}
+                    </span>
+                    {card.currency && (
+                      <Text variant="micro" color="muted" className="text-[0.5625rem]">
+                        {card.currency}
+                      </Text>
+                    )}
+                  </Row>
+                </button>
+              ))
+            )}
+          </div>
+
+          {hasMore && !loading && (
+            <Box className="border-t border-(--color-border) px-3 py-2">
+              <Text variant="micro" color="muted" className="text-[0.625rem]">
+                Showing the first {cards.length} cards — search to narrow the list.
+              </Text>
+            </Box>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -222,17 +460,34 @@ export default function CardLimitsControlsPage() {
     "Manage spending limits, permissions and card security policies",
   );
 
-  const { data: rawCards = [], isLoading: cardsLoading } = useCards();
+  // Only ever request a page of cards — the picker searches server-side, so
+  // the payload stays flat no matter how many cards exist.
+  const [cardSearch, setCardSearch] = useState("");
+  const debouncedCardSearch = useDebounce(cardSearch, 350);
+  const { data: rawCards = [], isLoading: cardsLoading } = useCards({
+    page: 1,
+    limit: CARD_PAGE_SIZE,
+    search: debouncedCardSearch.trim() || undefined,
+  });
   const cards = useMemo(() => (Array.isArray(rawCards) ? rawCards.map(normalizeChip) : []), [rawCards]);
+  const hasMoreCards = cards.length >= CARD_PAGE_SIZE;
 
   // Selection (no init effect — fall back to first card in render)
   const [searchParams] = useSearchParams();
   const cardParam = searchParams.get("card") ?? "";
   const [selectedIdState, setSelectedIdState] = useState("");
   const selectedId = selectedIdState || cardParam || cards[0]?.id || "";
-  const selectedChip = cards.find((c) => c.id === selectedId) ?? cards[0];
 
   const { data: rawDetail, isLoading: detailLoading } = useCardDetail(selectedId);
+
+  // Once a search filters the list, the selected card may not be in it —
+  // fall back to its detail response so the visual never goes blank.
+  const selectedChip = useMemo(() => {
+    const fromList = cards.find((c) => c.id === selectedId);
+    if (fromList) return fromList;
+    if (rawDetail) return normalizeChip(rawDetail, 0);
+    return cards[0];
+  }, [cards, selectedId, rawDetail]);
   const { data: rawActivity = [], isLoading: activityLoading } = useCardActivity(selectedId);
   const { data: rawChanges = [], isLoading: changesLoading } = useTeamActivityLogs({
     category: "card_limits_updated",
@@ -318,7 +573,9 @@ export default function CardLimitsControlsPage() {
     [],
   );
 
-  if (cardsLoading) {
+  // Only block on the very first load — later loads are search refreshes and
+  // must not tear down the picker the user is typing in.
+  if (cardsLoading && !selectedChip) {
     return (
       <Box p={6} className="space-y-5">
         <Skeleton className="h-40 rounded-lg" />
@@ -330,7 +587,7 @@ export default function CardLimitsControlsPage() {
     );
   }
 
-  if (!cards.length || !selectedChip) {
+  if (!selectedChip) {
     return (
       <Box p={6}>
         <EmptyState icon={CreditCard} title="No cards available" description="There are no cards to manage limits and controls for yet." />
@@ -344,11 +601,15 @@ export default function CardLimitsControlsPage() {
       <Card>
         <Box px={5} py={4}>
           <Text variant="micro" color="tertiary" weight="semibold" uppercase className="mb-3 block tracking-[0.06em] text-[0.625rem]">Select Card</Text>
-          <Row gap={3} align="stretch" className="flex-wrap">
-            {cards.map((card) => (
-              <ChipButton key={card.id} card={card} selected={card.id === selectedId} onSelect={() => selectCard(card.id)} />
-            ))}
-          </Row>
+          <CardPicker
+            cards={cards}
+            selected={selectedChip}
+            loading={cardsLoading}
+            search={cardSearch}
+            onSearchChange={setCardSearch}
+            onSelect={selectCard}
+            hasMore={hasMoreCards}
+          />
           <Link to={`/cards/${selectedChip.id}`} className="mt-3 inline-flex items-center gap-1.5 font-geom text-[0.6875rem] font-medium text-(--color-brand) transition-opacity hover:opacity-75">
             View full card detail
             <ArrowRight size={12} />

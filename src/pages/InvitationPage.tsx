@@ -7,7 +7,6 @@ import { Text } from "@/components/ui/Text";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/forms/Input";
-import { useAuthStore } from "@/store/authStore";
 import { authService } from "@/services/authService";
 import { unwrapApiData } from "@/utils/apiData";
 import { NectaLogo } from "@/assets/icons/NectaLogo";
@@ -48,13 +47,12 @@ function ErrorBanner({ message }: { message: string }) {
  * Public route: /invitation/:token
  *
  * An invited admin lands here from their email link. The token comes from the
- * URL, so the only thing they supply is a password. The accept-invitation
- * endpoint returns the same auth payload as login, so we store it and drop
- * them straight into the dashboard.
+ * URL, so the only thing they supply is a password. Activation sets the
+ * password but does not start a session, so on success we hand them to the
+ * login page to sign in normally (including 2FA).
  */
 export default function InvitationPage() {
   const navigate = useNavigate();
-  const setAuth = useAuthStore((s) => s.setAuth);
 
   // Support both /invitation/:token and /invitation?token=…
   const { token: pathToken } = useParams<{ token: string }>();
@@ -89,27 +87,17 @@ export default function InvitationPage() {
       const response = await authService.acceptInvitation({ token, password });
       const authData = unwrapApiData<any>(response, {}) ?? {};
 
-      const accessToken = authData.access_token ?? "";
-      if (!accessToken) {
-        setError(
-          "Your password was set, but we could not sign you in. Please use the login page.",
-        );
-        return;
-      }
-
-      setAuth(
-        {
-          id: authData.user_id ?? authData.admin_id ?? "",
-          name:
-            `${authData.first_name ?? ""} ${authData.last_name ?? ""}`.trim() ||
-            (authData.username ?? "Admin"),
+      // Activation only sets the password — it does not start a session, and
+      // sign-in still requires the 2FA step. Send them to login to sign in
+      // with the credentials they just created.
+      navigate("/login", {
+        replace: true,
+        state: {
+          notice:
+            "Your account is now active. Sign in with your email and new password.",
           email: authData.email ?? "",
-          role: "admin",
         },
-        accessToken,
-        authData.refresh_token ?? "",
-      );
-      navigate("/");
+      });
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
