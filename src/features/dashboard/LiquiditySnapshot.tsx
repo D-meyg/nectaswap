@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/Text";
 import { Badge } from "@/components/ui/Badge";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { DataTable } from "@/components/tables/DataTable";
-import { formatNGN } from "@/lib/utils";
+import { formatUSD } from "@/lib/utils";
 import type { WalletAsset } from "@/api/types";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -39,7 +39,7 @@ export function LiquiditySnapshot({ assets, loading }: LiquiditySnapshotProps) {
         header: "USD Value",
         cell: ({ getValue }) => (
           <Text variant="caption" color="secondary">
-            {formatNGN(getValue<number>())}
+            {formatUSD(getValue<number>() ?? 0)}
           </Text>
         ),
       },

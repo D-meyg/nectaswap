@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDate, formatDateTime } from "@/lib/date";
 import {
   User,
@@ -132,6 +132,8 @@ function str(value: unknown): string | undefined {
 export function KYCReviewModal() {
   const { isOpen, close, props } = useModal(KYC_REVIEW_MODAL_ID);
   const [rejectReason, setRejectReason] = useState("");
+  const [rejectError, setRejectError] = useState("");
+  const reasonRef = useRef<HTMLTextAreaElement>(null);
 
   const applicationId = String(props?.kycId ?? "");
   // Queue row used as a fallback so the header isn't blank while the detail
@@ -143,7 +145,10 @@ export function KYCReviewModal() {
   const requestResubmission = useRequestResubmission();
 
   useEffect(() => {
-    if (isOpen) setRejectReason("");
+    if (isOpen) {
+      setRejectReason("");
+      setRejectError("");
+    }
   }, [isOpen, applicationId]);
 
   const d = (detail ?? {}) as Record<string, any>;
@@ -179,7 +184,17 @@ export function KYCReviewModal() {
   };
 
   const handleReject = () => {
-    if (!applicationId || !rejectReason.trim()) return;
+    if (!applicationId) return;
+
+    // Don't silently do nothing — point the admin at the field they missed.
+    if (!rejectReason.trim()) {
+      setRejectError("A rejection reason is required before you can reject.");
+      reasonRef.current?.focus();
+      reasonRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+      return;
+    }
+
+    setRejectError("");
     review.mutate(
       {
         id: applicationId,
@@ -325,17 +340,44 @@ export function KYCReviewModal() {
                 variant="label"
                 color="primary"
                 weight="semibold"
-                className="mb-2 block text-[0.8125rem]"
+                className="mb-1 block text-[0.8125rem]"
               >
-                Rejection Reason (if rejecting)
+                Rejection Reason{" "}
+                <span className="text-(--color-danger)">*</span>
+              </Text>
+              <Text
+                variant="micro"
+                color="tertiary"
+                className="mb-2 block text-[0.6875rem] leading-4"
+              >
+                Required before an application can be rejected. This reason is
+                sent to the user.
               </Text>
               <textarea
+                ref={reasonRef}
                 value={rejectReason}
-                onChange={(e) => setRejectReason(e.target.value)}
+                onChange={(e) => {
+                  setRejectReason(e.target.value);
+                  if (rejectError) setRejectError("");
+                }}
                 placeholder="Provide detailed reason for rejection..."
                 rows={3}
-                className="w-full resize-none rounded-(--radius-sm) border border-(--color-warning-border) bg-white px-3 py-2.5 text-[0.8125rem] text-(--color-text-primary) outline-none placeholder:text-(--color-text-muted) focus:border-(--color-brand)"
+                className={`w-full resize-none rounded-(--radius-sm) border bg-white px-3 py-2.5 text-[0.8125rem] text-(--color-text-primary) outline-none placeholder:text-(--color-text-muted) focus:border-(--color-brand) ${
+                  rejectError
+                    ? "border-(--color-danger)"
+                    : "border-(--color-warning-border)"
+                }`}
               />
+              {rejectError && (
+                <Text
+                  variant="micro"
+                  color="danger"
+                  weight="medium"
+                  className="mt-1.5 block text-[0.6875rem] leading-4"
+                >
+                  {rejectError}
+                </Text>
+              )}
             </div>
           </div>
         )}
@@ -356,16 +398,14 @@ export function KYCReviewModal() {
           {requestResubmission.isPending ? "Requesting…" : "Request Resubmission"}
         </Button>
 
+        {/* Deliberately clickable without a reason — clicking surfaces the
+            requirement instead of looking broken. */}
         <Button
           variant="danger"
           size="sm"
           onClick={handleReject}
-          disabled={busy || !applicationId || !rejectReason.trim()}
-          title={
-            !rejectReason.trim()
-              ? "Add a rejection reason first"
-              : undefined
-          }
+          disabled={busy || !applicationId}
+          title="A rejection reason is required"
         >
           <XCircle size={13} />
           Reject

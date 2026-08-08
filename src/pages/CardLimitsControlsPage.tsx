@@ -472,6 +472,18 @@ export default function CardLimitsControlsPage() {
   const cards = useMemo(() => (Array.isArray(rawCards) ? rawCards.map(normalizeChip) : []), [rawCards]);
   const hasMoreCards = cards.length >= CARD_PAGE_SIZE;
 
+  // The list endpoint does not reliably filter on `search`, so match locally
+  // too — this keeps the input honest whether or not the server narrows it.
+  const visibleCards = useMemo(() => {
+    const q = cardSearch.trim().toLowerCase();
+    if (!q) return cards;
+    return cards.filter((card) =>
+      [card.masked, card.label, card.cardholder, card.currency, card.type, card.status]
+        .filter(Boolean)
+        .some((field) => String(field).toLowerCase().includes(q)),
+    );
+  }, [cards, cardSearch]);
+
   // Selection (no init effect — fall back to first card in render)
   const [searchParams] = useSearchParams();
   const cardParam = searchParams.get("card") ?? "";
@@ -602,13 +614,14 @@ export default function CardLimitsControlsPage() {
         <Box px={5} py={4}>
           <Text variant="micro" color="tertiary" weight="semibold" uppercase className="mb-3 block tracking-[0.06em] text-[0.625rem]">Select Card</Text>
           <CardPicker
-            cards={cards}
+            cards={visibleCards}
             selected={selectedChip}
-            loading={cardsLoading}
+            // Keep showing matches while a refined server query loads.
+            loading={cardsLoading && visibleCards.length === 0}
             search={cardSearch}
             onSearchChange={setCardSearch}
             onSelect={selectCard}
-            hasMore={hasMoreCards}
+            hasMore={hasMoreCards && !cardSearch.trim()}
           />
           <Link to={`/cards/${selectedChip.id}`} className="mt-3 inline-flex items-center gap-1.5 font-geom text-[0.6875rem] font-medium text-(--color-brand) transition-opacity hover:opacity-75">
             View full card detail
